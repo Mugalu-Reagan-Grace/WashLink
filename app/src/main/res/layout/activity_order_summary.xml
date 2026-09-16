@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".OrderSummaryActivity">
+
+    <!-- Header -->
+    <ImageView
+        android:id="@+id/btn_back"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:padding="12dp"
+        android:src="@drawable/ic_back_arrow"
+        app:tint="@color/laundr_blue"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/nav_home"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_header_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:text="@string/order_summary_title"
+        android:textColor="@color/text_primary"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="@id/btn_back"
+        app:layout_constraintBottom_toBottomOf="@id/btn_back"
+        app:layout_constraintStart_toEndOf="@id/btn_back"
+        app:layout_constraintEnd_toStartOf="@id/iv_bell" />
+
+    <FrameLayout
+        android:id="@+id/iv_bell"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="20dp"
+        android:padding="12dp"
+        app:layout_constraintTop_toTopOf="@id/btn_back"
+        app:layout_constraintBottom_toBottomOf="@id/btn_back"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_bell"
+            app:tint="@color/laundr_blue"
+            android:contentDescription="@null" />
+
+        <View
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:layout_gravity="top|end"
+            android:background="@drawable/dot_notification" />
+    </FrameLayout>
+
+    <!-- Scrollable content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/btn_back"
+        app:layout_constraintBottom_toTopOf="@id/bottom_bar">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="20dp">
+
+            <!-- Service Type row -->
+            <TextView
+                android:id="@+id/label_service_type"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/service_type"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/tv_change_service" />
+
+            <TextView
+                android:id="@+id/tv_change_service"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/change"
+                android:textColor="@color/laundr_blue"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="@id/label_service_type"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_service_type_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/service_type_pickup"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@id/label_service_type"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!-- Pickup Logistics card -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/card_logistics"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_card_bordered"
+                android:padding="16dp"
+                app:layout_constraintTop_toBottomOf="@id/tv_service_type_value"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <TextView
+                    android:id="@+id/tv_logistics_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pickup_logistics"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/tv_edit_logistics" />
+
+                <TextView
+                    android:id="@+id/tv_edit_logistics"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/edit"
+                    android:textColor="@color/laundr_blue"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="@id/tv_logistics_label"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_datetime_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/pickup_datetime_value"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    app:layout_constraintTop_toBottomOf="@id/tv_logistics_label"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_address_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/home_address_value"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    app:layout_constraintTop_toBottomOf="@id/tv_datetime_value"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <View
+                    android:id="@+id/divider1"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@color/divider_gray"
+                    app:layout_constraintTop_toBottomOf="@id/tv_address_value"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <TextView
+                    android:id="@+id/label_items_inline"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/number_of_items"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    app:layout_constraintTop_toBottomOf="@id/divider1"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_items_value_inline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/default_item_count"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="@id/label_items_inline"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <TextView
+                    android:id="@+id/label_weight_inline"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/estimated_weight"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    app:layout_constraintTop_toBottomOf="@id/label_items_inline"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_weight_value_inline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/weight_range"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="@id/label_weight_inline"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/tv_fee_note"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_offer_card"
+                android:padding="10dp"
+                android:text="@string/reservation_fee_note"
+                android:textColor="@color/laundr_blue"
+                android:textSize="12sp"
+                app:layout_constraintTop_toBottomOf="@id/card_logistics"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!-- Promo code -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_promo"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundColor="@color/input_bg"
+                app:boxCornerRadiusTopStart="10dp"
+                app:boxCornerRadiusTopEnd="10dp"
+                app:boxCornerRadiusBottomStart="10dp"
+                app:boxCornerRadiusBottomEnd="10dp"
+                app:boxStrokeWidth="0dp"
+                app:hintEnabled="false"
+                app:layout_constraintTop_toBottomOf="@id/tv_fee_note"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btn_apply_promo">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/promo_code_hint"
+                    android:textSize="14sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_apply_promo"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="10dp"
+                android:text="@string/apply"
+                android:textAllCaps="false"
+                android:textSize="13sp"
+                android:textColor="@color/laundr_blue"
+                app:strokeColor="@color/laundr_blue"
+                app:cornerRadius="10dp"
+                app:layout_constraintTop_toTopOf="@id/til_promo"
+                app:layout_constraintBottom_toBottomOf="@id/til_promo"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Price Summary -->
+            <TextView
+                android:id="@+id/label_price_summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/price_summary"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@id/til_promo"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/row_base_service"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/label_price_summary">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/base_service_label"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/summary_subtotal_amount"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/row_pickup_delivery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/row_base_service">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/pickup_delivery_fee_label"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/summary_pickup_fee_amount"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <View
+                android:id="@+id/divider2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:background="@color/divider_gray"
+                app:layout_constraintTop_toBottomOf="@id/row_pickup_delivery" />
+
+            <LinearLayout
+                android:id="@+id/row_subtotal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/divider2">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/subtotal"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/summary_subtotal_amount"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/row_tax"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/row_subtotal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/tax"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/payment_tax_amount"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/row_total"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/row_tax">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/total"
+                    android:textColor="@color/text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/payment_total_amount"
+                    android:textColor="@color/laundr_blue"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Sticky bottom bar -->
+    <LinearLayout
+        android:id="@+id/bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/white"
+        android:elevation="8dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_proceed_payment"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="@string/proceed_to_payment"
+            android:textAllCaps="false"
+            android:textSize="15sp"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/laundr_blue"
+            app:cornerRadius="12dp" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

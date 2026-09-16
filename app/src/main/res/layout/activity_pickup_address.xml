@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:fitsSystemWindows="true"
+    tools:context=".PickupAddressActivity">
+
+    <!-- Header -->
+    <ImageView
+        android:id="@+id/btn_back"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="8dp"
+        android:padding="12dp"
+        android:src="@drawable/ic_back_arrow"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/back"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_header_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:text="@string/pickup_address_title"
+        android:textColor="@color/text_primary"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="@id/btn_back"
+        app:layout_constraintBottom_toBottomOf="@id/btn_back"
+        app:layout_constraintStart_toEndOf="@id/btn_back"
+        app:layout_constraintEnd_toStartOf="@id/iv_bell" />
+
+    <FrameLayout
+        android:id="@+id/iv_bell"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="20dp"
+        android:contentDescription="@string/notifications"
+        app:layout_constraintTop_toTopOf="@id/btn_back"
+        app:layout_constraintBottom_toBottomOf="@id/btn_back"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_bell"
+            app:tint="@color/laundr_blue"
+            android:contentDescription="@null" />
+
+        <View
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:layout_gravity="top|end"
+            android:background="@drawable/dot_notification" />
+    </FrameLayout>
+
+    <!-- Scrollable content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/btn_back"
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="20dp">
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/where_pickup"
+                android:textColor="@color/text_primary"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_subtitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/select_or_add_location"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                app:layout_constraintTop_toBottomOf="@id/tv_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Use Current Location -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_use_current_location"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/use_current_location"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:textColor="@color/laundr_blue"
+                app:icon="@drawable/ic_location_pin"
+                app:iconTint="@null"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                app:strokeColor="@color/laundr_blue"
+                app:cornerRadius="12dp"
+                app:layout_constraintWidth_max="320dp"
+                app:layout_constraintTop_toBottomOf="@id/tv_subtitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Saved Addresses -->
+            <TextView
+                android:id="@+id/tv_saved_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/saved_addresses"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@id/btn_use_current_location"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Home address card -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/card_address_home"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card_bordered"
+                android:padding="14dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:layout_constraintTop_toBottomOf="@id/tv_saved_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageView
+                    android:id="@+id/iv_pin_home"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_location_pin"
+                    android:contentDescription="@null"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_home_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/address_home_label"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="@id/iv_pin_home"
+                    app:layout_constraintStart_toEndOf="@id/iv_pin_home"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_home_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/address_home_value"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:lineSpacingExtra="1dp"
+                    app:layout_constraintTop_toBottomOf="@id/tv_home_label"
+                    app:layout_constraintStart_toEndOf="@id/iv_pin_home"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Work address card -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/card_address_work"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card_bordered"
+                android:padding="14dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:layout_constraintTop_toBottomOf="@id/card_address_home"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageView
+                    android:id="@+id/iv_pin_work"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_location_pin"
+                    android:contentDescription="@null"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_work_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/address_work_label"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="@id/iv_pin_work"
+                    app:layout_constraintStart_toEndOf="@id/iv_pin_work"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_work_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/address_work_value"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:lineSpacingExtra="1dp"
+                    app:layout_constraintTop_toBottomOf="@id/tv_work_label"
+                    app:layout_constraintStart_toEndOf="@id/iv_pin_work"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Add New Address -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_add_new_address"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:text="@string/add_new_address"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:textColor="@color/text_primary"
+                app:icon="@drawable/ic_plus"
+                app:iconTint="@null"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                app:strokeColor="@color/divider_gray"
+                app:cornerRadius="12dp"
+                app:layout_constraintWidth_max="320dp"
+                app:layout_constraintTop_toBottomOf="@id/card_address_work"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- New address form -->
+            <TextView
+                android:id="@+id/label_new_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/label_field"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@id/btn_add_new_address"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_new_label"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                app:boxBackgroundColor="@color/input_bg"
+                app:boxCornerRadiusTopStart="10dp"
+                app:boxCornerRadiusTopEnd="10dp"
+                app:boxCornerRadiusBottomStart="10dp"
+                app:boxCornerRadiusBottomEnd="10dp"
+                app:boxStrokeWidth="0dp"
+                app:hintEnabled="false"
+                app:layout_constraintWidth_max="320dp"
+                app:layout_constraintTop_toBottomOf="@id/label_new_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_new_address_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/address_home_label"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="14sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/label_full_address"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/full_address"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@id/til_new_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_full_address"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                app:boxBackgroundColor="@color/input_bg"
+                app:boxCornerRadiusTopStart="10dp"
+                app:boxCornerRadiusTopEnd="10dp"
+                app:boxCornerRadiusBottomStart="10dp"
+                app:boxCornerRadiusBottomEnd="10dp"
+                app:boxStrokeWidth="0dp"
+                app:hintEnabled="false"
+                app:layout_constraintWidth_max="320dp"
+                app:layout_constraintTop_toBottomOf="@id/label_full_address"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_full_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/enter_your_address"
+                    android:inputType="textPostalAddress"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="14sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_add_address"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/add_address"
+                android:textAllCaps="false"
+                android:textSize="15sp"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/laundr_blue"
+                app:cornerRadius="12dp"
+                app:layout_constraintWidth_max="320dp"
+                app:layout_constraintTop_toBottomOf="@id/til_full_address"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Continue (disabled until an address is selected/added) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_continue_checkout"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_marginTop="12dp"
+                android:enabled="false"
+                android:text="@string/continue_to_checkout"
+                android:textAllCaps="false"
+                android:textSize="15sp"
+                android:textColor="@color/button_disabled_text"
+                android:backgroundTint="@color/button_disabled_bg"
+                app:cornerRadius="12dp"
+                app:layout_constraintWidth_max="320dp"
+                app:layout_constraintTop_toBottomOf="@id/btn_add_address"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Bottom nav (Services tab active) -->
+    <include
+        android:id="@+id/bottom_nav_bar"
+        layout="@layout/bottom_nav_bar_services"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

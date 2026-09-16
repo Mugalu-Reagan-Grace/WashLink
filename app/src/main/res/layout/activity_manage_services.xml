@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".ManageServicesActivity">
+
+    <!-- Header -->
+    <TextView
+        android:id="@+id/tv_header_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/manage_services_title"
+        android:textColor="@color/text_primary"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_add_service" />
+
+    <ImageView
+        android:id="@+id/btn_add_service"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="20dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_plus"
+        android:background="@drawable/bg_offer_card"
+        android:clickable="true"
+        android:focusable="true"
+        android:contentDescription="@string/add_service"
+        app:layout_constraintTop_toTopOf="@id/tv_header_title"
+        app:layout_constraintBottom_toBottomOf="@id/tv_header_title"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Services list -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_services"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="16dp"
+        tools:listitem="@layout/item_provider_service"
+        tools:itemCount="4"
+        app:layout_constraintTop_toBottomOf="@id/tv_header_title"
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav_bar" />
+
+    <!-- Bottom nav (Services tab active) -->
+    <include
+        android:id="@+id/bottom_nav_bar"
+        layout="@layout/provider_nav_bar_services"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

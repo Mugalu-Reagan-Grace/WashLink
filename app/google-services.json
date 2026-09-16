@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "484372548369",
+    "project_id": "washlink-main",
+    "storage_bucket": "washlink-main.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:484372548369:android:86a9fe65d9340a90041ab0",
+        "android_client_info": {
+          "package_name": "com.example.washlink"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0nxX6no85S2wqyuwEpqbtUQXx3NAw7i4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

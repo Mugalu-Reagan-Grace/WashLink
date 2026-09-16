@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="laundr_blue">#1652E6</color>
+    <color name="laundr_blue_dark">#0F3FB8</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="text_primary">#1A1A1A</color>
+    <color name="text_secondary">#8A8F98</color>
+    <color name="hint_gray">#B0B4BA</color>
+    <color name="input_bg">#F4F5F7</color>
+    <color name="divider_gray">#E5E7EB</color>
+    <color name="google_button_bg">#FFFFFF</color>
+    <color name="google_button_border">#E5E7EB</color>
+
+    <!-- Home / Select Service -->
+    <color name="status_in_progress_bg">#E5EBFC</color>
+    <color name="status_in_progress_text">#1652E6</color>
+    <color name="offer_card_bg">#EFF3FE</color>
+    <color name="promo_chip_bg">#FFFFFF</color>
+    <color name="promo_chip_border">#1652E6</color>
+    <color name="card_border">#EDEEF1</color>
+    <color name="nav_inactive">#9AA0A8</color>
+    <color name="badge_save_bg">#1652E6</color>
+    <color name="progress_track_filled">#1652E6</color>
+    <color name="progress_track_empty">#E5E7EB</color>
+
+    <!-- Pickup flow -->
+    <color name="chip_selected_bg">#1652E6</color>
+    <color name="chip_unselected_bg">#F4F5F7</color>
+    <color name="chip_unselected_text">#6B7280</color>
+    <color name="button_disabled_bg">#E5E7EB</color>
+    <color name="button_disabled_text">#B0B4BA</color>
+    <color name="success_green">#1FA855</color>
+    <color name="success_green_bg">#E7F7ED</color>
+    <color name="visa_navy">#1A1F3D</color>
+    <color name="step_number_bg">#EFF3FE</color>
+
+    <!-- Tracking / Profile / History -->
+    <color name="status_delivered_bg">#E7F7ED</color>
+    <color name="status_delivered_text">#1FA855</color>
+    <color name="status_processing_bg">#E5EBFC</color>
+    <color name="status_processing_text">#1652E6</color>
+    <color name="logout_red">#E53935</color>
+    <color name="logout_red_bg">#FDECEC</color>
+    <color name="empty_state_icon_bg">#EFF3FE</color>
+    <color name="error_icon_color">#1652E6</color>
+    <color name="splash_tagline_text">#CFE0FB</color>
+
+    <!-- Nearby Providers -->
+    <color name="rating_gold">#FFB800</color>
+    <color name="open_now_bg">#E7F7ED</color>
+    <color name="open_now_text">#1FA855</color>
+    <color name="closed_bg">#F4F5F7</color>
+    <color name="closed_text">#9AA0A8</color>
+
+    <!-- Provider side -->
+    <color name="pending_bg">#FFF4E5</color>
+    <color name="pending_text">#B8720A</color>
+    <color name="accepted_bg">#E7F7ED</color>
+    <color name="accepted_text">#1FA855</color>
+    <color name="rejected_bg">#FDECEC</color>
+    <color name="rejected_text">#E53935</color>
+    <color name="reject_red">#E53935</color>
+    <color name="earnings_green">#1FA855</color>
+</resources>

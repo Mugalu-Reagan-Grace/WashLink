@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".BookingRequestsActivity">
+
+    <!-- Header -->
+    <TextView
+        android:id="@+id/tv_header_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/booking_requests_title"
+        android:textColor="@color/text_primary"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Tabs -->
+    <LinearLayout
+        android:id="@+id/tab_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/tv_header_title">
+
+        <TextView
+            android:id="@+id/tab_pending"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:background="@drawable/bg_chip_selected"
+            android:text="@string/tab_pending"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/tab_accepted"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:gravity="center"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:background="@drawable/bg_chip_unselected"
+            android:text="@string/tab_accepted"
+            android:textColor="@color/chip_unselected_text"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/tab_history"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:gravity="center"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:background="@drawable/bg_chip_unselected"
+            android:text="@string/tab_history"
+            android:textColor="@color/chip_unselected_text"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+    <!-- Booking requests list -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_booking_requests"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        tools:listitem="@layout/item_booking_request"
+        tools:itemCount="3"
+        app:layout_constraintTop_toBottomOf="@id/tab_row"
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav_bar" />
+
+    <!-- Bottom nav (Bookings tab active) -->
+    <include
+        android:id="@+id/bottom_nav_bar"
+        layout="@layout/provider_nav_bar_bookings"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

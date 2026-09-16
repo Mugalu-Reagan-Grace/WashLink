@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.WashLink">
+        <activity
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".OnboardingActivity">
+        </activity>
+        <activity android:name=".CreateAccountActivity">
+        </activity>
+        <activity android:name=".SignInActivity">
+        </activity>
+        <activity android:name=".SuccessActivity">
+        </activity>
+        <activity android:name=".HomeActivity">
+        </activity>
+        <activity android:name=".ProfileActivity">
+        </activity>
+        <activity android:name=".HistoryActivity">
+        </activity>
+        <activity android:name=".SelectServiceActivity">
+        </activity>
+        <activity android:name=".PickupAddressActivity">
+        </activity>
+        <activity android:name=".PickupSlotSelectionActivity">
+        </activity>
+        <activity android:name=".PickupConfirmationActivity">
+        </activity>
+        <activity android:name=".OrderSummaryActivity">
+        </activity>
+        <activity android:name=".PaymentActivity">
+        </activity>
+        <activity android:name=".AddCardActivity">
+        </activity>
+        <activity android:name=".OrderConfirmedActivity">
+        </activity>
+        <activity android:name=".DropOffActivity">
+        </activity>
+        <activity android:name=".DropOffConfirmationActivity">
+        </activity>
+        <activity android:name=".OrderSummaryDropOffActivity">
+        </activity>
+        <activity android:name=".DropOffPaymentActivity">
+        </activity>
+        <activity android:name=".OrderConfirmedDropOffActivity">
+        </activity>
+        <activity android:name=".NearbyProvidersActivity" />
+        <activity android:name=".ProviderDetailsActivity" />
+        <activity android:name=".OrderTrackingActivity" />
+        <activity android:name=".NotificationsActivity" />
+        <activity android:name=".ProviderLoginActivity" />
+        <activity android:name=".ProviderRegistrationActivity" />
+        <activity android:name=".ProviderDashboardActivity" />
+        <activity android:name=".ProviderProfileActivity" />
+        <activity android:name=".BookingRequestsActivity" />
+        <activity android:name=".ManageServicesActivity" />
+        <activity android:name=".UpdateOrderStatusActivity" />
+    </application>
+
+</manifest>

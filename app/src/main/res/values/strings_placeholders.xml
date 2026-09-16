@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Placeholder strings added to resolve build errors -->
+    <string name="user_name_placeholder">Your name</string>
+    <string name="user_address_placeholder">Home address</string>
+    <string name="order_id_placeholder">Order #0150501</string>
+    <string name="eta_placeholder">10:00 AM</string>
+    <string name="promo_code_placeholder">Add promo code</string>
+    <string name="sign_in_header">Sign in to your account</string>
+    <string name="enter_email">Enter your email</string>
+    <string name="your_password">Your password</string>
+    <string name="google_logo_description">Google logo</string>
+    <string name="_0150501">#0150501</string>
+    <string name="_26_00">UGX 26,000</string>
+    <string name="visa_4242">Visa •••• 4242</string>
+    <string name="_1">1</string>
+    <string name="_2">2</string>
+    <string name="back">Back</string>
+</resources>

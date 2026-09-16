@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notifications">Notifications</string>
+    <string name="today">Today</string>
+    <string name="day_06">06</string>
+    <string name="tue">Tue</string>
+    <string name="day_07">07</string>
+    <string name="wed">Wed</string>
+    <string name="day_08">08</string>
+    <string name="thu">Thu</string>
+    <string name="day_09">09</string>
+
+    <string name="time_800">8:00 AM</string>
+    <string name="time_900">9:00 AM</string>
+    <string name="time_1000">10:00 AM</string>
+    <string name="time_1100">11:00 AM</string>
+    <string name="time_1200">12:00 PM</string>
+    <string name="time_100">1:00 PM</string>
+    <string name="time_200">2:00 PM</string>
+    <string name="time_300">3:00 PM</string>
+    <string name="time_400">4:00 PM</string>
+    <string name="time_500">5:00 PM</string>
+</resources>

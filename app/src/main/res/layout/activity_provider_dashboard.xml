@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".ProviderDashboardActivity">
+
+    <!-- Header -->
+    <View
+        android:id="@+id/iv_logo"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_thumbnail_placeholder"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_greeting"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:text="@string/provider_greeting"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp"
+        app:layout_constraintTop_toTopOf="@id/iv_logo"
+        app:layout_constraintStart_toEndOf="@id/iv_logo"
+        app:layout_constraintEnd_toStartOf="@id/iv_bell" />
+
+    <TextView
+        android:id="@+id/tv_business_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="2dp"
+        android:text="CleanWave Laundry"
+        android:textColor="@color/text_primary"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/tv_greeting"
+        app:layout_constraintStart_toEndOf="@id/iv_logo"
+        app:layout_constraintEnd_toStartOf="@id/iv_bell" />
+
+    <FrameLayout
+        android:id="@+id/iv_bell"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintTop_toTopOf="@id/iv_logo"
+        app:layout_constraintBottom_toBottomOf="@id/iv_logo"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_bell"
+            android:contentDescription="@null" />
+
+        <View
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:layout_gravity="top|end"
+            android:background="@drawable/dot_notification" />
+    </FrameLayout>
+
+    <!-- Scrollable content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/iv_logo"
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav_bar">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="20dp">
+
+            <!-- Stat cards: 2x2 grid -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/stat_bookings"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card_bordered"
+                android:padding="14dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/stat_pending"
+                app:layout_constraintHorizontal_chainStyle="spread">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_calendar"
+                    android:contentDescription="@null"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:tint="@color/text_primary" />
+
+                <TextView
+                    android:id="@+id/tv_stat_bookings_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/stat_bookings_value"
+                    android:textColor="@color/text_primary"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/stat_todays_bookings"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp"
+                    app:layout_constraintTop_toBottomOf="@id/tv_stat_bookings_value"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/stat_pending"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/bg_card_bordered"
+                android:padding="14dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/stat_bookings"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_clock"
+                    android:contentDescription="@null"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:tint="@color/text_primary" />
+
+                <TextView
+                    android:id="@+id/tv_stat_pending_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/stat_pending_value"
+                    android:textColor="@color/text_primary"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/stat_pending_requests"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp"
+                    app:layout_constraintTop_toBottomOf="@id/tv_stat_pending_value"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/stat_earnings"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card_bordered"
+                android:padding="14dp"
+                app:layout_constraintTop_toBottomOf="@id/stat_bookings"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/stat_rating">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_money"
+                    android:contentDescription="@null"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:tint="@color/text_primary" />
+
+                <TextView
+                    android:id="@+id/tv_stat_earnings_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/stat_earnings_value"
+                    android:textColor="@color/text_primary"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/stat_weekly_earnings"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp"
+                    app:layout_constraintTop_toBottomOf="@id/tv_stat_earnings_value"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/stat_rating"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card_bordered"
+                android:padding="14dp"
+                app:layout_constraintTop_toBottomOf="@id/stat_pending"
+                app:layout_constraintStart_toEndOf="@id/stat_earnings"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_star_filled"
+                    android:contentDescription="@null"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:tint="@color/text_primary" />
+
+                <TextView
+                    android:id="@+id/tv_stat_rating_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/stat_rating_value"
+                    android:textColor="@color/text_primary"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/stat_rating"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp"
+                    app:layout_constraintTop_toBottomOf="@id/tv_stat_rating_value"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Recent Bookings -->
+            <TextView
+                android:id="@+id/label_recent_bookings"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/recent_bookings"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@id/stat_earnings"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/tv_view_all" />
+
+            <TextView
+                android:id="@+id/tv_view_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/view_all"
+                android:textColor="@color/laundr_blue"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="@id/label_recent_bookings"
+                app:layout_constraintBottom_toBottomOf="@id/label_recent_bookings"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Sample booking row -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/booking_row_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_card_bordered"
+                android:padding="14dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:layout_constraintTop_toBottomOf="@id/label_recent_bookings">
+
+                <TextView
+                    android:id="@+id/tv_customer_name_1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sample_customer_name_1"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/tv_status_1" />
+
+                <TextView
+                    android:id="@+id/tv_service_1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/sample_service_1"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    app:layout_constraintTop_toBottomOf="@id/tv_customer_name_1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/tv_status_1" />
+
+                <TextView
+                    android:id="@+id/tv_status_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_pending_pill"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:text="@string/tab_pending"
+                    android:textColor="@color/pending_text"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Bottom nav (Dashboard tab active) -->
+    <include
+        android:id="@+id/bottom_nav_bar"
+        layout="@layout/provider_nav_bar_dashboard"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

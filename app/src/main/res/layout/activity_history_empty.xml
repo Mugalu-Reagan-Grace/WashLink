@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".HistoryActivity">
+
+    <!-- Header -->
+    <ImageView
+        android:id="@+id/btn_back"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:padding="12dp"
+        android:src="@drawable/ic_back_arrow"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/nav_home"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:tint="@color/laundr_blue" />
+
+    <TextView
+        android:id="@+id/tv_header_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:text="@string/order_history_title"
+        android:textColor="@color/laundr_blue"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="@id/btn_back"
+        app:layout_constraintBottom_toBottomOf="@id/btn_back"
+        app:layout_constraintStart_toEndOf="@id/btn_back"
+        app:layout_constraintEnd_toStartOf="@id/iv_bell" />
+
+    <FrameLayout
+        android:id="@+id/iv_bell"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="20dp"
+        android:padding="12dp"
+        app:layout_constraintTop_toTopOf="@id/btn_back"
+        app:layout_constraintBottom_toBottomOf="@id/btn_back"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_bell"
+            android:contentDescription="@null"
+            app:tint="@color/laundr_blue" />
+
+        <View
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:layout_gravity="top|end"
+            android:background="@drawable/dot_notification" />
+    </FrameLayout>
+
+    <!-- Centered empty state -->
+    <LinearLayout
+        android:id="@+id/empty_state_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingStart="40dp"
+        android:paddingEnd="40dp"
+        android:paddingBottom="12dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <FrameLayout
+            android:layout_width="88dp"
+            android:layout_height="88dp"
+            android:background="@drawable/bg_state_icon_circle">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_empty_basket"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:background="@drawable/bg_status_pill"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:text="@string/awaiting_freshness"
+                android:textColor="@color/status_in_progress_text"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/history_empty_title"
+            android:textColor="@color/laundr_blue"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/history_empty_desc"
+            android:textColor="@color/text_primary"
+            android:textSize="13sp"
+            android:gravity="center"
+            android:lineSpacingExtra="2dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_book_service"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="20dp"
+            android:text="@string/book_a_service_cta"
+            android:textAllCaps="false"
+            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/laundr_blue"
+            app:cornerRadius="12dp" />
+
+    </LinearLayout>
+
+    <!-- Bottom nav (History tab active) -->
+    <include
+        android:id="@+id/bottom_nav_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        layout="@layout/bottom_nav_bar_history"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

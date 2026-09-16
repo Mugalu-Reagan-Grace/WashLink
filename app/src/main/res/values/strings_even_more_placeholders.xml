@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pick_up_fee_amount">UGX 5,000</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="re_enter_password">Re-enter Password</string>
+    <string name="accept_terms_and_conditions">I accept the Terms &amp; Conditions</string>
+</resources>

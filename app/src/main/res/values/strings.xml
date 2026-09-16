@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WashLink</string>
+    <string name="app_name_with_logo">💧 WashLink</string>
+
+    <!-- Splash -->
+    <string name="splash_tagline">Clean clothes. Zero hassle.</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title">Laundry Simplified</string>
+    <string name="onboarding_subtitle">Schedule pickups, track washes, and enjoy fresh clothes, hassle free</string>
+    <string name="get_started">Get Started</string>
+    <string name="login">Sign In</string>
+
+    <!-- Sign In -->
+    <string name="join_now_prompt">New to Laundr? Join now</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="sign_in_subtitle">Sign in to manage your laundry orders quickly</string>
+    <string name="email_address">Email Address</string>
+    <string name="enter_text">Enter text</string>
+    <string name="password">Password</string>
+    <string name="email_hint">you@example.com</string>
+    <string name="remember_me">Remember me</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="sign_in">Sign In</string>
+    <string name="or_continue_with">Or continue with</string>
+    <string name="continue_with_google">Google</string>
+
+    <!-- Create Account -->
+    <string name="sign_in_prompt">Welcome back! Sign in</string>
+    <string name="create_account">Create Account</string>
+    <string name="create_account_subtitle">Join us and make laundry simple and fast</string>
+    <string name="your_name">Your Name</string>
+    <string name="enter_your_name">Enter your name</string>
+    <string name="sign_up">Sign Up</string>
+
+    <!-- Success -->
+    <string name="success_title">You\'re all set, %1$s!</string>
+    <string name="success_subtitle">Your account is ready. Start booking your laundry service in just a few taps.</string>
+    <string name="book_first_wash">Book Your First Wash</string>
+
+    <!-- Home -->
+    <string name="promo_banner_title">Laundry day simplified.</string>
+    <string name="promo_banner_subtitle">Clean clothes, fast service, delivered to your doorstep.</string>
+    <string name="book_a_service">Book a Service</string>
+    <string name="active_order">Active Order</string>
+    <string name="view_details">View Details</string>
+    <string name="order_wash_fold">Wash &amp; Fold</string>
+    <string name="status_in_progress">In Progress</string>
+    <string name="label_pickup">Pickup</string>
+    <string name="label_cleaning">Cleaning</string>
+    <string name="label_delivery">Delivery</string>
+    <string name="estimated_arrival">Estimated Arrival</string>
+    <string name="welcome_offer">WELCOME OFFER</string>
+    <string name="welcome_offer_desc">UGX 500,000 off your first laundry</string>
+    <string name="more_options">More Options</string>
+    <string name="order_history_desc">View past orders</string>
+    <string name="profile_settings">Profile Settings</string>
+    <string name="profile_settings_desc">Manage your account</string>
+
+    <!-- Bottom nav -->
+    <string name="nav_home">Home</string>
+    <string name="nav_services">Services</string>
+    <string name="nav_tracking">Tracking</string>
+    <string name="nav_history">History</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Select Service -->
+    <string name="select_service">Select Service</string>
+    <string name="select_service_title">How should we handle your laundry?</string>
+    <string name="select_service_subtitle">Drop-off is more affordable. Pickup includes a convenience fee.</string>
+    <string name="save_money">Save Money</string>
+    <string name="save_time">Save Time</string>
+    <string name="drop_off">Drop Off</string>
+    <string name="drop_off_desc">Bring your laundry to the store and we\'ll take care of the rest.</string>
+    <string name="pickup_delivery">Pickup &amp; Delivery</string>
+    <string name="pickup_delivery_desc">Relax while we handle the hassle anywhere in Kampala.</string>
+    <string name="price_per_kg">UGX 25,000 /kg</string>
+
+    <!-- Pickup Address -->
+    <string name="pickup_address_title">Pickup Address</string>
+    <string name="where_pickup">Where should we pick up?</string>
+    <string name="select_or_add_location">Select or add a pickup location</string>
+    <string name="use_current_location">Use Current Location</string>
+    <string name="saved_addresses">Saved Addresses</string>
+    <string name="address_home_label">Home</string>
+    <string name="address_home_value">123 Main Street, Apartment 4B, Kampala, Uganda</string>
+    <string name="address_work_label">Work</string>
+    <string name="address_work_value">456 Business Ave, Suite 200, Kampala, Uganda</string>
+    <string name="add_new_address">Add New Address</string>
+    <string name="label_field">Label (e.g Home)</string>
+    <string name="full_address">Full Address</string>
+    <string name="enter_your_address">Enter your address</string>
+    <string name="add_address">Add Address</string>
+    <string name="continue_to_checkout">Continue to Checkout</string>
+
+    <!-- Pick Up Slot Selection -->
+    <string name="pick_up_slot_title">Pick Up Slot Selection</string>
+    <string name="when_expect_you">When should we expect you?</string>
+    <string name="select_preferred_date_time">Select your preferred date and time</string>
+    <string name="reservation_fee_note">UGX 5,000 reservation fee applies, deducted from the total.</string>
+    <string name="pickup_date">Pickup Date</string>
+    <string name="select_time">Select Time</string>
+    <string name="contact_preference">Contact Preference</string>
+    <string name="contact_call">Call</string>
+    <string name="contact_text">Text</string>
+    <string name="pick_up_fee">Pick Up Fee</string>
+    <string name="pay_amount">Pay UGX 26,000</string>
+
+    <!-- Pickup Confirmation -->
+    <string name="pickup_confirmation_title">Pickup Confirmation</string>
+    <string name="pickup_logistics">Pickup Logistics</string>
+    <string name="edit">Edit</string>
+    <string name="change">Change</string>
+    <string name="pickup_datetime_value">Friday, March 15, 2024 · 10:00 AM – 11:00 AM</string>
+    <string name="home_address_value">123 Main Street, Apt 4B, Kampala, Uganda</string>
+    <string name="number_of_items">Number of Items</string>
+    <string name="estimated_weight">Estimated Weight</string>
+    <string name="weight_range">10–15 lbs</string>
+    <string name="special_instructions">Special Instructions</string>
+    <string name="special_instructions_hint">Add any special instructions for your laundry</string>
+    <string name="confirm_pickup">Confirm Pickup</string>
+
+    <!-- Order Summary -->
+    <string name="order_summary_title">Order Summary</string>
+    <string name="service_type">Service Type</string>
+    <string name="service_type_pickup">Pick Up</string>
+    <string name="price_summary">Price Summary</string>
+    <string name="base_service_label">Base Service (10–15 lbs)</string>
+    <string name="pickup_delivery_fee_label">Pickup &amp; Delivery</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="tax">Tax</string>
+    <string name="total">Total</string>
+    <string name="promo_code_hint">Promo Code</string>
+    <string name="apply">Apply</string>
+    <string name="proceed_to_payment">Proceed to Payment</string>
+
+    <!-- Payment -->
+    <string name="payment_title">Payment</string>
+    <string name="secure_payment">Secure Payment</string>
+    <string name="secure_payment_note">Your payment information is encrypted</string>
+    <string name="add_new_card">Add New Card</string>
+    <string name="order_total">Order Total</string>
+    <string name="pay_with_google_pay">Pay with Google Pay</string>
+    <string name="authorize_payment_note">I authorize this payment and understand it will be processed securely.</string>
+    <string name="payment_airtel_money">Airtel Money</string>
+    <string name="payment_airtel_desc">Pay directly from Airtel Money</string>
+    <string name="payment_mtn_mobile_money">MTN Mobile Money</string>
+    <string name="payment_mtn_desc">Pay directly from MTN MoMo</string>
+    <string name="payment_cash_on_delivery">Cash</string>
+    <string name="payment_cash_desc">Pay in cash when you receive your order</string>
+    <string name="payment_subtotal_amount">UGX 23,000</string>
+    <string name="payment_tax_amount">UGX 3,000</string>
+    <string name="payment_total_amount">UGX 26,000</string>
+    <string name="summary_subtotal_amount">UGX 18,000</string>
+    <string name="summary_pickup_fee_amount">UGX 5,000</string>
+    <string name="summary_total_amount">UGX 23,000</string>
+    <string name="dropoff_summary_total_amount">UGX 20,000</string>
+    <string name="default_item_count">15</string>
+    <string name="default_order_id">#0150502</string>
+    <string name="default_visa_method">Visa •••• 4242</string>
+
+    <!-- Add Card -->
+    <string name="card_number">Card Number</string>
+    <string name="cardholder_name">Cardholder Name</string>
+    <string name="expiry_date">Expiry Date</string>
+    <string name="cvv">CVV</string>
+    <string name="add_card">Add Card</string>
+    <string name="visa_card_label">Visa •••• 4242</string>
+    <string name="mastercard_label">Mastercard •••• 8888</string>
+    <string name="expiry_label">Expiry 12/28</string>
+
+    <!-- Order Confirmed -->
+    <string name="order_confirmed_title">Order Confirmed</string>
+    <string name="order_confirmed_thanks">Thank you! We\'ve got your laundry.</string>
+    <string name="order_details">Order Details</string>
+    <string name="order_id">Order ID</string>
+    <string name="total_amount">Total Amount</string>
+    <string name="payment_method">Payment Method</string>
+    <string name="whats_next">What\'s Next?</string>
+    <string name="step_prepare_items">Prepare your items</string>
+    <string name="step_prepare_items_desc">Ensure your laundry is in a bag or basket, clearly labeled.</string>
+    <string name="step_pickup_time">We\'ll pick up on time</string>
+    <string name="step_pickup_time_desc">Our team will collect your items at the scheduled time.</string>
+    <string name="track_order">Track Order</string>
+
+    <!-- Drop Off -->
+    <string name="drop_off_screen_title">Drop Off</string>
+    <string name="dropoff_fee_note">UGX 5,000 fee applies for early or late drop-off outside the selected time.</string>
+    <string name="confirm_drop_off">Confirm Drop-Off</string>
+
+    <!-- Drop Off Confirmation -->
+    <string name="dropoff_confirmation_title">Drop Off Confirmation</string>
+    <string name="dropoff_logistics">Drop-off Logistics</string>
+    <string name="service_type_dropoff">Drop-off</string>
+    <string name="char_count_zero_of_sixty">0/60</string>
+    <string name="continue_to_summary">Continue to Summary</string>
+
+    <!-- Order Confirmed (Drop-off variant) -->
+    <string name="dropoff_confirmed_thanks">Thank you! Your laundry has been received.</string>
+    <string name="step_dropoff_location_title">Drop off at our store</string>
+    <string name="step_dropoff_location_desc">Drop your items off at our selected location and time.</string>
+    <string name="step_dropoff_cleaning_title">Professional cleaning</string>
+    <string name="step_dropoff_cleaning_desc">Our team will clean your laundry with care.</string>
+    <string name="step_dropoff_ready_title">Ready for Collection</string>
+    <string name="step_dropoff_ready_desc">We\'ll notify you once your laundry is ready for pickup.</string>
+
+    <!-- Order Tracking -->
+    <string name="order_tracking_title">Order Tracking</string>
+    <string name="tracking_order_id">Order #LF-2941</string>
+    <string name="tracking_status_in_progress">In Progress</string>
+    <string name="tracking_step_pickup">Pickup</string>
+    <string name="tracking_step_cleaning">Cleaning</string>
+    <string name="tracking_step_delivery">Delivery</string>
+    <string name="tracking_estimated_arrival">Estimated Arrival</string>
+    <string name="tracking_arrival_value">Tomorrow, 10:00 AM</string>
+    <string name="tracking_step_scheduled_title">Scheduled</string>
+    <string name="tracking_step_scheduled_desc">Jan 5, 2026 · 2:00 PM · Your order is confirmed</string>
+    <string name="tracking_step_pickedup_title">Picked Up</string>
+    <string name="tracking_step_pickedup_desc">Jan 5, 2026 · 2:00 PM · Items collected by our driver</string>
+    <string name="tracking_step_washing_title">Washing</string>
+    <string name="tracking_step_washing_desc">In progress · Your items are being professionally cleaned</string>
+    <string name="tracking_step_drying_title">Drying</string>
+    <string name="tracking_step_drying_desc">Pending · Items will be dried and prepared</string>
+    <string name="tracking_step_outfordelivery_title">Out for Delivery</string>
+    <string name="tracking_step_outfordelivery_desc">Pending · Out for delivery</string>
+    <string name="call_provider">Call Provider</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_company_name">Laundr</string>
+    <string name="profile_company_email">inquiry@laundrapp.com</string>
+    <string name="profile_company_phone">+256 700 123 456</string>
+    <string name="profile_saved_addresses">Saved Addresses</string>
+    <string name="profile_saved_addresses_desc">Manage delivery locations</string>
+    <string name="profile_password">Password</string>
+    <string name="profile_password_desc">Name, email, phone number</string>
+    <string name="profile_payment_methods">Payment Methods</string>
+    <string name="profile_payment_methods_desc">Manage payment options</string>
+    <string name="profile_order_history">Order History</string>
+    <string name="profile_order_history_desc">View past orders</string>
+    <string name="logout">Logout</string>
+
+    <!-- Order History -->
+    <string name="order_history_title">History</string>
+    <string name="order_1_id">Order #0105001</string>
+    <string name="order_1_type">Pickup &amp; Delivery</string>
+    <string name="order_1_date">4/3/2026</string>
+    <string name="order_1_status">Processing</string>
+    <string name="order_1_price">UGX 25,000</string>
+    <string name="order_2_id">Order #0105002</string>
+    <string name="order_2_type">Drop Off</string>
+    <string name="order_2_date">4/3/2026</string>
+    <string name="order_2_status">Delivered</string>
+    <string name="order_2_price">UGX 25,000</string>
+    <string name="order_3_id">Order #0105003</string>
+    <string name="order_3_type">Pickup &amp; Delivery</string>
+    <string name="order_3_date">4/3/2026</string>
+    <string name="order_3_status">Processing</string>
+    <string name="order_3_price">UGX 25,000</string>
+    <string name="order_4_id">Order #0105004</string>
+    <string name="order_4_type">Drop Off</string>
+    <string name="order_4_date">4/3/2026</string>
+    <string name="order_4_status">Processing</string>
+    <string name="order_4_price">UGX 25,000</string>
+
+    <!-- Order History - Error State -->
+    <string name="history_error_title">Something went wrong</string>
+    <string name="history_error_desc">We encountered a snag while loading your laundry fresh date. Please try again or reach out to us.</string>
+    <string name="retry">Retry</string>
+
+    <!-- Order History - Empty State -->
+    <string name="history_empty_title">No Orders Yet</string>
+    <string name="history_empty_desc">You haven\'t placed any orders with us. Ready to experience a new level of freshness?</string>
+    <string name="book_a_service_cta">Book a Service</string>
+    <string name="awaiting_freshness">Awaiting Freshness</string>
+
+    <!-- Nearby Providers -->
+    <string name="nearby_providers_title">Nearby Providers</string>
+    <string name="search_providers_hint">Search laundry providers</string>
+    <string name="filter_all">All</string>
+    <string name="filter_nearest">Nearest</string>
+    <string name="filter_top_rated">Top Rated</string>
+    <string name="filter_lowest_price">Lowest Price</string>
+    <string name="providers_found_count">12 providers near you</string>
+    <string name="open_now">Open Now</string>
+    <string name="closed">Closed</string>
+    <string name="price_from_prefix">From</string>
+    <string name="per_kg_suffix">/kg</string>
+
+    <!-- Provider: Registration -->
+    <string name="provider_registration_title">Register Your Business</string>
+    <string name="provider_registration_subtitle">Join Laundr and start growing your laundry business</string>
+    <string name="business_name">Business Name</string>
+    <string name="owner_name">Owner Full Name</string>
+    <string name="business_address">Business Address</string>
+    <string name="business_email">Business Email</string>
+    <string name="business_phone">Phone Number</string>
+    <string name="create_business_account">Create Business Account</string>
+    <string name="already_have_provider_account">Already have a business account? Sign in</string>
+
+    <!-- Provider: Login -->
+    <string name="provider_login_title">Provider Sign In</string>
+    <string name="provider_login_subtitle">Sign in to manage your business</string>
+    <string name="new_provider_prompt">New provider? Register your business</string>
+
+    <!-- Provider: Dashboard -->
+    <string name="provider_dashboard_title">Dashboard</string>
+    <string name="provider_greeting">Welcome back,</string>
+    <string name="stat_todays_bookings">Today\'s Bookings</string>
+    <string name="stat_pending_requests">Pending Requests</string>
+    <string name="stat_weekly_earnings">This Week</string>
+    <string name="stat_rating">Rating</string>
+    <string name="recent_bookings">Recent Bookings</string>
+    <string name="view_all">View All</string>
+
+    <!-- Provider: Nav -->
+    <string name="provider_nav_dashboard">Dashboard</string>
+    <string name="provider_nav_bookings">Bookings</string>
+    <string name="provider_nav_services">Services</string>
+    <string name="provider_nav_profile">Profile</string>
+
+    <!-- Provider: Manage Services -->
+    <string name="manage_services_title">Manage Services</string>
+    <string name="add_service">Add Service</string>
+    <string name="price_per_unit">Price</string>
+    <string name="edit_service">Edit</string>
+    <string name="delete_service">Delete</string>
+    <string name="service_name_hint">Service name (e.g. Wash &amp; Fold)</string>
+    <string name="service_price_hint">Price per kg</string>
+    <string name="save_service">Save Service</string>
+
+    <!-- Provider: Booking Requests -->
+    <string name="booking_requests_title">Booking Requests</string>
+    <string name="tab_pending">Pending</string>
+    <string name="tab_accepted">Accepted</string>
+    <string name="tab_history">History</string>
+    <string name="accept">Accept</string>
+    <string name="reject">Reject</string>
+    <string name="requested_time">Requested for</string>
+    <string name="customer_label">Customer</string>
+
+    <!-- Provider: Order Status Update -->
+    <string name="update_order_status_title">Update Order Status</string>
+    <string name="current_status">Current Status</string>
+    <string name="mark_as">Mark As</string>
+    <string name="status_accepted">Accepted</string>
+    <string name="status_picked_up">Picked Up</string>
+    <string name="status_washing">Washing</string>
+    <string name="status_drying">Drying</string>
+    <string name="status_ready">Ready</string>
+    <string name="status_out_for_delivery">Out for Delivery</string>
+    <string name="status_delivered">Delivered</string>
+    <string name="update_status_button">Update Status</string>
+
+    <!-- Provider: Business Profile -->
+    <string name="provider_profile_title">Business Profile</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="operating_hours">Operating Hours</string>
+    <string name="business_description">Description</string>
+    <string name="provider_logout">Log Out</string>
+
+
+    <string name="card_title">WashLink</string>
+    <string name="add_card_number">1234 5678 9012 3456</string>
+    <string name="card_holder_name">Cardholder Name</string>
+    <string name="mm_yy">MM/YY</string>
+    <string name="profile_name">Mugalu Reagan Grace</string>
+    <string name="provider_price_example">From UGX 20,000 /kg</string>
+
+    <!-- Dashboard sample values -->
+    <string name="default_business_name">CleanWave Laundry</string>
+    <string name="stat_bookings_value">8</string>
+    <string name="stat_pending_value">3</string>
+    <string name="stat_earnings_value">$342</string>
+    <string name="stat_rating_value">4.8</string>
+    <string name="sample_customer_name_1">Olusola James</string>
+    <string name="sample_service_1">Wash &amp; Fold · Pickup &amp; Delivery</string>
+
+</resources>

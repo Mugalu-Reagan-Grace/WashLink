@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placeholder bottom nav for History screens; mirrors bottom_nav_bar.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottom_nav_bar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:elevation="8dp"
+    android:orientation="horizontal"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:baselineAligned="false">
+
+    <!-- Home -->
+    <LinearLayout
+        android:id="@+id/nav_home"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_nav_home"
+            android:contentDescription="@string/nav_home" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="@string/nav_home"
+            android:textColor="@color/nav_inactive"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- Services -->
+    <LinearLayout
+        android:id="@+id/nav_services"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_nav_services"
+            android:contentDescription="@string/nav_services" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="@string/nav_services"
+            android:textColor="@color/nav_inactive"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- Tracking -->
+    <LinearLayout
+        android:id="@+id/nav_tracking"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_nav_tracking"
+            android:contentDescription="@string/nav_tracking" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="@string/nav_tracking"
+            android:textColor="@color/nav_inactive"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- History (active) -->
+    <LinearLayout
+        android:id="@+id/nav_history"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_nav_history"
+            android:contentDescription="@string/nav_history" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="@string/nav_history"
+            android:textColor="@color/laundr_blue"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- Profile -->
+    <LinearLayout
+        android:id="@+id/nav_profile"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_nav_profile"
+            android:contentDescription="@string/nav_profile" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="@string/nav_profile"
+            android:textColor="@color/nav_inactive"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+</LinearLayout>
