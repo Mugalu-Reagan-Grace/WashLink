@@ -20,6 +20,7 @@
     <string name="enter_text">Enter text</string>
     <string name="password">Password</string>
     <string name="email_hint">you@example.com</string>
+    <string name="business_email_hint">business@example.com</string>
     <string name="remember_me">Remember me</string>
     <string name="forgot_password">Forgot Password?</string>
     <string name="sign_in">Sign In</string>
@@ -376,5 +377,8 @@
     <string name="stat_rating_value">4.8</string>
     <string name="sample_customer_name_1">Olusola James</string>
     <string name="sample_service_1">Wash &amp; Fold · Pickup &amp; Delivery</string>
+
+    <string name="decrease_items">Decrease items</string>
+    <string name="increase_items">Increase items</string>
 
 </resources>

@@ -12,7 +12,12 @@
           "package_name": "com.example.washlink"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "484372548369-jk9tu2gdce6j98m25502415nk5gca12c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyC0nxX6no85S2wqyuwEpqbtUQXx3NAw7i4"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "484372548369-jk9tu2gdce6j98m25502415nk5gca12c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

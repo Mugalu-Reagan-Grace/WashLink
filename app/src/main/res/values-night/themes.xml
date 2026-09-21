@@ -4,12 +4,29 @@
         <item name="android:fontFamily">@font/poppins</item>
         <item name="fontFamily">@font/poppins</item>
         <item name="android:textViewStyle">@style/Widget.WashLink.TextView</item>
+        <item name="buttonStyle">@style/Widget.WashLink.Button</item>
     </style>
 
     <style name="Theme.WashLink" parent="Base.Theme.WashLink" />
 
     <style name="Widget.WashLink.TextView" parent="@android:style/Widget.TextView">
-        <item name="android:fontFamily">@font/poppins</item>
-        <item name="fontFamily">@font/poppins</item>
+        <item name="android:fontFamily">@font/poppins_medium</item>
+        <item name="fontFamily">@font/poppins_medium</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="Widget.WashLink.Button" parent="Widget.Material3.Button">
+        <item name="android:fontFamily">@font/poppins_semibold</item>
+        <item name="fontFamily">@font/poppins_semibold</item>
+    </style>
+
+    <style name="Widget.WashLink.EditText" parent="@android:style/Widget.EditText">
+        <item name="android:fontFamily">@font/poppins_medium</item>
+        <item name="fontFamily">@font/poppins_medium</item>
+    </style>
+
+    <style name="Widget.WashLink.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="android:fontFamily">@font/poppins_medium</item>
+        <item name="fontFamily">@font/poppins_medium</item>
     </style>
 </resources>

@@ -38,6 +38,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+    // Google Sign-In for Firebase Auth
+    implementation("com.google.android.gms:play-services-auth:20.5.0")
 
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)

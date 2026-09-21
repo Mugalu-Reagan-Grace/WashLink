@@ -10,6 +10,8 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 public class ProfileActivity extends AppCompatActivity {
 
     @Override
@@ -62,7 +64,12 @@ public class ProfileActivity extends AppCompatActivity {
         com.google.android.material.button.MaterialButton logoutButton = findViewById(R.id.btn_logout);
         if (logoutButton != null) {
             logoutButton.setOnClickListener(v -> {
+                FirebaseAuth.getInstance().signOut();
                 Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(ProfileActivity.this, SignInActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
                 finish();
             });
         }
