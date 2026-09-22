@@ -26,6 +26,8 @@ public class NearbyProvidersActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_nearby_providers);
+        findViewById(R.id.btn_open_map).setOnClickListener(v ->
+                startActivity(new Intent(this, NearbyLaundryMapActivity.class)));
 
         View backButton = findViewById(R.id.btn_back);
         if (backButton != null) {

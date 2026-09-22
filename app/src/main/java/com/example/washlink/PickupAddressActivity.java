@@ -56,9 +56,7 @@ public class PickupAddressActivity extends AppCompatActivity {
         BottomNavHelper.bind(this);
 
         useCurrentLocationButton.setOnClickListener(v -> {
-            selectedAddress = "Current location";
-            enableContinue();
-            Toast.makeText(this, "Using current location", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, NearbyLaundryMapActivity.class));
         });
 
         homeAddressCard.setOnClickListener(v -> {

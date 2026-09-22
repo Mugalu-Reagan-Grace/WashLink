@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="nearby_map_title">Laundry near you</string>
+    <string name="map_radius_label">Search radius: %1$d km</string>
+    <string name="map_location_permission">Location permission is needed to show nearby laundries.</string>
+    <string name="map_location_unavailable">Could not determine your current location.</string>
+    <string name="provider_use_current_location">Use current location</string>
+    <string name="provider_location_not_selected">Add your business location so customers can find you nearby.</string>
+    <string name="provider_location_saved">Business location selected</string>
     <string name="app_name">WashLink</string>
     <string name="app_name_with_logo">💧 WashLink</string>
 
@@ -33,7 +40,34 @@
     <string name="create_account_subtitle">Join us and make laundry simple and fast</string>
     <string name="your_name">Your Name</string>
     <string name="enter_your_name">Enter your name</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="enter_phone_number">Enter your phone number</string>
+    <string name="verify_phone">Send verification code</string>
+    <string name="verify_phone_code">Verify phone number</string>
+    <string name="enter_verification_code">Enter the 6-digit code</string>
+    <string name="phone_verified">Phone number verified</string>
+    <string name="resend_verification_code">Resend code</string>
+    <string name="phone_sms_consent">You may receive an SMS. Standard message rates may apply.</string>
+    <string name="edit_profile_picture">Edit profile picture</string>
+    <string name="profile_address_dialog_message">Enter the address you want to save for pickup and delivery.</string>
+    <string name="save">Save</string>
     <string name="sign_up">Sign Up</string>
+    <string name="welcome_user_name">Welcome, %1$s</string>
+    <string name="add_phone_almost_done">Almost done — add your number</string>
+    <string name="add_phone_subtitle">Add your mobile number so we can confirm pickups and send order updates.</string>
+    <string name="phone_number_label">Phone Number</string>
+    <string name="phone_number_hint">7XXXXXXX</string>
+    <string name="phone_privacy_note">Used only for order updates and pickup coordination. We never share your number.</string>
+    <string name="save_and_continue">Save &amp; Continue</string>
+    <string name="country_code_ug">+256</string>
+    <string name="action_track_order">Track Order</string>
+    <string name="action_track_order_desc">View order progress</string>
+    <string name="action_view_receipt">View Receipt</string>
+    <string name="action_view_receipt_desc">See your payment details</string>
+    <string name="action_cancel_order">Cancel Order</string>
+    <string name="action_cancel_order_desc">Cancel this order</string>
+    <string name="action_contact_support">Contact Support</string>
+    <string name="action_contact_support_desc">Get help with this order</string>
 
     <!-- Success -->
     <string name="success_title">You\'re all set, %1$s!</string>
@@ -235,11 +269,22 @@
     <string name="profile_saved_addresses">Saved Addresses</string>
     <string name="profile_saved_addresses_desc">Manage delivery locations</string>
     <string name="profile_password">Password</string>
-    <string name="profile_password_desc">Name, email, phone number</string>
+    <string name="profile_password_desc">Send a password reset link to your email</string>
     <string name="profile_payment_methods">Payment Methods</string>
     <string name="profile_payment_methods_desc">Manage payment options</string>
     <string name="profile_order_history">Order History</string>
     <string name="profile_order_history_desc">View past orders</string>
+    <string name="profile_support">Help &amp; Support</string>
+    <string name="profile_support_desc">Get help with orders and payments</string>
+    <string name="profile_feedback">Feedback</string>
+    <string name="profile_feedback_desc">Tell us how we can improve</string>
+    <string name="profile_privacy">Privacy Policy</string>
+    <string name="profile_privacy_desc">How WashLink protects your data</string>
+    <string name="profile_terms">Terms of Service</string>
+    <string name="profile_terms_desc">Rules for using WashLink</string>
+    <string name="profile_about">About WashLink</string>
+    <string name="profile_about_desc">Version 1.0.0</string>
+    <string name="profile_support_email">washlink.support@gmail.com</string>
     <string name="logout">Logout</string>
 
     <!-- Order History -->
@@ -366,7 +411,7 @@
     <string name="add_card_number">1234 5678 9012 3456</string>
     <string name="card_holder_name">Cardholder Name</string>
     <string name="mm_yy">MM/YY</string>
-    <string name="profile_name">Mugalu Reagan Grace</string>
+    <string name="profile_name">Profile Name</string>
     <string name="provider_price_example">From UGX 20,000 /kg</string>
 
     <!-- Dashboard sample values -->

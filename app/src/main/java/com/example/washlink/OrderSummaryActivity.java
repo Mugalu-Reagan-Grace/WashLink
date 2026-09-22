@@ -11,6 +11,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+import com.example.washlink.data.BookingPricing;
 
 public class OrderSummaryActivity extends AppCompatActivity {
 
@@ -42,6 +43,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
         String time = getIntent() != null ? getIntent().getStringExtra("selected_time") : null;
         String contact = getIntent() != null ? getIntent().getStringExtra("selected_contact") : null;
         int itemCount = getIntent() != null ? getIntent().getIntExtra("item_count", 15) : 15;
+        int weightKg = getIntent() != null ? getIntent().getIntExtra("weight_kg", 10) : 10;
 
         if (serviceName == null || serviceName.trim().isEmpty()) {
             serviceName = "Pickup & Delivery";
@@ -65,11 +67,20 @@ public class OrderSummaryActivity extends AppCompatActivity {
         final String selectedTime = time;
         final String selectedContact = contact;
         final int selectedItemCount = itemCount;
+        final BookingPricing.Quote quote = BookingPricing.quote(weightKg, true);
 
         serviceTypeValueText.setText(selectedService);
         dateTimeValueText.setText(selectedDate + " • " + selectedTime + " • " + selectedContact);
         addressValueText.setText(selectedAddress);
         itemsValueText.setText(String.valueOf(selectedItemCount));
+        ((TextView) findViewById(R.id.tv_summary_laundry_amount))
+                .setText(BookingPricing.format(quote.laundry));
+        ((TextView) findViewById(R.id.tv_summary_pickup_fee))
+                .setText(BookingPricing.format(quote.pickup + quote.delivery));
+        ((TextView) findViewById(R.id.tv_summary_subtotal_amount))
+                .setText(BookingPricing.format(quote.laundry + quote.pickup + quote.delivery));
+        ((TextView) findViewById(R.id.tv_summary_total_amount))
+                .setText(BookingPricing.format(quote.total));
 
         backButton.setOnClickListener(v -> finish());
         bellLayout.setOnClickListener(v -> {
@@ -85,6 +96,8 @@ public class OrderSummaryActivity extends AppCompatActivity {
             intent.putExtra("selected_time", selectedTime);
             intent.putExtra("selected_contact", selectedContact);
             intent.putExtra("item_count", selectedItemCount);
+            intent.putExtra("weight_kg", weightKg);
+            intent.putExtra("quote_total", quote.total);
             startActivity(intent);
         });
     }

@@ -11,6 +11,8 @@ public class UserAccount {
     private String phone;
     private String role;
     private String createdAt;
+    private String address;
+    private String photoUri;
 
     public UserAccount() {
         this.createdAt = java.time.Instant.now().toString();
@@ -71,5 +73,21 @@ public class UserAccount {
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPhotoUri() {
+        return photoUri;
+    }
+
+    public void setPhotoUri(String photoUri) {
+        this.photoUri = photoUri;
     }
 }

@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "484372548369-ks0ktg0i0omuh6vcfk619vqlrt3ed2e4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.washlink",
+            "certificate_hash": "36f35c084d9eeeedc75983b7ac19702006d40900"
+          }
+        },
+        {
           "client_id": "484372548369-jk9tu2gdce6j98m25502415nk5gca12c.apps.googleusercontent.com",
           "client_type": 3
         }

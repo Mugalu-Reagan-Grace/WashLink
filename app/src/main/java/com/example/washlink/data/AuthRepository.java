@@ -6,6 +6,9 @@ import com.example.washlink.models.Provider;
 import com.example.washlink.models.UserAccount;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -132,6 +135,14 @@ public class AuthRepository {
     public void registerProvider(String businessName, String ownerName, String email,
                                   String phone, String address, String password,
                                   AuthCallback callback) {
+        registerProvider(businessName, ownerName, email, phone, address, password,
+                0d, 0d, callback);
+    }
+
+    public void registerProvider(String businessName, String ownerName, String email,
+                                  String phone, String address, String password,
+                                  double latitude, double longitude,
+                                  AuthCallback callback) {
         auth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener(result -> {
                     FirebaseUser firebaseUser = result.getUser();
@@ -143,6 +154,8 @@ public class AuthRepository {
                     UserAccount user = new UserAccount(
                             uid, ownerName, email, phone, UserAccount.ROLE_PROVIDER);
                     Provider provider = new Provider(uid, businessName, ownerName, email, phone, address);
+                    provider.setLatitude(latitude);
+                    provider.setLongitude(longitude);
                     firebaseUser.sendEmailVerification();
 
                     Map<String, Object> userDoc = new HashMap<>();
@@ -248,6 +261,166 @@ public class AuthRepository {
 
     public void logout() {
         auth.signOut();
+    }
+
+    public void getCurrentUserAccount(AuthCallback callback) {
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+        if (firebaseUser == null) {
+            callback.onError("You are not signed in.");
+            return;
+        }
+        db.collection("users").document(firebaseUser.getUid()).get()
+                .addOnSuccessListener(doc -> {
+                    UserAccount user = doc.toObject(UserAccount.class);
+                    if (user == null) {
+                        callback.onError("Account data not found.");
+                    } else {
+                        callback.onSuccess(user);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    String name = firebaseUser.getDisplayName() == null
+                            ? "" : firebaseUser.getDisplayName();
+                    String email = firebaseUser.getEmail() == null
+                            ? "" : firebaseUser.getEmail();
+                    UserAccount fallback = new UserAccount(
+                            firebaseUser.getUid(), name, email, "",
+                            UserAccount.ROLE_CUSTOMER);
+                    callback.onSuccess(fallback);
+                });
+    }
+
+    public void updateCustomerProfile(String name, String phone, String address,
+                                      String photoUri, SimpleCallback callback) {
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+        if (firebaseUser == null) {
+            callback.onError("You are not signed in.");
+            return;
+        }
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("name", name);
+        updates.put("phone", phone);
+        updates.put("address", address);
+        updates.put("photoUri", photoUri);
+        db.collection("users").document(firebaseUser.getUid()).update(updates)
+                .addOnSuccessListener(unused -> {
+                    firebaseUser.updateProfile(new UserProfileChangeRequest.Builder()
+                            .setDisplayName(name)
+                            .build());
+                    callback.onSuccess();
+                })
+                .addOnFailureListener(e -> callback.onError(e.getMessage()));
+    }
+
+    public void updatePhoneNumber(String uid, String phone, SimpleCallback callback) {
+        if (uid == null || uid.trim().isEmpty()) {
+            callback.onError("Account identifier is missing.");
+            return;
+        }
+        db.collection("users").document(uid)
+                .update("phone", phone)
+                .addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onError(
+                        e.getMessage() == null ? "Could not save your phone number." : e.getMessage()));
+    }
+
+    public void sendPasswordReset(SimpleCallback callback) {
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+        if (firebaseUser == null || firebaseUser.getEmail() == null) {
+            callback.onError("No email address is associated with this account.");
+            return;
+        }
+        auth.sendPasswordResetEmail(firebaseUser.getEmail())
+                .addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onError(e.getMessage()));
+    }
+
+    public void linkPhoneCredential(AuthCredential credential, SimpleCallback callback) {
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+        if (firebaseUser == null) {
+            callback.onError("Account creation session expired.");
+            return;
+        }
+        firebaseUser.linkWithCredential(credential)
+                .addOnSuccessListener(result -> callback.onSuccess())
+                .addOnFailureListener(e -> {
+                    if (e instanceof FirebaseAuthUserCollisionException) {
+                        callback.onError("This phone number is already linked to another account.");
+                    } else {
+                        callback.onError(e.getMessage());
+                    }
+                });
+    }
+
+    public void deleteCurrentCustomerProfile(SimpleCallback callback) {
+        String uid = getCurrentUserId();
+        if (uid == null) {
+            callback.onSuccess();
+            return;
+        }
+        db.collection("users").document(uid).delete()
+                .addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onError(e.getMessage()));
+    }
+
+    public void completeCustomerRegistration(String name, String email, String phone,
+                                             String password, AuthCredential phoneCredential,
+                                             AuthCallback callback) {
+        if (phoneCredential == null) {
+            callback.onError("Phone verification is incomplete. Verify your phone number first.");
+            return;
+        }
+
+        auth.createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener(result -> {
+                    FirebaseUser firebaseUser = result.getUser();
+                    if (firebaseUser == null) {
+                        callback.onError("Account creation failed unexpectedly.");
+                        return;
+                    }
+
+                    firebaseUser.updateProfile(new UserProfileChangeRequest.Builder()
+                            .setDisplayName(name)
+                            .build());
+
+                    firebaseUser.linkWithCredential(phoneCredential)
+                            .addOnSuccessListener(linkResult -> {
+                                UserAccount user = new UserAccount(
+                                        firebaseUser.getUid(), name, email, phone,
+                                        UserAccount.ROLE_CUSTOMER);
+                                firebaseUser.sendEmailVerification();
+
+                                db.collection("users").document(user.getUid()).set(user)
+                                        .addOnSuccessListener(unused -> callback.onSuccess(user))
+                                        .addOnFailureListener(e -> cleanUpFailedRegistration(
+                                                firebaseUser, user.getUid(), "Failed to save your account profile.", callback));
+                            })
+                            .addOnFailureListener(e -> {
+                                String message = e instanceof FirebaseAuthUserCollisionException
+                                        ? "This phone number is already linked to another account."
+                                        : e.getMessage();
+                                cleanUpFailedRegistration(firebaseUser, firebaseUser.getUid(), message,
+                                        callback);
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    if (e instanceof FirebaseAuthUserCollisionException) {
+                        callback.onError("An account with this email already exists.");
+                    } else {
+                        callback.onError(e.getMessage());
+                    }
+                });
+    }
+
+    private void cleanUpFailedRegistration(FirebaseUser firebaseUser, String uid,
+                                           String message, AuthCallback callback) {
+        if (uid != null) {
+            db.collection("users").document(uid).delete();
+        }
+        if (firebaseUser != null) {
+            firebaseUser.delete();
+        }
+        callback.onError(message);
     }
 
     public String getCurrentUserId() {

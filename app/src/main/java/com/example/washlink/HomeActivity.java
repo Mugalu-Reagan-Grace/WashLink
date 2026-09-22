@@ -43,11 +43,21 @@ public class HomeActivity extends AppCompatActivity {
             });
         }
 
+        findViewById(R.id.row_order_history).setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, HistoryActivity.class);
+            startActivity(intent);
+        });
+
+        findViewById(R.id.row_profile_settings).setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
+            startActivity(intent);
+        });
+
         BottomNavHelper.bind(this);
     }
 
     private void bookServiceButtonClicked() {
-        Intent intent = new Intent(HomeActivity.this, SelectServiceActivity.class);
+        Intent intent = new Intent(HomeActivity.this, NearbyProvidersActivity.class);
         startActivity(intent);
     }
 }

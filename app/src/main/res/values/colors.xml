@@ -46,6 +46,9 @@
     <color name="empty_state_icon_bg">#EFF3FE</color>
     <color name="error_icon_color">#1652E6</color>
     <color name="splash_tagline_text">#CFE0FB</color>
+    <color name="action_icon_bg">#EAF0FF</color>
+    <color name="cancel_action_bg">#FDECEC</color>
+    <color name="privacy_note_overlay">#1D2A4D</color>
 
     <!-- Nearby Providers -->
     <color name="rating_gold">#FFB800</color>
@@ -53,6 +56,12 @@
     <color name="open_now_text">#1FA855</color>
     <color name="closed_bg">#F4F5F7</color>
     <color name="closed_text">#9AA0A8</color>
+
+    <!-- Payment states -->
+    <color name="payment_pending_bg">#FFF4E5</color>
+    <color name="payment_pending_text">#B8720A</color>
+    <color name="payment_paid_bg">#E7F7ED</color>
+    <color name="payment_paid_text">#1FA855</color>
 
     <!-- Provider side -->
     <color name="pending_bg">#FFF4E5</color>

@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -12,93 +12,145 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.washlink.data.BookingService;
+import com.example.washlink.data.BookingServiceFacade;
+import com.example.washlink.data.ListenerRegistration;
+import com.example.washlink.models.Booking;
 import com.google.android.material.button.MaterialButton;
-
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class HistoryActivity extends AppCompatActivity {
+    private final List<Booking> allBookings = new ArrayList<>();
+    private HistoryAdapter adapter;
+    private String filter = "active";
+    private ListenerRegistration registration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-
-        String state = getIntent() != null ? getIntent().getStringExtra("state") : "list";
-        if ("loading".equals(state)) {
-            setContentView(R.layout.activity_history_loading);
-        } else if ("empty".equals(state)) {
-            setContentView(R.layout.activity_history_empty);
-        } else if ("error".equals(state)) {
-            setContentView(R.layout.activity_history_error);
-        } else {
-            setContentView(R.layout.activity_history);
-        }
-
+        setContentView(R.layout.activity_history);
         BottomNavHelper.bind(this);
 
-        View back = findViewById(R.id.btn_back);
-        if (back != null) back.setOnClickListener(v -> finish());
-
+        findViewById(R.id.btn_back).setOnClickListener(v -> finish());
         FrameLayout bell = findViewById(R.id.iv_bell);
-        if (bell != null) bell.setOnClickListener(v ->
-                Toast.makeText(this, "Notifications enabled", Toast.LENGTH_SHORT).show());
+        bell.setOnClickListener(v -> startActivity(new Intent(this, NotificationsActivity.class)));
 
-        MaterialButton bookButton = findViewById(R.id.btn_book_service);
-        if (bookButton != null) {
-            bookButton.setOnClickListener(v -> {
-                Intent intent = new Intent(HistoryActivity.this, SelectServiceActivity.class);
-                startActivity(intent);
-            });
-        }
+        RecyclerView recyclerView = findViewById(R.id.rv_order_history);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new HistoryAdapter();
+        recyclerView.setAdapter(adapter);
+        bindFilter(R.id.filter_active, "active");
+        bindFilter(R.id.filter_completed, "completed");
+        bindFilter(R.id.filter_all, "all");
 
-        RecyclerView rv = findViewById(R.id.rv_order_history);
-        if (rv != null) {
-            rv.setLayoutManager(new LinearLayoutManager(this));
-            // TODO: replace with real data source. For now show empty list so layout remains functional.
-            List<String> sample = new ArrayList<>();
-            // sample.add("Order #1234 - Completed"); // add items here if you want to preview
-            rv.setAdapter(new SimpleAdapter(sample));
+        String uid = FirebaseAuth.getInstance().getCurrentUser() == null
+                ? null : FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if (uid == null) {
+            Toast.makeText(this, "Sign in to view your orders", Toast.LENGTH_SHORT).show();
+            return;
         }
+        registration = BookingServiceFacade.getBookingService().addCustomerBookingsListener(uid,
+                new BookingService.CustomerBookingsListener() {
+                    @Override
+                    public void onBookingsChanged(List<Booking> bookings) {
+                        allBookings.clear();
+                        allBookings.addAll(bookings);
+                        adapter.replace(filteredBookings());
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        Toast.makeText(HistoryActivity.this, message, Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 
-    private static class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.VH> {
-        private final List<String> items;
+    private void bindFilter(int id, String value) {
+        findViewById(id).setOnClickListener(v -> {
+            filter = value;
+            adapter.replace(filteredBookings());
+        });
+    }
 
-        SimpleAdapter(List<String> items) {
-            this.items = items != null ? items : new ArrayList<>();
-        }
-
-        static class VH extends RecyclerView.ViewHolder {
-            TextView title;
-            TextView subtitle;
-            VH(View itemView) {
-                super(itemView);
-                title = itemView.findViewById(android.R.id.text1);
-                subtitle = itemView.findViewById(android.R.id.text2);
+    private List<Booking> filteredBookings() {
+        if ("all".equals(filter)) return new ArrayList<>(allBookings);
+        List<Booking> result = new ArrayList<>();
+        for (Booking booking : allBookings) {
+            boolean completed = "DELIVERED".equals(booking.getStatus())
+                    || "CANCELLED".equals(booking.getStatus())
+                    || "REJECTED".equals(booking.getStatus());
+            if (("completed".equals(filter) && completed)
+                    || ("active".equals(filter) && !completed)) {
+                result.add(booking);
             }
         }
+        return result;
+    }
 
-        @Override
-        public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_2, parent, false);
-            return new VH(v);
+    @Override
+    protected void onDestroy() {
+        if (registration != null) registration.remove();
+        super.onDestroy();
+    }
+
+    private class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.Holder> {
+        private final List<Booking> items = new ArrayList<>();
+
+        void replace(List<Booking> bookings) {
+            items.clear();
+            items.addAll(bookings);
+            notifyDataSetChanged();
         }
 
         @Override
-        public void onBindViewHolder(VH holder, int position) {
-            String s = items.get(position);
-            holder.title.setText(s);
-            holder.subtitle.setText("Details");
+        public Holder onCreateViewHolder(android.view.ViewGroup parent, int viewType) {
+            return new Holder(getLayoutInflater().inflate(R.layout.item_order_history, parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(Holder holder, int position) {
+            Booking booking = items.get(position);
+            holder.id.setText("Order #" + booking.getId());
+            holder.date.setText(booking.getScheduledDateTime() == null
+                    ? "Date pending" : booking.getScheduledDateTime());
+            holder.type.setText(booking.getServiceName() == null
+                    ? "Laundry service" : booking.getServiceName());
+            holder.status.setText(booking.getStatus() == null
+                    ? "BOOKED" : booking.getStatus().replace('_', ' '));
+            holder.price.setText(com.example.washlink.data.BookingPricing.format(
+                    (int) booking.getTotal()));
+            holder.itemView.setOnClickListener(v -> {
+                Intent intent = new Intent(HistoryActivity.this, OrderTrackingActivity.class);
+                intent.putExtra("booking_id", booking.getId());
+                startActivity(intent);
+            });
         }
 
         @Override
         public int getItemCount() {
             return items.size();
+        }
+
+        class Holder extends RecyclerView.ViewHolder {
+            final TextView id;
+            final TextView date;
+            final TextView status;
+            final TextView type;
+            final TextView price;
+
+            Holder(View itemView) {
+                super(itemView);
+                id = itemView.findViewById(R.id.tv_order_id);
+                date = itemView.findViewById(R.id.tv_order_date);
+                status = itemView.findViewById(R.id.tv_order_status);
+                type = itemView.findViewById(R.id.tv_order_type);
+                price = itemView.findViewById(R.id.tv_order_price);
+            }
         }
     }
 }

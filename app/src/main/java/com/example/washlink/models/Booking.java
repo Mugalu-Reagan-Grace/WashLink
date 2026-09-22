@@ -31,6 +31,10 @@ public class Booking {
     private double tax;
     private double total;
     private String paymentMethod;     // e.g. "Visa •••• 4242"
+    private String paymentStatus;     // PENDING, PAID, or FAILED
+    private double pickupFee;
+    private double deliveryFee;
+    private double serviceFee;
     private long createdAt;
     private long updatedAt;
 
@@ -47,6 +51,7 @@ public class Booking {
         this.serviceName = serviceName;
         this.address = address;
         this.status = OrderStatus.BOOKED.name();
+        this.paymentStatus = "PENDING";
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = this.createdAt;
     }
@@ -185,6 +190,38 @@ public class Booking {
 
     public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public double getPickupFee() {
+        return pickupFee;
+    }
+
+    public void setPickupFee(double pickupFee) {
+        this.pickupFee = pickupFee;
+    }
+
+    public double getDeliveryFee() {
+        return deliveryFee;
+    }
+
+    public void setDeliveryFee(double deliveryFee) {
+        this.deliveryFee = deliveryFee;
+    }
+
+    public double getServiceFee() {
+        return serviceFee;
+    }
+
+    public void setServiceFee(double serviceFee) {
+        this.serviceFee = serviceFee;
     }
 
     public long getCreatedAt() {

@@ -7,15 +7,15 @@ package com.example.washlink.data;
  */
 public class BookingServiceFacade {
 
-    private static boolean useStub = true; // safe default
+    private static boolean useStub = false;
 
     public static void setUseStub(boolean stub) {
         useStub = stub;
     }
 
     public static BookingService getBookingService() {
-            return BookingService.getInstance();
-        }
+        return BookingService.getInstance();
+    }
 
         public static BookingServiceStub getBookingServiceStub() {
             return BookingServiceStub.getInstance();

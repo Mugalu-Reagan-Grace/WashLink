@@ -1,23 +1,43 @@
 package com.example.washlink;
 
 import android.content.Intent;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.washlink.data.AuthRepository;
 import com.example.washlink.models.UserAccount;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
 public class ProviderRegistrationActivity extends AppCompatActivity {
+    private static final int LOCATION_REQUEST = 520;
+    private FusedLocationProviderClient locationClient;
+    private double businessLatitude;
+    private double businessLongitude;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_provider_registration);
+        locationClient = LocationServices.getFusedLocationProviderClient(this);
 
         redirectIfAlreadySignedIn();
 
@@ -26,6 +46,8 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
 
         View create = findViewById(R.id.btn_create_business_account);
         if (create != null) create.setOnClickListener(v -> handleProviderRegistration());
+        View useLocation = findViewById(R.id.btn_provider_current_location);
+        if (useLocation != null) useLocation.setOnClickListener(v -> useCurrentLocation());
 
         View signInPrompt = findViewById(R.id.tv_sign_in_prompt);
         if (signInPrompt != null) signInPrompt.setOnClickListener(v -> startActivity(new Intent(this, ProviderLoginActivity.class)));
@@ -76,6 +98,7 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
         }
 
         AuthRepository.getInstance().registerProvider(businessName, ownerName, email, phone, address, password,
+                businessLatitude, businessLongitude,
                 new AuthRepository.AuthCallback() {
                     @Override
                     public void onSuccess(UserAccount user) {
@@ -91,6 +114,61 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
                         Toast.makeText(ProviderRegistrationActivity.this, message, Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void useCurrentLocation() {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED
+                        && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    }, LOCATION_REQUEST);
+                    return;
+                }
+                locationClient.getLastLocation().addOnSuccessListener(location -> {
+                    if (location == null) {
+                        Toast.makeText(this, R.string.map_location_unavailable, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    businessLatitude = location.getLatitude();
+                    businessLongitude = location.getLongitude();
+                    TextInputLayout addressLayout = findViewById(R.id.til_address);
+                    EditText addressInput = addressLayout.getEditText();
+                    if (addressInput != null) {
+                        try {
+                            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                            List<Address> results = geocoder.getFromLocation(
+                                    businessLatitude, businessLongitude, 1);
+                            if (results != null && !results.isEmpty()
+                                    && results.get(0).getAddressLine(0) != null) {
+                                addressInput.setText(results.get(0).getAddressLine(0));
+                            }
+                        } catch (IOException ignored) {
+                            // Coordinates remain usable if reverse geocoding is unavailable.
+                        }
+                    }
+                    TextView status = findViewById(R.id.tv_provider_location_status);
+                    status.setText(getString(R.string.provider_location_saved)
+                            + String.format(Locale.US, " (%.5f, %.5f)",
+                            businessLatitude, businessLongitude));
+                }).addOnFailureListener(error ->
+                        Toast.makeText(this, R.string.map_location_unavailable, Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                if (requestCode == LOCATION_REQUEST) {
+                    for (int result : grantResults) {
+                        if (result == PackageManager.PERMISSION_GRANTED) {
+                            useCurrentLocation();
+                            return;
+                        }
+                    }
+                    Toast.makeText(this, R.string.map_location_permission, Toast.LENGTH_LONG).show();
+                }
     }
 
     private String getTextFromInputLayout(int layoutId) {

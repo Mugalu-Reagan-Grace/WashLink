@@ -97,6 +97,7 @@ public class PickupConfirmationActivity extends AppCompatActivity {
             intent.putExtra("selected_time", selectedTime);
             intent.putExtra("selected_contact", selectedContact);
             intent.putExtra("item_count", itemCount);
+            intent.putExtra("weight_kg", 10);
             startActivity(intent);
         });
     }

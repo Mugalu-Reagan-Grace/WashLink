@@ -313,6 +313,7 @@
                     android:textSize="13sp" />
 
                 <TextView
+                    android:id="@+id/tv_summary_laundry_amount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/summary_subtotal_amount"
@@ -337,6 +338,7 @@
                     android:textSize="13sp" />
 
                 <TextView
+                    android:id="@+id/tv_summary_pickup_fee"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/summary_pickup_fee_amount"
@@ -369,6 +371,7 @@
                     android:textSize="13sp" />
 
                 <TextView
+                    android:id="@+id/tv_summary_subtotal_amount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/summary_subtotal_amount"
@@ -393,6 +396,7 @@
                     android:textSize="13sp" />
 
                 <TextView
+                    android:id="@+id/tv_summary_total_amount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/payment_tax_amount"

@@ -5,6 +5,10 @@
 
 android {
     namespace = "com.example.washlink"
+    defaultConfig {
+        manifestPlaceholders["MAPS_API_KEY"] =
+            providers.gradleProperty("MAPS_API_KEY").orElse("").get()
+    }
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -40,6 +44,8 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     // Google Sign-In for Firebase Auth
     implementation("com.google.android.gms:play-services-auth:20.5.0")
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)

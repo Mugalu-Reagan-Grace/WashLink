@@ -278,6 +278,31 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_provider_current_location"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/provider_use_current_location"
+                android:textAllCaps="false"
+                android:textColor="@color/laundr_blue"
+                app:icon="@drawable/ic_location_pin"
+                app:layout_constraintTop_toBottomOf="@id/til_address"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_provider_location_status"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/provider_location_not_selected"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                app:layout_constraintTop_toBottomOf="@id/btn_provider_current_location"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
             <!-- Password -->
             <TextView
                 android:id="@+id/label_password"
@@ -288,7 +313,7 @@
                 android:textColor="@color/text_primary"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/til_address" />
+                app:layout_constraintTop_toBottomOf="@id/tv_provider_location_status" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_password"

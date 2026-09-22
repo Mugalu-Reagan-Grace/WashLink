@@ -9,6 +9,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+import com.example.washlink.data.BookingPricing;
 
 import java.util.Locale;
 
@@ -27,9 +28,14 @@ public class OrderConfirmedActivity extends AppCompatActivity {
         TextView serviceTypeValue = findViewById(R.id.tv_service_type_value);
         TextView totalAmountValue = findViewById(R.id.tv_total_amount_value);
         TextView paymentMethodValue = findViewById(R.id.tv_payment_method_value);
+        TextView orderIdValue = findViewById(R.id.tv_order_id);
         trackOrderButton = findViewById(R.id.btn_track_order);
 
         if (getIntent() != null) {
+            String bookingId = getIntent().getStringExtra("booking_id");
+            if (orderIdValue != null && bookingId != null) {
+                orderIdValue.setText("Order #" + bookingId);
+            }
             String service = getIntent().getStringExtra("selected_service");
             String paymentMethod = getIntent().getStringExtra("selected_payment_method");
             if (service != null && !service.trim().isEmpty()) {
@@ -40,11 +46,16 @@ public class OrderConfirmedActivity extends AppCompatActivity {
             }
         }
 
-        totalAmountValue.setText(String.format(Locale.US, "UGX %,d", 26000));
+        int total = getIntent() != null
+                ? getIntent().getIntExtra("quote_total", 0) : 0;
+        if (total <= 0) {
+            total = BookingPricing.quote(10, true).total;
+        }
+        totalAmountValue.setText(BookingPricing.format(total));
 
         trackOrderButton.setOnClickListener(v -> {
-            Toast.makeText(this, "Tracking is not available in demo mode", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(OrderConfirmedActivity.this, HomeActivity.class);
+            Intent intent = new Intent(OrderConfirmedActivity.this, OrderTrackingActivity.class);
+            intent.putExtra("booking_id", getIntent().getStringExtra("booking_id"));
             startActivity(intent);
             finish();
         });

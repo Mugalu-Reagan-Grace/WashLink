@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Locale;
@@ -14,6 +15,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.button.MaterialButton;
+import com.example.washlink.data.BookingPricing;
+import com.example.washlink.data.BookingService;
+import com.example.washlink.data.BookingServiceFacade;
+import com.example.washlink.models.Booking;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class PaymentActivity extends AppCompatActivity {
 
@@ -94,17 +101,67 @@ public class PaymentActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        String totalText = String.format(Locale.US, "Pay UGX %,d", 26000);
+        int weightKg = getIntent() != null ? getIntent().getIntExtra("weight_kg", 10) : 10;
+        BookingPricing.Quote quote = BookingPricing.quote(weightKg, true);
+        ((TextView) findViewById(R.id.tv_payment_subtotal))
+                .setText(BookingPricing.format(quote.laundry + quote.pickup + quote.delivery));
+        ((TextView) findViewById(R.id.tv_payment_tax))
+                .setText(BookingPricing.format(quote.serviceFee));
+        ((TextView) findViewById(R.id.tv_payment_total))
+                .setText(BookingPricing.format(quote.total));
+        String totalText = String.format(Locale.US, "Pay UGX %,d", quote.total);
         payButton.setText(totalText);
 
         payButton.setOnClickListener(v -> {
-            Intent intent = new Intent(PaymentActivity.this, OrderConfirmedActivity.class);
-            if (getIntent() != null) {
-                intent.putExtras(getIntent());
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user == null) {
+                Toast.makeText(this, "Please sign in before placing an order", Toast.LENGTH_SHORT).show();
+                return;
             }
-            intent.putExtra("selected_payment_method", selectedPaymentMethod);
-            startActivity(intent);
-            finish();
+            payButton.setEnabled(false);
+            String address = getIntent().getStringExtra("selected_address");
+            if (address == null) address = getIntent().getStringExtra("address");
+            if (address == null) address = "Address to be confirmed";
+            Booking booking = new Booking(
+                    user.getUid(),
+                    user.getDisplayName() == null ? "Customer" : user.getDisplayName(),
+                    getIntent().getStringExtra("provider_id"),
+                    getIntent().getStringExtra("provider_name"),
+                    Booking.SERVICE_TYPE_PICKUP,
+                    getIntent().getStringExtra("selected_service"),
+                    address);
+            booking.setScheduledDateTime(getIntent().getStringExtra("selected_date")
+                    + " • " + getIntent().getStringExtra("selected_time"));
+            booking.setItemCount(getIntent().getIntExtra("item_count", 0));
+            booking.setEstimatedWeight(weightKg + " kg");
+            booking.setSubtotal(quote.laundry + quote.pickup + quote.delivery);
+            booking.setPickupFee(quote.pickup);
+            booking.setDeliveryFee(quote.delivery);
+            booking.setServiceFee(quote.serviceFee);
+            booking.setTax(quote.serviceFee);
+            booking.setTotal(quote.total);
+            booking.setPaymentMethod(selectedPaymentMethod);
+            booking.setPaymentStatus("cash".equals(selectedPaymentMethod) ? "PENDING" : "PAID");
+
+            BookingServiceFacade.getBookingService().createBooking(booking, new BookingService.SimpleCallback() {
+                @Override
+                public void onSuccess() {
+                    Intent intent = new Intent(PaymentActivity.this, OrderConfirmedActivity.class);
+                    if (getIntent() != null) intent.putExtras(getIntent());
+                    intent.putExtra("booking_id", booking.getId());
+                    intent.putExtra("selected_payment_method", selectedPaymentMethod);
+                    intent.putExtra("quote_total", quote.total);
+                    startActivity(intent);
+                    finish();
+                }
+
+                @Override
+                public void onError(String message) {
+                    payButton.setEnabled(true);
+                    Toast.makeText(PaymentActivity.this,
+                            "Could not place order: " + message, Toast.LENGTH_LONG).show();
+                }
+            });
         });
 
         selectPaymentMethod("visa");

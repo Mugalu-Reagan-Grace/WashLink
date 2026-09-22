@@ -477,6 +477,7 @@
                     android:textSize="13sp" />
 
                 <TextView
+                    android:id="@+id/tv_payment_subtotal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/payment_subtotal_amount"
@@ -501,6 +502,7 @@
                     android:textSize="13sp" />
 
                 <TextView
+                    android:id="@+id/tv_payment_tax"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/payment_tax_amount"
@@ -526,6 +528,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tv_payment_total"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/payment_total_amount"
