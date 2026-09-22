@@ -8,6 +8,8 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.washlink.data.AuthGuard;
+import com.example.washlink.models.UserAccount;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -17,6 +19,7 @@ public class ProviderProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_provider_profile);
+        AuthGuard.requireRole(this, UserAccount.ROLE_PROVIDER, ProviderLoginActivity.class);
 
         View back = findViewById(R.id.btn_back);
         if (back != null) back.setOnClickListener(v -> finish());

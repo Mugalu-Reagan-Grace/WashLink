@@ -10,6 +10,9 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.washlink.data.AuthGuard;
+import com.example.washlink.models.UserAccount;
+
 public class HomeActivity extends AppCompatActivity {
 
     private Button btn_book_service;
@@ -20,6 +23,7 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
+        AuthGuard.requireRole(this, UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 
         btn_book_service = findViewById(R.id.btn_book_service);
         bellLayout = findViewById(R.id.iv_bell);

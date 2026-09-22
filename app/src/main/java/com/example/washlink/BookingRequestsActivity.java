@@ -15,6 +15,7 @@ import com.example.washlink.data.BookingService;
 import com.example.washlink.data.BookingServiceFacade;
 import com.example.washlink.data.BookingServiceStub;
 import com.example.washlink.data.AuthRepository;
+import com.example.washlink.data.AuthGuard;
 import com.example.washlink.models.Booking;
 import com.example.washlink.models.OrderStatus;
 import com.example.washlink.data.ListenerRegistration;
@@ -33,6 +34,8 @@ public class BookingRequestsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_booking_requests);
+        AuthGuard.requireRole(this, com.example.washlink.models.UserAccount.ROLE_PROVIDER,
+                ProviderLoginActivity.class);
 
         View back = findViewById(R.id.btn_back);
         if (back != null) back.setOnClickListener(v -> finish());

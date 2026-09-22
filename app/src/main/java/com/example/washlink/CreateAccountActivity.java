@@ -13,6 +13,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.washlink.data.AuthRepository;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -20,16 +21,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
-import com.google.firebase.Timestamp;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class CreateAccountActivity extends AppCompatActivity {
 
@@ -43,7 +38,6 @@ public class CreateAccountActivity extends AppCompatActivity {
     private CheckBox termsCheckBox;
 
     private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
     private GoogleSignInClient mGoogleSignInClient;
 
     @Override
@@ -53,7 +47,6 @@ public class CreateAccountActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_account);
 
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
 
         nameEt = findViewById(R.id.et_name_reg);
         emailEt = findViewById(R.id.et_email_reg);
@@ -111,41 +104,24 @@ public class CreateAccountActivity extends AppCompatActivity {
             return;
         }
 
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        Log.d(TAG, "createUserWithEmail:success");
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            // set display name
-                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                    .setDisplayName(fullName)
-                                    .build();
-                            user.updateProfile(profileUpdates)
-                                    .addOnCompleteListener(task1 -> Log.d(TAG, "User profile updated."));
+        AuthRepository.getInstance().registerCustomer(fullName, email, "", password,
+                new AuthRepository.AuthCallback() {
+                    @Override
+                    public void onSuccess(com.example.washlink.models.UserAccount user) {
+                        Toast.makeText(CreateAccountActivity.this,
+                                "Account created. Verify your email before signing in.",
+                                Toast.LENGTH_LONG).show();
+                        mAuth.signOut();
+                        Intent intent = new Intent(CreateAccountActivity.this, SuccessActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
 
-                            // send email verification
-                            user.sendEmailVerification()
-                                    .addOnCompleteListener(task1 -> Log.d(TAG, "Verification email sent."));
-
-                            // write user document to Firestore
-                            Map<String, Object> userDoc = new HashMap<>();
-                            userDoc.put("uid", user.getUid());
-                            userDoc.put("name", fullName);
-                            userDoc.put("email", user.getEmail());
-                            userDoc.put("createdAt", Timestamp.now());
-
-                            db.collection("users").document(user.getUid())
-                                    .set(userDoc)
-                                    .addOnCompleteListener(task12 -> Log.d(TAG, "User document written to Firestore."));
-                        }
-
-                        updateUI(user);
-                    } else {
-                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                        Toast.makeText(CreateAccountActivity.this, "Authentication failed.",
+                    @Override
+                    public void onError(String message) {
+                        Log.w(TAG, "Customer registration failed: " + message);
+                        Toast.makeText(CreateAccountActivity.this, message,
                                 Toast.LENGTH_SHORT).show();
-                        updateUI(null);
                     }
                 });
     }
@@ -175,19 +151,22 @@ public class CreateAccountActivity extends AppCompatActivity {
                                 if (task1.isSuccessful()) {
                                     Log.d(TAG, "signInWithCredential:success");
                                     FirebaseUser user = mAuth.getCurrentUser();
-                                    if (user != null) {
-                                        // write to Firestore if needed
-                                        Map<String, Object> userDoc = new HashMap<>();
-                                        userDoc.put("uid", user.getUid());
-                                        userDoc.put("name", user.getDisplayName());
-                                        userDoc.put("email", user.getEmail());
-                                        userDoc.put("createdAt", Timestamp.now());
+                                    AuthRepository.getInstance().ensureGoogleCustomer(user,
+                                            new AuthRepository.AuthCallback() {
+                                                @Override
+                                                public void onSuccess(com.example.washlink.models.UserAccount account) {
+                                                    Intent intent = new Intent(CreateAccountActivity.this,
+                                                            SuccessActivity.class);
+                                                    startActivity(intent);
+                                                    finish();
+                                                }
 
-                                        db.collection("users").document(user.getUid())
-                                                .set(userDoc)
-                                                .addOnCompleteListener(task13 -> Log.d(TAG, "User doc (Google) written."));
-                                    }
-                                    updateUI(user);
+                                                @Override
+                                                public void onError(String message) {
+                                                    Toast.makeText(CreateAccountActivity.this,
+                                                            message, Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
                                 } else {
                                     Log.w(TAG, "signInWithCredential:failure", task1.getException());
                                     Toast.makeText(CreateAccountActivity.this, "Google sign-in failed.", Toast.LENGTH_SHORT).show();

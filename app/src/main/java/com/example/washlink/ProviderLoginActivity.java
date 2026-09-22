@@ -30,6 +30,11 @@ public class ProviderLoginActivity extends AppCompatActivity {
 
         View registerPrompt = findViewById(R.id.tv_register_prompt);
         if (registerPrompt != null) registerPrompt.setOnClickListener(v -> startActivity(new Intent(this, ProviderRegistrationActivity.class)));
+
+        View forgotPassword = findViewById(R.id.tv_forgot_password);
+        if (forgotPassword != null) {
+            forgotPassword.setOnClickListener(v -> sendProviderPasswordReset());
+        }
     }
 
     private void redirectIfAlreadySignedIn() {
@@ -96,5 +101,22 @@ public class ProviderLoginActivity extends AppCompatActivity {
         TextInputEditText input = (TextInputEditText) layout.getEditText();
         if (input == null) return "";
         return input.getText() == null ? "" : input.getText().toString().trim();
+    }
+
+    private void sendProviderPasswordReset() {
+        String email = getTextFromInputLayout(R.id.til_email);
+        if (email.isEmpty()) {
+            Toast.makeText(this, "Enter your business email first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(this, "Password reset email sent", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Unable to send reset email", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

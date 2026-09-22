@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.washlink.data.BookingService;
 import com.example.washlink.data.BookingServiceFacade;
 import com.example.washlink.data.BookingServiceStub;
+import com.example.washlink.data.AuthGuard;
+import com.example.washlink.models.UserAccount;
 import com.example.washlink.models.Booking;
 import com.example.washlink.models.OrderStatus;
 import com.example.washlink.data.ListenerRegistration;
@@ -27,6 +29,7 @@ public class UpdateOrderStatusActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_order_status);
+        AuthGuard.requireRole(this, UserAccount.ROLE_PROVIDER, ProviderLoginActivity.class);
 
         View back = findViewById(R.id.btn_back);
         if (back != null) back.setOnClickListener(v -> finish());

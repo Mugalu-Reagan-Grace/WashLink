@@ -6,6 +6,7 @@ import com.example.washlink.models.Provider;
 import com.example.washlink.models.UserAccount;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -111,6 +112,11 @@ public class AuthRepository {
                     }
                     UserAccount user = new UserAccount(
                             firebaseUser.getUid(), name, email, phone, UserAccount.ROLE_CUSTOMER);
+                    UserProfileChangeRequest profile = new UserProfileChangeRequest.Builder()
+                            .setDisplayName(name)
+                            .build();
+                    firebaseUser.updateProfile(profile);
+                    firebaseUser.sendEmailVerification();
                     db.collection("users").document(user.getUid()).set(user)
                             .addOnSuccessListener(unused -> callback.onSuccess(user))
                             .addOnFailureListener(e -> callback.onError(e.getMessage()));
@@ -137,6 +143,7 @@ public class AuthRepository {
                     UserAccount user = new UserAccount(
                             uid, ownerName, email, phone, UserAccount.ROLE_PROVIDER);
                     Provider provider = new Provider(uid, businessName, ownerName, email, phone, address);
+                    firebaseUser.sendEmailVerification();
 
                     Map<String, Object> userDoc = new HashMap<>();
                     userDoc.put("uid", user.getUid());
@@ -174,14 +181,25 @@ public class AuthRepository {
                         callback.onError("Sign in failed unexpectedly.");
                         return;
                     }
+                    if (!firebaseUser.isEmailVerified()) {
+                        auth.signOut();
+                        callback.onError("Please verify your email before signing in.");
+                        return;
+                    }
                     db.collection("users").document(firebaseUser.getUid()).get()
                             .addOnSuccessListener(doc -> {
                                 if (!doc.exists()) {
+                                    auth.signOut();
                                     callback.onError("Account data not found.");
                                     return;
                                 }
                                 UserAccount user = doc.toObject(UserAccount.class);
-                                if (requiredRole != null && user != null
+                                if (user == null || user.getRole() == null) {
+                                    auth.signOut();
+                                    callback.onError("Account role is not configured.");
+                                    return;
+                                }
+                                if (requiredRole != null
                                         && !requiredRole.equals(user.getRole())) {
                                     // e.g. a customer trying to sign in on the Provider Login screen
                                     auth.signOut();
@@ -191,6 +209,38 @@ public class AuthRepository {
                                 }
                                 callback.onSuccess(user);
                             })
+                            .addOnFailureListener(e -> callback.onError(e.getMessage()));
+                })
+                .addOnFailureListener(e -> callback.onError(e.getMessage()));
+    }
+
+    public void ensureGoogleCustomer(FirebaseUser firebaseUser, AuthCallback callback) {
+        if (firebaseUser == null) {
+            callback.onError("Google sign-in failed unexpectedly.");
+            return;
+        }
+
+        db.collection("users").document(firebaseUser.getUid()).get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        UserAccount user = doc.toObject(UserAccount.class);
+                        if (user == null || !UserAccount.ROLE_CUSTOMER.equals(user.getRole())) {
+                            auth.signOut();
+                            callback.onError("This account is not registered as a customer.");
+                            return;
+                        }
+                        callback.onSuccess(user);
+                        return;
+                    }
+
+                    String name = firebaseUser.getDisplayName() == null
+                            ? "" : firebaseUser.getDisplayName();
+                    String email = firebaseUser.getEmail() == null
+                            ? "" : firebaseUser.getEmail();
+                    UserAccount user = new UserAccount(
+                            firebaseUser.getUid(), name, email, "", UserAccount.ROLE_CUSTOMER);
+                    db.collection("users").document(user.getUid()).set(user)
+                            .addOnSuccessListener(unused -> callback.onSuccess(user))
                             .addOnFailureListener(e -> callback.onError(e.getMessage()));
                 })
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));

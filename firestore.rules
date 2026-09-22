@@ -1,0 +1,53 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isProvider() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'provider';
+    }
+
+    match /users/{uid} {
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.role in ['customer', 'provider'];
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow update: if signedIn()
+        && (request.auth.uid == uid || isAdmin())
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.role == resource.data.role;
+      allow delete: if isAdmin();
+    }
+
+    match /providers/{uid} {
+      allow read: if signedIn();
+      allow create, update, delete: if isProvider()
+        && request.auth.uid == uid;
+    }
+
+    match /bookings/{bookingId} {
+      allow read, update, delete: if signedIn()
+        && (resource.data.customerId == request.auth.uid
+          || resource.data.providerId == request.auth.uid
+          || isAdmin());
+      allow create: if signedIn()
+        && (request.resource.data.customerId == request.auth.uid
+          || isProvider()
+          || isAdmin());
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

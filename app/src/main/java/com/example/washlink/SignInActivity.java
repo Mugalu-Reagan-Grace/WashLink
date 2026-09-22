@@ -14,6 +14,8 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.washlink.data.AuthRepository;
+import com.example.washlink.models.UserAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -76,15 +78,18 @@ public class SignInActivity extends AppCompatActivity {
             return;
         }
 
-        mAuth.signInWithEmailAndPassword(user_email, user_password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
+        AuthRepository.getInstance().login(user_email, user_password, UserAccount.ROLE_CUSTOMER,
+                new AuthRepository.AuthCallback() {
+                    @Override
+                    public void onSuccess(UserAccount account) {
                         Log.d(TAG, "signInWithEmail:success");
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        updateUI(user);
-                    } else {
-                        Log.w(TAG, "signInWithEmail:failure", task.getException());
-                        Toast.makeText(SignInActivity.this, "Invalid email or password", Toast.LENGTH_SHORT).show();
+                        updateUI(mAuth.getCurrentUser());
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        Log.w(TAG, "signInWithEmail:failure: " + message);
+                        Toast.makeText(SignInActivity.this, message, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -119,7 +124,19 @@ public class SignInActivity extends AppCompatActivity {
                             if (authTask.isSuccessful()) {
                                 Log.d(TAG, "signInWithCredential:success");
                                 FirebaseUser user = mAuth.getCurrentUser();
-                                updateUI(user);
+                                AuthRepository.getInstance().ensureGoogleCustomer(user,
+                                        new AuthRepository.AuthCallback() {
+                                            @Override
+                                            public void onSuccess(UserAccount account) {
+                                                updateUI(user);
+                                            }
+
+                                            @Override
+                                            public void onError(String message) {
+                                                Toast.makeText(SignInActivity.this,
+                                                        message, Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
                             } else {
                                 Log.w(TAG, "signInWithCredential:failure", authTask.getException());
                                 Toast.makeText(SignInActivity.this, "Google sign-in failed", Toast.LENGTH_SHORT).show();
