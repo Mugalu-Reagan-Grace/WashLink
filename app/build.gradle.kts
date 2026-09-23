@@ -49,6 +49,7 @@ dependencies {
 
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
+    implementation("androidx.fragment:fragment:1.8.5")
     implementation(libs.constraintlayout)
     implementation(libs.material)
     testImplementation(libs.junit)

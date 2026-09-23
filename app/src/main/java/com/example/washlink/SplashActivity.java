@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.washlink.data.AuthRepository;
 import com.example.washlink.models.UserAccount;
 import com.google.firebase.auth.FirebaseAuth;
+import com.example.washlink.ui.customer.MainActivity;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -39,7 +40,7 @@ public class SplashActivity extends AppCompatActivity {
 
                 Class<?> destination = UserAccount.ROLE_PROVIDER.equals(user.getRole())
                         ? ProviderDashboardActivity.class
-                        : HomeActivity.class;
+                        : MainActivity.class;
                 openScreen(destination);
             }
 

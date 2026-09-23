@@ -24,6 +24,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
+import com.example.washlink.ui.customer.MainActivity;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
@@ -178,7 +179,7 @@ public class SignInActivity extends AppCompatActivity {
         if (firstTimeSignup) {
             intent = new Intent(SignInActivity.this, SuccessActivity.class);
         } else {
-            intent = new Intent(SignInActivity.this, HomeActivity.class);
+            intent = new Intent(SignInActivity.this, MainActivity.class);
         }
 
         startActivity(intent);

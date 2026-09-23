@@ -2,6 +2,7 @@ package com.example.washlink;
 
 import android.content.Intent;
 import android.os.Bundle;
+import com.example.washlink.ui.customer.MainActivity;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
@@ -21,7 +22,7 @@ public class OnboardingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_onboarding);
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            Intent intent = new Intent(OnboardingActivity.this, HomeActivity.class);
+            Intent intent = new Intent(OnboardingActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
             return;

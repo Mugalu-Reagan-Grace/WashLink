@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.washlink.data.AuthRepository;
+import com.example.washlink.ui.customer.MainActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -361,7 +362,7 @@ public class CreateAccountActivity extends AppCompatActivity {
 
     private void updateUI(FirebaseUser user) {
         if (user != null) {
-            Intent intent = new Intent(CreateAccountActivity.this, HomeActivity.class);
+            Intent intent = new Intent(CreateAccountActivity.this, MainActivity.class);
             intent.putExtra("first_time_signup", true);
             startActivity(intent);
             finish();
@@ -371,7 +372,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     }
 
     private void reload() {
-        Intent intent = new Intent(CreateAccountActivity.this, HomeActivity.class);
+        Intent intent = new Intent(CreateAccountActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
     }

@@ -29,6 +29,7 @@ import com.example.washlink.models.UserAccount;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -52,7 +53,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_profile);
+        setContentView(R.layout.activity_customer_profile);
 
         profileName = findViewById(R.id.tv_profile_name);
         profileEmail = findViewById(R.id.tv_profile_email);
@@ -62,9 +63,21 @@ public class ProfileActivity extends AppCompatActivity {
         imagePicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
                 uri -> {
                     if (uri == null || account == null) return;
-                    photoUri = uri.toString();
-                    avatar.setImageURI(uri);
-                    saveProfile();
+                    try {
+                        getContentResolver().takePersistableUriPermission(
+                                uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        if (!displayAvatar(uri)) {
+                            showDefaultAvatar();
+                            return;
+                        }
+                        photoUri = uri.toString();
+                        saveProfile();
+                    } catch (SecurityException | IllegalArgumentException e) {
+                        showDefaultAvatar();
+                        Toast.makeText(ProfileActivity.this,
+                                "The selected image could not be accessed. Please choose another image.",
+                                Toast.LENGTH_SHORT).show();
+                    }
                 });
 
         loadProfile();
@@ -159,7 +172,12 @@ public class ProfileActivity extends AppCompatActivity {
                         : user.getAddress());
                 photoUri = valueOrFallback(user.getPhotoUri(), "");
                 if (!photoUri.isEmpty()) {
-                    avatar.setImageURI(Uri.parse(photoUri));
+                    Uri savedUri = Uri.parse(photoUri);
+                    if (!displayAvatar(savedUri)) {
+                        photoUri = "";
+                        showDefaultAvatar();
+                        saveProfile();
+                    }
                 }
             }
 
@@ -298,6 +316,34 @@ public class ProfileActivity extends AppCompatActivity {
 
     private String valueOrFallback(String value, String fallback) {
         return value == null ? fallback : value;
+    }
+
+    private boolean canReadUri(Uri uri) {
+        try (android.os.ParcelFileDescriptor descriptor =
+                     getContentResolver().openFileDescriptor(uri, "r")) {
+            return descriptor != null;
+        } catch (SecurityException | FileNotFoundException e) {
+            return false;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private boolean displayAvatar(Uri uri) {
+        if (!canReadUri(uri)) {
+            return false;
+        }
+        try {
+            avatar.setImageURI(uri);
+            return true;
+        } catch (SecurityException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    private void showDefaultAvatar() {
+        photoUri = "";
+        avatar.setImageDrawable(null);
     }
 
     @Override

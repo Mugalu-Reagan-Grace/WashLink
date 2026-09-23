@@ -33,7 +33,7 @@ public class HistoryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_history);
+        setContentView(R.layout.activity_customer_history);
         BottomNavHelper.bind(this);
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());

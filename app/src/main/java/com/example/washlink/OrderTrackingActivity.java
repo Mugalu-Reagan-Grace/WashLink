@@ -21,7 +21,7 @@ public class OrderTrackingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_order_tracking);
+        setContentView(R.layout.activity_customer_tracking);
 
         // Wire bottom nav so Tracking shows as active
         BottomNavHelper.bind(this);

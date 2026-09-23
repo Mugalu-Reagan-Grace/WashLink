@@ -21,7 +21,7 @@ public class SelectServiceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_select_service);
+        setContentView(R.layout.activity_customer_services);
 
         backButton = findViewById(R.id.btn_back);
         bellLayout = findViewById(R.id.iv_bell);

@@ -22,7 +22,7 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_customer_home);
         AuthGuard.requireRole(this, UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 
         btn_book_service = findViewById(R.id.btn_book_service);
