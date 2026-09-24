@@ -11,6 +11,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+import com.example.washlink.data.BookingPricing;
 
 public class OrderSummaryDropOffActivity extends AppCompatActivity {
 
@@ -35,6 +36,16 @@ public class OrderSummaryDropOffActivity extends AppCompatActivity {
         dateTimeValueText = findViewById(R.id.tv_datetime_value);
         itemsValueText = findViewById(R.id.tv_items_value_inline);
         weightValueText = findViewById(R.id.tv_weight_value_inline);
+        int weightKg = getIntent() != null ? getIntent().getIntExtra("weight_kg", 10) : 10;
+        BookingPricing.Quote quote = BookingPricing.quote(weightKg, false);
+        ((TextView) findViewById(R.id.tv_base_service_value))
+                .setText(BookingPricing.format(quote.laundry));
+        ((TextView) findViewById(R.id.tv_subtotal_value))
+                .setText(BookingPricing.format(quote.laundry));
+        ((TextView) findViewById(R.id.tv_tax_value))
+                .setText(BookingPricing.format(quote.serviceFee));
+        ((TextView) findViewById(R.id.tv_total_value))
+                .setText(BookingPricing.format(quote.total));
 
         String serviceName = getIntent() != null ? getIntent().getStringExtra("selected_service") : null;
         String selectedDate = getIntent() != null ? getIntent().getStringExtra("selected_date") : null;
@@ -54,7 +65,7 @@ public class OrderSummaryDropOffActivity extends AppCompatActivity {
         serviceTypeValueText.setText(serviceName);
         dateTimeValueText.setText(selectedDate + " • " + selectedTime);
         itemsValueText.setText(String.valueOf(itemCount));
-        weightValueText.setText(getString(R.string.weight_range));
+        weightValueText.setText(weightKg + " kg");
 
         backButton.setOnClickListener(v -> finish());
         bellLayout.setOnClickListener(v -> {
@@ -68,6 +79,7 @@ public class OrderSummaryDropOffActivity extends AppCompatActivity {
                 intent.putExtras(getIntent());
             }
             intent.putExtra("item_count", itemCount);
+            intent.putExtra("weight_kg", weightKg);
             startActivity(intent);
         });
     }

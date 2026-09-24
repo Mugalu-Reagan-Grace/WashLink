@@ -64,6 +64,8 @@ public class ProviderDetailsActivity extends AppCompatActivity {
                 Intent intent = new Intent(ProviderDetailsActivity.this, PickupAddressActivity.class);
                 intent.putExtra("selected_service", "Pickup & Delivery");
                 intent.putExtra("selected_provider", name);
+                intent.putExtra("provider_name", name);
+                intent.putExtra("provider_address", in.getStringExtra("provider_address"));
                 startActivity(intent);
             });
         }

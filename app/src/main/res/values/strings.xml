@@ -9,6 +9,7 @@
     <string name="provider_location_saved">Business location selected</string>
     <string name="app_name">WashLink</string>
     <string name="app_name_with_logo">💧 WashLink</string>
+    <string name="laundry_delivery_image">Laundry provider carrying clean clothes</string>
 
     <!-- Splash -->
     <string name="splash_tagline">Clean clothes. Zero hassle.</string>
@@ -16,6 +17,8 @@
     <!-- Onboarding -->
     <string name="onboarding_title">Laundry Simplified</string>
     <string name="onboarding_subtitle">Schedule pickups, track washes, and enjoy fresh clothes, hassle free</string>
+    <string name="onboarding_slide_two_title">Fresh laundry, delivered</string>
+    <string name="onboarding_slide_two_subtitle">Book a trusted laundry provider and get your clean clothes back with less effort.</string>
     <string name="get_started">Get Started</string>
     <string name="login">Sign In</string>
 
@@ -201,6 +204,10 @@
     <string name="expiry_date">Expiry Date</string>
     <string name="cvv">CVV</string>
     <string name="add_card">Add Card</string>
+    <string name="card_chip">Card chip</string>
+    <string name="contactless">Contactless payment</string>
+    <string name="card_brand">Card brand</string>
+    <string name="cvv_placeholder">123</string>
     <string name="visa_card_label">Visa •••• 4242</string>
     <string name="mastercard_label">Mastercard •••• 8888</string>
     <string name="expiry_label">Expiry 12/28</string>
@@ -212,6 +219,18 @@
     <string name="order_id">Order ID</string>
     <string name="total_amount">Total Amount</string>
     <string name="payment_method">Payment Method</string>
+    <string name="payment_status">Payment Status</string>
+    <string name="payment_pending">Pending</string>
+    <string name="payment_paid">Paid</string>
+    <string name="schedule">Schedule</string>
+    <string name="date_pending">Date pending</string>
+    <string name="view_receipt">View receipt</string>
+    <string name="contact_support">Contact support</string>
+    <string name="provider">Provider</string>
+    <string name="provider_pending">Provider pending</string>
+    <string name="address">Address</string>
+    <string name="address_pending">Address pending</string>
+    <string name="provider_dropoff_location">Provider drop-off location</string>
     <string name="whats_next">What\'s Next?</string>
     <string name="step_prepare_items">Prepare your items</string>
     <string name="step_prepare_items_desc">Ensure your laundry is in a bag or basket, clearly labeled.</string>

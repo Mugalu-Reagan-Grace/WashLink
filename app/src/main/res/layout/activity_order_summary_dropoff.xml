@@ -302,6 +302,7 @@
                     android:textSize="13sp" />
 
                 <TextView
+                    android:id="@+id/tv_base_service_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/summary_subtotal_amount"
@@ -334,6 +335,7 @@
                     android:textSize="13sp" />
 
                 <TextView
+                    android:id="@+id/tv_subtotal_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/summary_subtotal_amount"
@@ -358,6 +360,7 @@
                     android:textSize="13sp" />
 
                 <TextView
+                    android:id="@+id/tv_tax_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/summary_pickup_fee_amount"
@@ -383,6 +386,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tv_total_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/dropoff_summary_total_amount"

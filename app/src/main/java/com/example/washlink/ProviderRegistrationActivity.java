@@ -97,6 +97,11 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
             return;
         }
 
+        if (businessLatitude == 0d && businessLongitude == 0d) {
+            Toast.makeText(this, "Please use your current location before creating the business account.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         AuthRepository.getInstance().registerProvider(businessName, ownerName, email, phone, address, password,
                 businessLatitude, businessLongitude,
                 new AuthRepository.AuthCallback() {

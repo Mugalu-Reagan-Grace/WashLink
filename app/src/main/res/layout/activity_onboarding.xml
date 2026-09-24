@@ -12,11 +12,11 @@
         android:id="@+id/iv_hero"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:scaleType="centerCrop"
+        android:scaleType="fitCenter"
         android:paddingTop="35dp"
         android:paddingStart="50dp"
         android:paddingEnd="50dp"
-        android:src="@drawable/img_onboarding_hero"
+        android:src="@drawable/man_carrying_clothes_one_hand"
         android:contentDescription="@string/onboarding_title"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -106,20 +106,17 @@
             app:layout_constraintEnd_toEndOf="parent">
 
             <View
+                android:id="@+id/indicator_one"
                 android:layout_width="18dp"
                 android:layout_height="6dp"
                 android:layout_marginEnd="4dp"
                 android:background="@drawable/dot_active_indicator" />
 
             <View
+                android:id="@+id/indicator_two"
                 android:layout_width="6dp"
                 android:layout_height="6dp"
                 android:layout_marginEnd="4dp"
-                android:background="@drawable/dot_inactive_indicator" />
-
-            <View
-                android:layout_width="6dp"
-                android:layout_height="6dp"
                 android:background="@drawable/dot_inactive_indicator" />
 
         </LinearLayout>

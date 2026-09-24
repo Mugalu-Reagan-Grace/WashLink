@@ -141,7 +141,9 @@ public class PaymentActivity extends AppCompatActivity {
             booking.setTax(quote.serviceFee);
             booking.setTotal(quote.total);
             booking.setPaymentMethod(selectedPaymentMethod);
-            booking.setPaymentStatus("cash".equals(selectedPaymentMethod) ? "PENDING" : "PAID");
+            com.example.washlink.data.PaymentGateway.PaymentResult paymentResult =
+                    com.example.washlink.data.PaymentGateway.process(selectedPaymentMethod, quote.total);
+            booking.setPaymentStatus(paymentResult.getStatus());
 
             BookingServiceFacade.getBookingService().createBooking(booking, new BookingService.SimpleCallback() {
                 @Override
@@ -150,6 +152,11 @@ public class PaymentActivity extends AppCompatActivity {
                     if (getIntent() != null) intent.putExtras(getIntent());
                     intent.putExtra("booking_id", booking.getId());
                     intent.putExtra("selected_payment_method", selectedPaymentMethod);
+                    intent.putExtra("payment_status", booking.getPaymentStatus());
+                    intent.putExtra("provider_name", booking.getProviderName());
+                    intent.putExtra("selected_address", booking.getAddress());
+                    intent.putExtra("selected_date", getIntent().getStringExtra("selected_date"));
+                    intent.putExtra("selected_time", getIntent().getStringExtra("selected_time"));
                     intent.putExtra("quote_total", quote.total);
                     startActivity(intent);
                     finish();

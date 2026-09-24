@@ -13,6 +13,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.button.MaterialButton;
+import com.example.washlink.data.BookingPricing;
+import com.example.washlink.data.BookingService;
+import com.example.washlink.data.BookingServiceFacade;
+import com.example.washlink.models.Booking;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Locale;
 
@@ -84,17 +90,69 @@ public class DropOffPaymentActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        payButton.setText(String.format(Locale.US, "Pay UGX %,d", 26000));
+        int weightKg = getIntent().getIntExtra("weight_kg", 10);
+        BookingPricing.Quote quote = BookingPricing.quote(weightKg, false);
+        payButton.setText(String.format(Locale.US, "Pay UGX %,d", quote.total));
         selectPaymentMethod("visa");
 
         payButton.setOnClickListener(v -> {
-            Intent intent = new Intent(DropOffPaymentActivity.this, OrderConfirmedDropOffActivity.class);
-            if (getIntent() != null) {
-                intent.putExtras(getIntent());
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user == null) {
+                Toast.makeText(this, "Please sign in before placing an order", Toast.LENGTH_SHORT).show();
+                return;
             }
-            intent.putExtra("selected_payment_method", getSelectedPaymentLabel());
-            startActivity(intent);
-            finish();
+            payButton.setEnabled(false);
+            String service = getIntent().getStringExtra("selected_service");
+            String date = getIntent().getStringExtra("selected_date");
+            String time = getIntent().getStringExtra("selected_time");
+            Booking booking = new Booking(
+                    user.getUid(),
+                    user.getDisplayName() == null ? "Customer" : user.getDisplayName(),
+                    getIntent().getStringExtra("provider_id"),
+                    getIntent().getStringExtra("provider_name"),
+                    Booking.SERVICE_TYPE_DROPOFF,
+                    service == null ? "Drop Off" : service,
+                    getIntent().getStringExtra("provider_address") == null
+                            ? "Provider drop-off location"
+                            : getIntent().getStringExtra("provider_address"));
+            booking.setScheduledDateTime((date == null ? "Date pending" : date)
+                    + " • " + (time == null ? "Time pending" : time));
+            booking.setItemCount(getIntent().getIntExtra("item_count", 15));
+            booking.setEstimatedWeight(weightKg + " kg");
+            booking.setSpecialInstructions(getIntent().getStringExtra("special_instructions"));
+            booking.setSubtotal(quote.laundry);
+            booking.setPickupFee(quote.pickup);
+            booking.setDeliveryFee(quote.delivery);
+            booking.setServiceFee(quote.serviceFee);
+            booking.setTax(quote.serviceFee);
+            booking.setTotal(quote.total);
+            booking.setPaymentMethod(getSelectedPaymentLabel());
+            booking.setPaymentStatus("cash".equals(selectedPaymentMethod) ? "PENDING" : "PENDING");
+
+            BookingServiceFacade.getBookingService().createBooking(booking,
+                    new BookingService.SimpleCallback() {
+                        @Override
+                        public void onSuccess() {
+                            Intent intent = new Intent(DropOffPaymentActivity.this,
+                                    OrderConfirmedDropOffActivity.class);
+                            intent.putExtras(getIntent());
+                            intent.putExtra("booking_id", booking.getId());
+                            intent.putExtra("selected_payment_method", getSelectedPaymentLabel());
+                            intent.putExtra("payment_status", booking.getPaymentStatus());
+                            intent.putExtra("provider_name", booking.getProviderName());
+                            intent.putExtra("provider_address", booking.getAddress());
+                            intent.putExtra("quote_total", quote.total);
+                            startActivity(intent);
+                            finish();
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            payButton.setEnabled(true);
+                            Toast.makeText(DropOffPaymentActivity.this,
+                                    "Could not place order: " + message, Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
     }
 

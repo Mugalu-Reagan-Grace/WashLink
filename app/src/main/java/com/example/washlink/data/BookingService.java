@@ -75,7 +75,8 @@ public class BookingService {
     public com.example.washlink.data.ListenerRegistration addCustomerBookingsListener(
             String customerId, CustomerBookingsListener listener) {
         Query query = firestore.collection("bookings")
-                .whereEqualTo("customerId", customerId);
+                .whereEqualTo("customerId", customerId)
+                .orderBy("createdAt", Query.Direction.DESCENDING);
         com.google.firebase.firestore.ListenerRegistration registration = query.addSnapshotListener((snapshot, error) -> {
             if (error != null) {
                 listener.onError(error.getMessage());
@@ -98,8 +99,9 @@ public class BookingService {
 
     private com.example.washlink.data.ListenerRegistration addBookingsQuery(
             String field, String value, ProviderBookingsListener listener) {
-        com.google.firebase.firestore.        ListenerRegistration registration = firestore.collection("bookings")
+        com.google.firebase.firestore.ListenerRegistration registration = firestore.collection("bookings")
                 .whereEqualTo(field, value)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, error) -> {
                     if (error != null) {
                         listener.onError(error.getMessage());
