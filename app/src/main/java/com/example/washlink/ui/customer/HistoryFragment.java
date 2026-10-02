@@ -23,6 +23,8 @@ import java.util.List;
 public class HistoryFragment extends CustomerTabFragment {
     private final List<Booking> allBookings = new ArrayList<>();
     private HistoryAdapter adapter;
+    private RecyclerView recyclerView;
+    private TextView emptyState;
     private String filter = "active";
     private ListenerRegistration registration;
 
@@ -37,13 +39,15 @@ public class HistoryFragment extends CustomerTabFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         bindNavigation(view, MainActivity.TAB_HISTORY);
         view.findViewById(R.id.iv_bell).setOnClickListener(v -> openNotifications());
-        RecyclerView recyclerView = view.findViewById(R.id.rv_order_history);
+        recyclerView = view.findViewById(R.id.rv_order_history);
+        emptyState = view.findViewById(R.id.tv_empty_history);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new HistoryAdapter();
         recyclerView.setAdapter(adapter);
         bindFilter(view, R.id.filter_active, "active");
         bindFilter(view, R.id.filter_completed, "completed");
         bindFilter(view, R.id.filter_all, "all");
+        updateEmptyState();
 
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             Toast.makeText(requireContext(), "Sign in to view your orders", Toast.LENGTH_SHORT).show();
@@ -56,6 +60,7 @@ public class HistoryFragment extends CustomerTabFragment {
                         allBookings.clear();
                         allBookings.addAll(bookings);
                         adapter.replace(filteredBookings());
+                        updateEmptyState();
                     }
                     @Override public void onError(String message) {
                         if (isAdded()) Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
@@ -67,6 +72,7 @@ public class HistoryFragment extends CustomerTabFragment {
         view.findViewById(id).setOnClickListener(v -> {
             filter = value;
             adapter.replace(filteredBookings());
+            updateEmptyState();
         });
     }
 
@@ -81,6 +87,13 @@ public class HistoryFragment extends CustomerTabFragment {
                     || ("active".equals(filter) && !completed)) result.add(booking);
         }
         return result;
+    }
+
+    private void updateEmptyState() {
+        if (recyclerView == null || emptyState == null || adapter == null) return;
+        boolean hasItems = adapter.getItemCount() > 0;
+        recyclerView.setVisibility(hasItems ? View.VISIBLE : View.GONE);
+        emptyState.setVisibility(hasItems ? View.GONE : View.VISIBLE);
     }
 
     @Override

@@ -10,9 +10,12 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,16 +35,8 @@ import java.util.Map;
  *                                so looking up "this user's business" is a direct
  *                                document read, not a query)
  *
- * SECURITY RULES YOU STILL NEED TO WRITE (not covered by this file):
- * Firestore's default "test mode" allows anyone to read/write anything for 30
- * days, which is NOT safe to submit or ship. Before that window closes, add
- * rules roughly like:
- *   - users/{uid}: only that uid (or an admin) can read/write their own doc
- *   - providers/{uid}: anyone signed in can READ (customers browse providers),
- *     only that provider's uid can WRITE their own doc
- *   - bookings/{id}: only the booking's customerId or providerId can read/write it
- * This file only handles the client-side logic; rules are configured in the
- * Firebase console (Firestore Database > Rules) or a rules file, not in Java.
+ * Firestore access is restricted by the repository's firestore.rules file;
+ * deploy that rules file to Firebase when changing the backend configuration.
  */
 public class AuthRepository {
 
@@ -292,6 +287,12 @@ public class AuthRepository {
 
     public void updateCustomerProfile(String name, String phone, String address,
                                       String photoUri, SimpleCallback callback) {
+        updateCustomerProfile(name, phone, address, photoUri, null, callback);
+    }
+
+    public void updateCustomerProfile(String name, String phone, String address,
+                                      String photoUri, List<String> savedAddresses,
+                                      SimpleCallback callback) {
         FirebaseUser firebaseUser = auth.getCurrentUser();
         if (firebaseUser == null) {
             callback.onError("You are not signed in.");
@@ -302,6 +303,9 @@ public class AuthRepository {
         updates.put("phone", phone);
         updates.put("address", address);
         updates.put("photoUri", photoUri);
+        if (savedAddresses != null) {
+            updates.put("savedAddresses", new ArrayList<>(savedAddresses));
+        }
         db.collection("users").document(firebaseUser.getUid()).update(updates)
                 .addOnSuccessListener(unused -> {
                     firebaseUser.updateProfile(new UserProfileChangeRequest.Builder()
@@ -322,6 +326,23 @@ public class AuthRepository {
                 .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(e -> callback.onError(
                         e.getMessage() == null ? "Could not save your phone number." : e.getMessage()));
+    }
+
+    public void addSavedAddress(String address, SimpleCallback callback) {
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+        String normalizedAddress = address == null ? "" : address.trim();
+        if (firebaseUser == null) {
+            callback.onError("You are not signed in.");
+            return;
+        }
+        if (normalizedAddress.isEmpty()) {
+            callback.onError("Address cannot be empty.");
+            return;
+        }
+        db.collection("users").document(firebaseUser.getUid())
+                .update("savedAddresses", FieldValue.arrayUnion(normalizedAddress))
+                .addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
 
     public void sendPasswordReset(SimpleCallback callback) {

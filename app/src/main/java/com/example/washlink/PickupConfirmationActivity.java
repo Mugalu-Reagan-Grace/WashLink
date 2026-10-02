@@ -13,6 +13,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 public class PickupConfirmationActivity extends AppCompatActivity {
 
     private ImageView backButton;
@@ -26,8 +30,8 @@ public class PickupConfirmationActivity extends AppCompatActivity {
     private int itemCount = 15;
     private String selectedService = "Pickup & Delivery";
     private String selectedAddress = "Home address";
-    private String selectedDate = "Today";
-    private String selectedTime = "10:00 AM";
+    private String selectedDate = "";
+    private String selectedTime = "";
     private String selectedContact = "Call";
 
     @Override
@@ -51,10 +55,14 @@ public class PickupConfirmationActivity extends AppCompatActivity {
             selectedAddress = "Home address";
         }
         if (selectedDate == null || selectedDate.trim().isEmpty()) {
-            selectedDate = "Today";
+            Calendar cal = Calendar.getInstance();
+            SimpleDateFormat dateFmt = new SimpleDateFormat("EEE, MMM d", Locale.getDefault());
+            selectedDate = dateFmt.format(cal.getTime());
         }
         if (selectedTime == null || selectedTime.trim().isEmpty()) {
-            selectedTime = "10:00 AM";
+            Calendar cal2 = Calendar.getInstance();
+            SimpleDateFormat timeFmt = new SimpleDateFormat("h:mm a", Locale.getDefault());
+            selectedTime = timeFmt.format(cal2.getTime());
         }
         if (selectedContact == null || selectedContact.trim().isEmpty()) {
             selectedContact = "Call";
@@ -84,6 +92,9 @@ public class PickupConfirmationActivity extends AppCompatActivity {
             itemCountText.setText(String.valueOf(itemCount));
         });
 
+        // initialize item count view
+        itemCountText.setText(String.valueOf(itemCount));
+
         confirmPickupButton.setOnClickListener(v -> {
             if (!pickupFeeCheckBox.isChecked()) {
                 Toast.makeText(this, "Please confirm the pickup fee", Toast.LENGTH_SHORT).show();
@@ -91,13 +102,15 @@ public class PickupConfirmationActivity extends AppCompatActivity {
             }
 
             Intent intent = new Intent(PickupConfirmationActivity.this, OrderSummaryActivity.class);
+            intent.putExtras(getIntent());
             intent.putExtra("selected_service", selectedService);
             intent.putExtra("selected_address", selectedAddress);
             intent.putExtra("selected_date", selectedDate);
             intent.putExtra("selected_time", selectedTime);
             intent.putExtra("selected_contact", selectedContact);
             intent.putExtra("item_count", itemCount);
-            intent.putExtra("weight_kg", 10);
+            int estimatedKg = com.example.washlink.data.BookingPricing.estimateWeightKg(itemCount);
+            intent.putExtra("weight_kg", estimatedKg);
             startActivity(intent);
         });
     }

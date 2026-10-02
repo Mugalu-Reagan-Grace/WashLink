@@ -36,8 +36,10 @@ public class OrderSummaryDropOffActivity extends AppCompatActivity {
         dateTimeValueText = findViewById(R.id.tv_datetime_value);
         itemsValueText = findViewById(R.id.tv_items_value_inline);
         weightValueText = findViewById(R.id.tv_weight_value_inline);
-        int weightKg = getIntent() != null ? getIntent().getIntExtra("weight_kg", 10) : 10;
-        BookingPricing.Quote quote = BookingPricing.quote(weightKg, false);
+        int itemCount = getIntent() != null ? getIntent().getIntExtra("item_count", 15) : 15;
+        int weightKg = getIntent() != null ? getIntent().getIntExtra("weight_kg", BookingPricing.estimateWeightKg(itemCount)) : BookingPricing.estimateWeightKg(itemCount);
+        double pricePerKg = getIntent().getDoubleExtra("price_per_kg", BookingPricing.PRICE_PER_KG);
+        BookingPricing.Quote quote = BookingPricing.quote(weightKg, false, pricePerKg);
         ((TextView) findViewById(R.id.tv_base_service_value))
                 .setText(BookingPricing.format(quote.laundry));
         ((TextView) findViewById(R.id.tv_subtotal_value))
@@ -50,16 +52,19 @@ public class OrderSummaryDropOffActivity extends AppCompatActivity {
         String serviceName = getIntent() != null ? getIntent().getStringExtra("selected_service") : null;
         String selectedDate = getIntent() != null ? getIntent().getStringExtra("selected_date") : null;
         String selectedTime = getIntent() != null ? getIntent().getStringExtra("selected_time") : null;
-        int itemCount = getIntent() != null ? getIntent().getIntExtra("item_count", 15) : 15;
 
         if (serviceName == null || serviceName.trim().isEmpty()) {
             serviceName = "Drop Off";
         }
+        String laundryService = getIntent().getStringExtra("selected_laundry_service");
+        if (laundryService != null && !laundryService.trim().isEmpty()) serviceName = laundryService;
         if (selectedDate == null || selectedDate.trim().isEmpty()) {
-            selectedDate = "Tue, Jun 7";
+            java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("EEE, MMM d", java.util.Locale.getDefault());
+            selectedDate = df.format(java.util.Calendar.getInstance().getTime());
         }
         if (selectedTime == null || selectedTime.trim().isEmpty()) {
-            selectedTime = "10:00 AM";
+            java.text.SimpleDateFormat tf = new java.text.SimpleDateFormat("h:mm a", java.util.Locale.getDefault());
+            selectedTime = tf.format(java.util.Calendar.getInstance().getTime());
         }
 
         serviceTypeValueText.setText(serviceName);

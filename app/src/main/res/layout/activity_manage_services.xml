@@ -53,6 +53,19 @@
         app:layout_constraintTop_toBottomOf="@id/tv_header_title"
         app:layout_constraintBottom_toTopOf="@id/bottom_nav_bar" />
 
+    <TextView
+        android:id="@+id/tv_services_state"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="24dp"
+        android:textColor="@color/text_secondary"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/rv_services"
+        app:layout_constraintBottom_toBottomOf="@id/rv_services"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Bottom nav (Services tab active) -->
     <include
         android:id="@+id/bottom_nav_bar"

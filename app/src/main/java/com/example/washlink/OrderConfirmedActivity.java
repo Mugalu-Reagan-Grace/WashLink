@@ -42,13 +42,15 @@ public class OrderConfirmedActivity extends AppCompatActivity {
                 orderIdValue.setText("Order #" + bookingId);
             }
             String service = getIntent().getStringExtra("selected_service");
+            String laundryService = getIntent().getStringExtra("selected_laundry_service");
             String paymentMethod = getIntent().getStringExtra("selected_payment_method");
             String schedule = getIntent().getStringExtra("selected_date");
             String time = getIntent().getStringExtra("selected_time");
             String provider = getIntent().getStringExtra("provider_name");
             String address = getIntent().getStringExtra("selected_address");
             if (service != null && !service.trim().isEmpty()) {
-                serviceTypeValue.setText(service);
+                serviceTypeValue.setText(laundryService == null || laundryService.trim().isEmpty()
+                        ? service : laundryService);
             }
             if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
                 paymentMethodValue.setText(paymentMethod);
@@ -57,22 +59,33 @@ public class OrderConfirmedActivity extends AppCompatActivity {
             if (provider != null && !provider.trim().isEmpty()) providerValue.setText(provider);
             if (address != null && !address.trim().isEmpty()) addressValue.setText(address);
             String paymentStatus = getIntent().getStringExtra("payment_status");
-            if ("PAID".equalsIgnoreCase(paymentStatus)) {
-                paymentStatusValue.setText(R.string.payment_paid);
-                paymentStatusValue.setBackgroundResource(R.drawable.bg_payment_paid_pill);
-            }
+            PaymentStatusRenderer.render(paymentStatusValue, paymentStatus);
         }
 
         int total = getIntent() != null
                 ? getIntent().getIntExtra("quote_total", 0) : 0;
         if (total <= 0) {
-            total = BookingPricing.quote(10, true).total;
+            int itemCount = getIntent().getIntExtra("item_count", 15);
+            int weightKg = getIntent().getIntExtra("weight_kg",
+                    BookingPricing.estimateWeightKg(itemCount));
+            double rate = getIntent().getDoubleExtra("price_per_kg", BookingPricing.PRICE_PER_KG);
+            total = BookingPricing.quote(weightKg, true, rate).total;
         }
         final int confirmedTotal = total;
         totalAmountValue.setText(BookingPricing.format(confirmedTotal));
 
-        findViewById(R.id.btn_view_receipt).setOnClickListener(v ->
-                showReceipt(totalAmountValue.getText().toString(), orderIdValue.getText().toString()));
+        findViewById(R.id.btn_view_receipt).setOnClickListener(v -> {
+            String receiptTotal = "";
+            if (totalAmountValue != null && totalAmountValue.getText() != null) {
+                receiptTotal = totalAmountValue.getText().toString();
+            }
+            String receiptOrderId = "";
+            TextView orderIdView = findViewById(R.id.tv_order_id);
+            if (orderIdView != null && orderIdView.getText() != null) {
+                receiptOrderId = orderIdView.getText().toString();
+            }
+            showReceipt(receiptTotal, receiptOrderId);
+        });
         findViewById(R.id.btn_contact_support).setOnClickListener(v -> {
             Intent support = new Intent(Intent.ACTION_SENDTO,
                     Uri.parse("mailto:" + getString(R.string.profile_support_email)));

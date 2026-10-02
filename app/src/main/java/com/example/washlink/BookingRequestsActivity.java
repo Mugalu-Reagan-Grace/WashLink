@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.washlink.data.BookingService;
 import com.example.washlink.data.BookingServiceFacade;
-import com.example.washlink.data.BookingServiceStub;
+import com.example.washlink.data.BookingPricing;
 import com.example.washlink.data.AuthRepository;
 import com.example.washlink.data.AuthGuard;
 import com.example.washlink.models.Booking;
@@ -28,6 +29,10 @@ public class BookingRequestsActivity extends AppCompatActivity {
     private RecyclerView rv;
     private BookingRequestsAdapter adapter;
     private ListenerRegistration providerBookingsReg;
+    private TextView stateView;
+    private final List<Booking> allBookings = new ArrayList<>();
+    private String filter = "pending";
+    private boolean loaded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,34 +48,95 @@ public class BookingRequestsActivity extends AppCompatActivity {
         ProviderNavBarHelper.bind(this, ProviderNavBarHelper.TAB_BOOKINGS);
 
         rv = findViewById(R.id.rv_booking_requests);
+        stateView = findViewById(R.id.tv_booking_requests_state);
         rv.setLayoutManager(new LinearLayoutManager(this));
         adapter = new BookingRequestsAdapter(new ArrayList<>());
         rv.setAdapter(adapter);
+        bindFilter(R.id.tab_pending, "pending");
+        bindFilter(R.id.tab_accepted, "accepted");
+        bindFilter(R.id.tab_history, "history");
+        showState("Loading bookings...");
 
-        // Use current signed-in user as providerId (AuthRepository.getCurrentUserId())
         String providerId = AuthRepository.getInstance().getCurrentUserId();
-        if (providerId == null) providerId = "prov-1"; // fallback for dev
+        if (providerId == null) {
+            showState("Sign in as a provider to view bookings.");
+            return;
+        }
         loadBookingsForProvider(providerId);
+    }
+
+    private void bindFilter(int viewId, String value) {
+        View tab = findViewById(viewId);
+        tab.setOnClickListener(v -> {
+            filter = value;
+            updateFilterStyles();
+            updateList();
+        });
+    }
+
+    private void updateFilterStyles() {
+        int[] ids = {R.id.tab_pending, R.id.tab_accepted, R.id.tab_history};
+        String[] values = {"pending", "accepted", "history"};
+        for (int i = 0; i < ids.length; i++) {
+            TextView tab = findViewById(ids[i]);
+            boolean selected = values[i].equals(filter);
+            tab.setBackgroundResource(selected
+                    ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
+            tab.setTextColor(androidx.core.content.ContextCompat.getColor(this,
+                    selected ? R.color.white : R.color.chip_unselected_text));
+        }
     }
 
     private void loadBookingsForProvider(String providerId) {
         if (BookingServiceFacade.isUsingStub()) {
-            List<Booking> bookings = BookingServiceStub.getInstance().getAllBookingsForProvider(providerId);
-            adapter.setItems(bookings);
+            showState("Demo booking data is not enabled.");
         } else {
-            // Attach Firestore listener for provider bookings
             providerBookingsReg = BookingService.getInstance().addProviderBookingsListener(providerId, new BookingService.ProviderBookingsListener() {
                 @Override
                 public void onBookingsChanged(List<Booking> bookings) {
-                    runOnUiThread(() -> adapter.setItems(bookings));
+                    runOnUiThread(() -> {
+                        allBookings.clear();
+                        allBookings.addAll(bookings);
+                        loaded = true;
+                        updateList();
+                    });
                 }
 
                 @Override
                 public void onError(String message) {
-                    runOnUiThread(() -> adapter.setItems(new ArrayList<>()));
+                    runOnUiThread(() -> showState("Could not load bookings. " + message));
                 }
             });
         }
+    }
+
+    private void updateList() {
+        List<Booking> filtered = new ArrayList<>();
+        for (Booking booking : allBookings) {
+            OrderStatus status = OrderStatus.fromString(booking.getStatus());
+            boolean matches = "pending".equals(filter)
+                    ? status == OrderStatus.BOOKED
+                    : "accepted".equals(filter)
+                    ? status != OrderStatus.BOOKED && !status.isTerminal()
+                    : status.isTerminal();
+            if (matches) filtered.add(booking);
+        }
+        adapter.setItems(filtered);
+        if (filtered.isEmpty()) showState(loaded ? "No bookings in this section yet." : "Loading bookings...");
+        else showList();
+    }
+
+    private void showState(String message) {
+        if (stateView != null) {
+            stateView.setText(message);
+            stateView.setVisibility(View.VISIBLE);
+        }
+        if (rv != null) rv.setVisibility(View.GONE);
+    }
+
+    private void showList() {
+        if (stateView != null) stateView.setVisibility(View.GONE);
+        if (rv != null) rv.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -99,7 +165,7 @@ public class BookingRequestsActivity extends AppCompatActivity {
             holder.tvDate.setText(b.getScheduledDateTime() != null ? b.getScheduledDateTime() : "");
             holder.tvStatus.setText(OrderStatus.fromString(b.getStatus()).getDisplayName());
             holder.tvType.setText(b.getServiceName() != null ? b.getServiceName() : "");
-            holder.tvPrice.setText(String.format("$%.2f", b.getTotal()));
+            holder.tvPrice.setText(BookingPricing.format((int) b.getTotal()));
 
             holder.itemView.setOnClickListener(v -> {
                 Intent i = new Intent(BookingRequestsActivity.this, UpdateOrderStatusActivity.class);

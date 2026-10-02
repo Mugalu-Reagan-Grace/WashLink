@@ -26,9 +26,9 @@ public class OrderConfirmedDropOffActivity extends AppCompatActivity {
         LinearLayout serviceTypeRow = findViewById(R.id.row_service_type);
         LinearLayout paymentMethodRow = findViewById(R.id.row_payment_method);
         LinearLayout totalAmountRow = findViewById(R.id.row_total_amount);
-        TextView serviceTypeValue = (TextView) serviceTypeRow.getChildAt(1);
-        TextView paymentMethodValue = (TextView) paymentMethodRow.getChildAt(1);
-        TextView totalAmountValue = (TextView) totalAmountRow.getChildAt(1);
+        TextView serviceTypeValue = serviceTypeRow != null && serviceTypeRow.getChildCount() > 1 ? (TextView) serviceTypeRow.getChildAt(1) : null;
+        TextView paymentMethodValue = paymentMethodRow != null && paymentMethodRow.getChildCount() > 1 ? (TextView) paymentMethodRow.getChildAt(1) : null;
+        TextView totalAmountValue = totalAmountRow != null && totalAmountRow.getChildCount() > 1 ? (TextView) totalAmountRow.getChildAt(1) : null;
         trackOrderButton = findViewById(R.id.btn_track_order);
         TextView paymentStatusValue = findViewById(R.id.tv_payment_status_value);
         TextView scheduleValue = findViewById(R.id.tv_schedule_value);
@@ -37,33 +37,46 @@ public class OrderConfirmedDropOffActivity extends AppCompatActivity {
 
         if (getIntent() != null) {
             String service = getIntent().getStringExtra("selected_service");
+            String laundryService = getIntent().getStringExtra("selected_laundry_service");
             String paymentMethod = getIntent().getStringExtra("selected_payment_method");
             String bookingId = getIntent().getStringExtra("booking_id");
             String date = getIntent().getStringExtra("selected_date");
             String time = getIntent().getStringExtra("selected_time");
             String provider = getIntent().getStringExtra("provider_name");
-            if (service != null && !service.trim().isEmpty()) {
-                serviceTypeValue.setText(service);
+            if (serviceTypeValue != null && service != null && !service.trim().isEmpty()) {
+                serviceTypeValue.setText(laundryService == null || laundryService.trim().isEmpty()
+                        ? service : laundryService);
             }
-            if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
+            if (paymentMethodValue != null && paymentMethod != null && !paymentMethod.trim().isEmpty()) {
                 paymentMethodValue.setText(paymentMethod);
             }
             if (bookingId != null && !bookingId.trim().isEmpty()) {
-                ((TextView) ((LinearLayout) findViewById(R.id.row_order_id)).getChildAt(1))
-                        .setText("Order #" + bookingId);
+                LinearLayout orderIdRow = findViewById(R.id.row_order_id);
+                if (orderIdRow != null && orderIdRow.getChildCount() > 1) {
+                    ((TextView) orderIdRow.getChildAt(1)).setText("Order #" + bookingId);
+                }
             }
-            if (date != null && time != null) scheduleValue.setText(date + " • " + time);
-            if (provider != null && !provider.trim().isEmpty()) providerValue.setText(provider);
+            if (date != null && time != null && scheduleValue != null) scheduleValue.setText(date + " • " + time);
+            if (providerValue != null && provider != null && !provider.trim().isEmpty()) providerValue.setText(provider);
             String providerAddress = getIntent().getStringExtra("provider_address");
-            addressValue.setText(providerAddress == null || providerAddress.trim().isEmpty()
-                    ? getString(R.string.provider_dropoff_location) : providerAddress);
-            if ("PAID".equalsIgnoreCase(getIntent().getStringExtra("payment_status"))) {
-                paymentStatusValue.setText(R.string.payment_paid);
-                paymentStatusValue.setBackgroundResource(R.drawable.bg_payment_paid_pill);
+            if (addressValue != null) {
+                addressValue.setText(providerAddress == null || providerAddress.trim().isEmpty()
+                        ? getString(R.string.provider_dropoff_location) : providerAddress);
             }
+            PaymentStatusRenderer.render(paymentStatusValue,
+                    getIntent().getStringExtra("payment_status"));
             int total = getIntent().getIntExtra("quote_total", 0);
-            totalAmountValue.setText(BookingPricing.format(
-                    total > 0 ? total : BookingPricing.quote(10, false).total));
+            if (totalAmountValue != null) {
+                if (total <= 0) {
+                    int itemCount = getIntent().getIntExtra("item_count", 15);
+                    int weightKg = getIntent().getIntExtra("weight_kg",
+                            BookingPricing.estimateWeightKg(itemCount));
+                    double rate = getIntent().getDoubleExtra(
+                            "price_per_kg", BookingPricing.PRICE_PER_KG);
+                    total = BookingPricing.quote(weightKg, false, rate).total;
+                }
+                totalAmountValue.setText(BookingPricing.format(total));
+            }
         }
 
         trackOrderButton.setOnClickListener(v -> {
@@ -72,13 +85,23 @@ public class OrderConfirmedDropOffActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
-        findViewById(R.id.btn_view_receipt).setOnClickListener(v ->
-                new androidx.appcompat.app.AlertDialog.Builder(this)
-                        .setTitle(R.string.view_receipt)
-                        .setMessage(((TextView) ((LinearLayout) findViewById(R.id.row_order_id)).getChildAt(1)).getText()
-                                + "\n" + getString(R.string.total_amount) + ": " + totalAmountValue.getText())
-                        .setPositiveButton(android.R.string.ok, null)
-                        .show());
+        findViewById(R.id.btn_view_receipt).setOnClickListener(v -> {
+            String orderIdText = "";
+            LinearLayout orderIdRow = findViewById(R.id.row_order_id);
+            if (orderIdRow != null && orderIdRow.getChildCount() > 1) {
+                CharSequence text = ((TextView) orderIdRow.getChildAt(1)).getText();
+                if (text != null) {
+                    orderIdText = text.toString();
+                }
+            }
+            String totalText = totalAmountValue != null && totalAmountValue.getText() != null
+                    ? totalAmountValue.getText().toString() : "";
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle(R.string.view_receipt)
+                    .setMessage(orderIdText + "\n" + getString(R.string.total_amount) + ": " + totalText)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show();
+        });
         findViewById(R.id.btn_contact_support).setOnClickListener(v -> {
             Intent support = new Intent(Intent.ACTION_SENDTO,
                     Uri.parse("mailto:" + getString(R.string.profile_support_email)));

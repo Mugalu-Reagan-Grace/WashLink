@@ -26,6 +26,8 @@ import java.util.List;
 public class HistoryActivity extends AppCompatActivity {
     private final List<Booking> allBookings = new ArrayList<>();
     private HistoryAdapter adapter;
+    private RecyclerView recyclerView;
+    private TextView emptyState;
     private String filter = "active";
     private ListenerRegistration registration;
 
@@ -40,13 +42,15 @@ public class HistoryActivity extends AppCompatActivity {
         FrameLayout bell = findViewById(R.id.iv_bell);
         bell.setOnClickListener(v -> startActivity(new Intent(this, NotificationsActivity.class)));
 
-        RecyclerView recyclerView = findViewById(R.id.rv_order_history);
+        recyclerView = findViewById(R.id.rv_order_history);
+        emptyState = findViewById(R.id.tv_empty_history);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new HistoryAdapter();
         recyclerView.setAdapter(adapter);
         bindFilter(R.id.filter_active, "active");
         bindFilter(R.id.filter_completed, "completed");
         bindFilter(R.id.filter_all, "all");
+        updateEmptyState();
 
         String uid = FirebaseAuth.getInstance().getCurrentUser() == null
                 ? null : FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -61,6 +65,7 @@ public class HistoryActivity extends AppCompatActivity {
                         allBookings.clear();
                         allBookings.addAll(bookings);
                         adapter.replace(filteredBookings());
+                        updateEmptyState();
                     }
 
                     @Override
@@ -74,6 +79,7 @@ public class HistoryActivity extends AppCompatActivity {
         findViewById(id).setOnClickListener(v -> {
             filter = value;
             adapter.replace(filteredBookings());
+            updateEmptyState();
         });
     }
 
@@ -90,6 +96,13 @@ public class HistoryActivity extends AppCompatActivity {
             }
         }
         return result;
+    }
+
+    private void updateEmptyState() {
+        if (recyclerView == null || emptyState == null) return;
+        boolean hasItems = adapter != null && adapter.getItemCount() > 0;
+        recyclerView.setVisibility(hasItems ? View.VISIBLE : View.GONE);
+        emptyState.setVisibility(hasItems ? View.GONE : View.VISIBLE);
     }
 
     @Override

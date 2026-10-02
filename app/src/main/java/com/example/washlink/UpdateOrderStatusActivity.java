@@ -59,14 +59,16 @@ public class UpdateOrderStatusActivity extends AppCompatActivity {
 
                     // Populate radio options from remaining forward statuses
                     radioGroup.removeAllViews();
-                    List<OrderStatus> remaining = OrderStatus.getRemainingForwardStatuses(current);
-                    if (remaining.isEmpty()) {
+                    List<OrderStatus> availableStatuses = new java.util.ArrayList<>(
+                            OrderStatus.getRemainingForwardStatuses(current));
+                    if (current == OrderStatus.BOOKED) availableStatuses.add(OrderStatus.REJECTED);
+                    if (availableStatuses.isEmpty()) {
                         btnUpdate.setEnabled(false);
                         Toast.makeText(UpdateOrderStatusActivity.this, "No further statuses available.", Toast.LENGTH_SHORT).show();
                     } else {
                         btnUpdate.setEnabled(true);
-                        for (int i = 0; i < remaining.size(); i++) {
-                            OrderStatus s = remaining.get(i);
+                        for (int i = 0; i < availableStatuses.size(); i++) {
+                            OrderStatus s = availableStatuses.get(i);
                             RadioButton rb = new RadioButton(UpdateOrderStatusActivity.this);
                             rb.setId(View.generateViewId());
                             rb.setText(s.getDisplayName());

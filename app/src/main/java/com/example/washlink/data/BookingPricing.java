@@ -11,9 +11,23 @@ public final class BookingPricing {
 
     private BookingPricing() {}
 
+    public static int estimateWeightKg(int itemCount) {
+        if (itemCount <= 0) return MINIMUM_KG;
+        double estimated = itemCount * 0.45d;
+        int rounded = (int) Math.round(estimated);
+        return Math.max(MINIMUM_KG, rounded);
+    }
+
     public static Quote quote(int kilograms, boolean pickupAndDelivery) {
+        return quote(kilograms, pickupAndDelivery, PRICE_PER_KG);
+    }
+
+    public static Quote quote(int kilograms, boolean pickupAndDelivery, double pricePerKg) {
+        if (!Double.isFinite(pricePerKg) || pricePerKg <= 0) {
+            throw new IllegalArgumentException("Price per kilogram must be a positive number.");
+        }
         int billableKg = Math.max(MINIMUM_KG, kilograms);
-        int laundry = billableKg * PRICE_PER_KG;
+        int laundry = (int) Math.round(billableKg * pricePerKg);
         int pickup = pickupAndDelivery ? PICKUP_FEE : 0;
         int delivery = pickupAndDelivery ? DELIVERY_FEE : 0;
         int serviceFee = (int) Math.round((laundry + pickup + delivery) * SERVICE_FEE_RATE);

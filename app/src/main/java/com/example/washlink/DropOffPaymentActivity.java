@@ -14,8 +14,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.button.MaterialButton;
 import com.example.washlink.data.BookingPricing;
-import com.example.washlink.data.BookingService;
-import com.example.washlink.data.BookingServiceFacade;
+import com.example.washlink.data.FlutterwavePaymentClient;
 import com.example.washlink.models.Booking;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -39,6 +38,9 @@ public class DropOffPaymentActivity extends AppCompatActivity {
     private MaterialButton googlePayButton;
     private MaterialButton addNewCardButton;
     private MaterialButton payButton;
+    private Booking pendingBooking;
+    private BookingPricing.Quote pendingQuote;
+    private String pendingPaymentCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,17 +83,20 @@ public class DropOffPaymentActivity extends AppCompatActivity {
         cashRadio.setOnClickListener(v -> selectPaymentMethod("cash"));
 
         googlePayButton.setOnClickListener(v -> {
-                selectPaymentMethod("google_pay");
-                Toast.makeText(this, "Google Pay selected", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Choose card or Uganda mobile money for hosted checkout.",
+                        Toast.LENGTH_SHORT).show();
             });
+        googlePayButton.setEnabled(false);
 
         addNewCardButton.setOnClickListener(v -> {
-            Intent intent = new Intent(DropOffPaymentActivity.this, AddCardActivity.class);
-            startActivity(intent);
+            Toast.makeText(this, "Card details are entered securely on Flutterwave checkout.",
+                    Toast.LENGTH_SHORT).show();
         });
 
-        int weightKg = getIntent().getIntExtra("weight_kg", 10);
-        BookingPricing.Quote quote = BookingPricing.quote(weightKg, false);
+        int itemCount = getIntent().getIntExtra("item_count", 15);
+        int weightKg = getIntent().getIntExtra("weight_kg", BookingPricing.estimateWeightKg(itemCount));
+        double pricePerKg = getIntent().getDoubleExtra("price_per_kg", BookingPricing.PRICE_PER_KG);
+        BookingPricing.Quote quote = BookingPricing.quote(weightKg, false, pricePerKg);
         payButton.setText(String.format(Locale.US, "Pay UGX %,d", quote.total));
         selectPaymentMethod("visa");
 
@@ -101,17 +106,31 @@ public class DropOffPaymentActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please sign in before placing an order", Toast.LENGTH_SHORT).show();
                 return;
             }
+            if (pendingBooking != null) {
+                if (!pendingPaymentCode.equals(selectedPaymentCode)) {
+                    Toast.makeText(this, "Retry the current payment before changing methods.",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                payButton.setEnabled(false);
+                continuePayment(pendingBooking, pendingQuote, pendingPaymentCode);
+                return;
+            }
             payButton.setEnabled(false);
             String service = getIntent().getStringExtra("selected_service");
             String date = getIntent().getStringExtra("selected_date");
             String time = getIntent().getStringExtra("selected_time");
+            final String requestedPaymentCode = selectedPaymentCode;
+            final String requestedPaymentLabel = selectedPaymentMethod;
             Booking booking = new Booking(
                     user.getUid(),
                     user.getDisplayName() == null ? "Customer" : user.getDisplayName(),
                     getIntent().getStringExtra("provider_id"),
                     getIntent().getStringExtra("provider_name"),
                     Booking.SERVICE_TYPE_DROPOFF,
-                    service == null ? "Drop Off" : service,
+                    getIntent().getStringExtra("selected_laundry_service") == null
+                            ? (service == null ? "Drop Off" : service)
+                            : getIntent().getStringExtra("selected_laundry_service"),
                     getIntent().getStringExtra("provider_address") == null
                             ? "Provider drop-off location"
                             : getIntent().getStringExtra("provider_address"));
@@ -126,51 +145,91 @@ public class DropOffPaymentActivity extends AppCompatActivity {
             booking.setServiceFee(quote.serviceFee);
             booking.setTax(quote.serviceFee);
             booking.setTotal(quote.total);
-            booking.setPaymentMethod(getSelectedPaymentLabel());
-            booking.setPaymentStatus("cash".equals(selectedPaymentMethod) ? "PENDING" : "PENDING");
+            booking.setPaymentMethod(requestedPaymentLabel);
+            booking.setPaymentStatus("PENDING");
 
-            BookingServiceFacade.getBookingService().createBooking(booking,
-                    new BookingService.SimpleCallback() {
-                        @Override
-                        public void onSuccess() {
-                            Intent intent = new Intent(DropOffPaymentActivity.this,
-                                    OrderConfirmedDropOffActivity.class);
-                            intent.putExtras(getIntent());
-                            intent.putExtra("booking_id", booking.getId());
-                            intent.putExtra("selected_payment_method", getSelectedPaymentLabel());
-                            intent.putExtra("payment_status", booking.getPaymentStatus());
-                            intent.putExtra("provider_name", booking.getProviderName());
-                            intent.putExtra("provider_address", booking.getAddress());
-                            intent.putExtra("quote_total", quote.total);
-                            startActivity(intent);
-                            finish();
-                        }
-
-                        @Override
-                        public void onError(String message) {
+            FlutterwavePaymentClient.createBooking(booking, requestedPaymentCode,
+                    bookingId -> {
+                            booking.setId(bookingId);
+                            pendingBooking = booking;
+                            pendingQuote = quote;
+                            pendingPaymentCode = requestedPaymentCode;
+                            if (!pendingPaymentCode.equals(selectedPaymentCode)) {
+                                selectPaymentMethod("card".equals(pendingPaymentCode)
+                                        ? "visa" : pendingPaymentCode);
+                            }
+                            continuePayment(pendingBooking, pendingQuote, pendingPaymentCode);
+                    }, message -> {
                             payButton.setEnabled(true);
                             Toast.makeText(DropOffPaymentActivity.this,
-                                    "Could not place order: " + message, Toast.LENGTH_LONG).show();
-                        }
+                                    "Could not create booking: " + message, Toast.LENGTH_LONG).show();
                     });
         });
     }
 
-    private String selectedPaymentMethod = "Visa •••• 4242";
+    private void continuePayment(Booking booking, BookingPricing.Quote quote, String methodCode) {
+        if ("cash".equals(methodCode)) {
+            FlutterwavePaymentClient.registerCashOnDelivery(booking.getId(),
+                    () -> confirmBooking(booking, quote),
+                    message -> {
+                        payButton.setEnabled(true);
+                        Toast.makeText(this, "Could not confirm cash on delivery: " + message,
+                                Toast.LENGTH_LONG).show();
+                    });
+            return;
+        }
+        FlutterwavePaymentClient.initialize(booking.getId(), methodCode,
+                checkoutUrl -> {
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW,
+                                android.net.Uri.parse(checkoutUrl)));
+                        finish();
+                    } catch (android.content.ActivityNotFoundException error) {
+                        payButton.setEnabled(true);
+                        Toast.makeText(this, "No browser is available to open checkout.",
+                                Toast.LENGTH_LONG).show();
+                    }
+                },
+                message -> {
+                    payButton.setEnabled(true);
+                    Toast.makeText(this, "Could not start payment: " + message,
+                            Toast.LENGTH_LONG).show();
+                });
+    }
+
+    private void confirmBooking(Booking booking, BookingPricing.Quote quote) {
+        Intent intent = new Intent(DropOffPaymentActivity.this,
+                OrderConfirmedDropOffActivity.class);
+        intent.putExtras(getIntent());
+        intent.putExtra("booking_id", booking.getId());
+        intent.putExtra("selected_payment_method", booking.getPaymentMethod());
+        intent.putExtra("payment_status", booking.getPaymentStatus());
+        intent.putExtra("provider_name", booking.getProviderName());
+        intent.putExtra("provider_address", booking.getAddress());
+        intent.putExtra("quote_total", quote.total);
+        startActivity(intent);
+        finish();
+    }
+
+    private String selectedPaymentMethod = "Flutterwave card";
+    private String selectedPaymentCode = "card";
 
     private void selectPaymentMethod(String method) {
         if ("visa".equals(method)) {
-            selectedPaymentMethod = "Visa •••• 4242";
+            selectedPaymentMethod = "Flutterwave card";
+            selectedPaymentCode = "card";
         } else if ("mastercard".equals(method)) {
-            selectedPaymentMethod = "Mastercard •••• 4242";
+            selectedPaymentMethod = "Flutterwave card";
+            selectedPaymentCode = "card";
         } else if ("airtel".equals(method)) {
             selectedPaymentMethod = getString(R.string.payment_airtel_money);
+            selectedPaymentCode = "airtel";
         } else if ("mtn".equals(method)) {
             selectedPaymentMethod = getString(R.string.payment_mtn_mobile_money);
+            selectedPaymentCode = "mtn";
         } else if ("cash".equals(method)) {
             selectedPaymentMethod = getString(R.string.payment_cash_on_delivery);
-        } else if ("google_pay".equals(method)) {
-            selectedPaymentMethod = "Google Pay";
+            selectedPaymentCode = "cash";
         }
 
         visaRadio.setChecked("visa".equals(method));

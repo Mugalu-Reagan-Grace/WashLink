@@ -20,6 +20,8 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class OnboardingActivity extends AppCompatActivity {
 
+    public static final String EXTRA_SHOW_ONBOARDING = "extra_show_onboarding";
+
     private Button btn_get_started;
     private Button btn_sign_in;
     private ImageView heroImage;
@@ -41,7 +43,8 @@ public class OnboardingActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_onboarding);
 
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+        boolean forceShowOnboarding = getIntent() != null && getIntent().getBooleanExtra(EXTRA_SHOW_ONBOARDING, false);
+        if (FirebaseAuth.getInstance().getCurrentUser() != null && !forceShowOnboarding) {
             Intent intent = new Intent(OnboardingActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
@@ -175,10 +178,12 @@ public class OnboardingActivity extends AppCompatActivity {
     private void getStartedButtonClicked() {
         Intent intent = new Intent(OnboardingActivity.this, CreateAccountActivity.class);
         startActivity(intent);
+        finish();
     }
 
     private void signInButtonClicked() {
         Intent intent = new Intent(OnboardingActivity.this, SignInActivity.class);
         startActivity(intent);
+        finish();
     }
 }

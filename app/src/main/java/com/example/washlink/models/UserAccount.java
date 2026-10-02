@@ -1,5 +1,8 @@
 package com.example.washlink.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UserAccount {
     public static final String ROLE_CUSTOMER = "customer";
     public static final String ROLE_PROVIDER = "provider";
@@ -13,6 +16,7 @@ public class UserAccount {
     private String createdAt;
     private String address;
     private String photoUri;
+    private List<String> savedAddresses = new ArrayList<>();
 
     public UserAccount() {
         this.createdAt = java.time.Instant.now().toString();
@@ -89,5 +93,14 @@ public class UserAccount {
 
     public void setPhotoUri(String photoUri) {
         this.photoUri = photoUri;
+    }
+
+    public List<String> getSavedAddresses() {
+        return savedAddresses;
+    }
+
+    public void setSavedAddresses(List<String> savedAddresses) {
+        this.savedAddresses = savedAddresses == null
+                ? new ArrayList<>() : new ArrayList<>(savedAddresses);
     }
 }

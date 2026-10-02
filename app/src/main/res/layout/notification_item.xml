@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card_bordered"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:showIn="@layout/activity_notifications">
+
+    <TextView
+        android:id="@+id/tv_notification_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_primary"
+        android:textSize="14sp"
+        android:lineSpacingExtra="3dp"
+        tools:text="Pickup confirmed&#10;Your driver will collect your laundry at the scheduled time." />
+
+</LinearLayout>

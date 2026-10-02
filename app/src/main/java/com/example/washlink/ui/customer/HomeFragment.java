@@ -3,14 +3,27 @@ package com.example.washlink.ui.customer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.washlink.NearbyProvidersActivity;
 import com.example.washlink.R;
+import com.example.washlink.data.BookingService;
+import com.example.washlink.data.BookingServiceFacade;
+import com.example.washlink.data.ListenerRegistration;
+import com.example.washlink.models.Booking;
+import com.example.washlink.models.OrderStatus;
+import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.List;
 
 public class HomeFragment extends CustomerTabFragment {
+    private ListenerRegistration bookingsRegistration;
+    private String activeBookingId;
+
     @Override
     public View onCreateView(@NonNull android.view.LayoutInflater inflater,
                              @Nullable android.view.ViewGroup container,
@@ -21,6 +34,21 @@ public class HomeFragment extends CustomerTabFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         bindNavigation(view, MainActivity.TAB_HOME);
+
+        View activeCard = view.findViewById(R.id.active_order_card);
+        TextView orderTitle = view.findViewById(R.id.tv_order_title);
+        TextView orderId = view.findViewById(R.id.tv_order_id);
+        TextView orderStatus = view.findViewById(R.id.tv_order_status);
+        TextView etaValue = view.findViewById(R.id.tv_eta_value);
+
+        if (orderTitle != null) orderTitle.setText("Your latest order");
+        if (orderId != null) orderId.setText("Loading orders...");
+        if (orderStatus != null) orderStatus.setText("Loading");
+        if (etaValue != null) etaValue.setText("—");
+        if (activeCard != null) {
+            activeCard.setOnClickListener(v -> openActiveOrder());
+        }
+
         view.findViewById(R.id.btn_book_service).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), NearbyProvidersActivity.class)));
         view.findViewById(R.id.iv_bell).setOnClickListener(v -> openNotifications());
@@ -28,10 +56,83 @@ public class HomeFragment extends CustomerTabFragment {
                 ((MainActivity) requireActivity()).showTab(MainActivity.TAB_HISTORY));
         view.findViewById(R.id.row_profile_settings).setOnClickListener(v ->
                 ((MainActivity) requireActivity()).showTab(MainActivity.TAB_PROFILE));
-        View details = view.findViewById(R.id.tv_view_details);
+        TextView details = view.findViewById(R.id.tv_view_details);
         if (details != null) {
-            details.setOnClickListener(v ->
-                    ((MainActivity) requireActivity()).showTab(MainActivity.TAB_TRACKING));
+            details.setText("View details");
+            details.setOnClickListener(v -> openActiveOrder());
         }
+
+        loadLatestBooking(orderTitle, orderId, orderStatus, etaValue, details);
+    }
+
+    private void loadLatestBooking(TextView orderTitle, TextView orderId,
+                                   TextView orderStatus, TextView etaValue, TextView details) {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            showNoActiveOrder(orderTitle, orderId, orderStatus, etaValue, details);
+            return;
+        }
+        String customerId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        bookingsRegistration = BookingServiceFacade.getBookingService().addCustomerBookingsListener(
+                customerId, new BookingService.CustomerBookingsListener() {
+                    @Override
+                    public void onBookingsChanged(List<Booking> bookings) {
+                        if (!isAdded()) return;
+                        Booking active = null;
+                        for (Booking booking : bookings) {
+                            if (!OrderStatus.fromString(booking.getStatus()).isTerminal()) {
+                                active = booking;
+                                break;
+                            }
+                        }
+                        if (active == null) {
+                            showNoActiveOrder(orderTitle, orderId, orderStatus, etaValue, details);
+                            return;
+                        }
+                        activeBookingId = active.getId();
+                        if (orderTitle != null) orderTitle.setText(active.getServiceName() == null
+                                ? "Laundry order" : active.getServiceName());
+                        if (orderId != null) orderId.setText("Order #" + active.getId());
+                        if (orderStatus != null) orderStatus.setText(
+                                OrderStatus.fromString(active.getStatus()).getDisplayName());
+                        if (etaValue != null) etaValue.setText(active.getScheduledDateTime() == null
+                                ? "Schedule pending" : active.getScheduledDateTime());
+                        if (details != null) details.setText("View details");
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        if (!isAdded()) return;
+                        if (orderId != null) orderId.setText("Could not load your orders");
+                        if (orderStatus != null) orderStatus.setText("Unavailable");
+                        if (details != null) details.setText("Retry");
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    private void showNoActiveOrder(TextView orderTitle, TextView orderId,
+                                   TextView orderStatus, TextView etaValue, TextView details) {
+        activeBookingId = null;
+        if (orderTitle != null) orderTitle.setText("No active order");
+        if (orderId != null) orderId.setText("Book a wash to get started");
+        if (orderStatus != null) orderStatus.setText("Ready");
+        if (etaValue != null) etaValue.setText("Start booking");
+        if (details != null) details.setText("Book now");
+    }
+
+    private void openActiveOrder() {
+        if (activeBookingId == null) {
+            startActivity(new Intent(requireContext(), NearbyProvidersActivity.class));
+            return;
+        }
+        ((MainActivity) requireActivity()).showTab(MainActivity.TAB_TRACKING, activeBookingId);
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (bookingsRegistration != null) bookingsRegistration.remove();
+        bookingsRegistration = null;
+        activeBookingId = null;
+        super.onDestroyView();
     }
 }

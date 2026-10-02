@@ -43,9 +43,11 @@ public enum OrderStatus {
         if (current == null) return remaining;
         if (current.sequence < 0) return remaining;
         for (OrderStatus s : values()) {
-            if (s.sequence > current.sequence) remaining.add(s);
+            if (s.sequence > current.sequence) {
+                remaining.add(s);
+                break;
+            }
         }
-        remaining.sort((a,b) -> Integer.compare(a.sequence,b.sequence));
         return remaining;
     }
 

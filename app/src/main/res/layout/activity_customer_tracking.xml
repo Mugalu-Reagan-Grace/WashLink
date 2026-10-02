@@ -279,11 +279,13 @@
                         android:orientation="vertical">
 
                         <FrameLayout
+                            android:id="@+id/timeline_scheduled_dot"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:background="@drawable/dot_timeline_complete">
 
                             <ImageView
+                                android:id="@+id/timeline_scheduled_check"
                                 android:layout_width="14dp"
                                 android:layout_height="14dp"
                                 android:layout_gravity="center"
@@ -308,6 +310,7 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/timeline_scheduled_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/tracking_step_scheduled_title"
@@ -316,6 +319,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/timeline_scheduled_desc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
@@ -337,11 +341,13 @@
                         android:orientation="vertical">
 
                         <FrameLayout
+                            android:id="@+id/timeline_pickup_dot"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:background="@drawable/dot_timeline_complete">
 
                             <ImageView
+                                android:id="@+id/timeline_pickup_check"
                                 android:layout_width="14dp"
                                 android:layout_height="14dp"
                                 android:layout_gravity="center"
@@ -366,6 +372,7 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/timeline_pickup_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/tracking_step_pickedup_title"
@@ -374,6 +381,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/timeline_pickup_desc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
@@ -395,6 +403,7 @@
                         android:orientation="vertical">
 
                         <View
+                            android:id="@+id/timeline_washing_dot"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:background="@drawable/dot_active_indicator" />
@@ -416,6 +425,7 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/timeline_washing_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/tracking_step_washing_title"
@@ -424,6 +434,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/timeline_washing_desc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
@@ -445,6 +456,7 @@
                         android:orientation="vertical">
 
                         <View
+                            android:id="@+id/timeline_drying_dot"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:background="@drawable/dot_timeline_pending" />
@@ -466,6 +478,7 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/timeline_drying_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/tracking_step_drying_title"
@@ -474,6 +487,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/timeline_drying_desc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
@@ -490,6 +504,7 @@
                     android:orientation="horizontal">
 
                     <View
+                        android:id="@+id/timeline_delivery_dot"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:background="@drawable/dot_timeline_pending" />
@@ -502,6 +517,7 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/timeline_delivery_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/tracking_step_outfordelivery_title"
@@ -510,6 +526,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/timeline_delivery_desc"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
@@ -539,6 +556,19 @@
                 app:strokeColor="@color/laundr_blue"
                 app:cornerRadius="12dp"
                 app:layout_constraintTop_toBottomOf="@id/timeline" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_cancel_booking"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/cancel_booking"
+                android:textAllCaps="false"
+                android:textColor="@color/logout_red"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/logout_red"
+                app:layout_constraintTop_toBottomOf="@id/btn_call_provider" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -55,6 +56,19 @@
         </activity>
         <activity android:name=".PaymentActivity">
         </activity>
+        <activity
+            android:name=".PaymentReturnActivity"
+            android:exported="true"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="washlink"
+                    android:host="payment-return" />
+            </intent-filter>
+        </activity>
         <activity android:name=".AddCardActivity">
         </activity>
         <activity android:name=".OrderConfirmedActivity">
@@ -81,6 +95,13 @@
         <activity android:name=".BookingRequestsActivity" />
         <activity android:name=".ManageServicesActivity" />
         <activity android:name=".UpdateOrderStatusActivity" />
+        <service
+            android:name=".WashLinkMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

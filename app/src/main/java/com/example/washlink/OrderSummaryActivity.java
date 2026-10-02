@@ -43,7 +43,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
         String time = getIntent() != null ? getIntent().getStringExtra("selected_time") : null;
         String contact = getIntent() != null ? getIntent().getStringExtra("selected_contact") : null;
         int itemCount = getIntent() != null ? getIntent().getIntExtra("item_count", 15) : 15;
-        int weightKg = getIntent() != null ? getIntent().getIntExtra("weight_kg", 10) : 10;
+        int weightKg = getIntent() != null ? getIntent().getIntExtra("weight_kg", com.example.washlink.data.BookingPricing.estimateWeightKg(itemCount)) : com.example.washlink.data.BookingPricing.estimateWeightKg(itemCount);
 
         if (serviceName == null || serviceName.trim().isEmpty()) {
             serviceName = "Pickup & Delivery";
@@ -67,9 +67,11 @@ public class OrderSummaryActivity extends AppCompatActivity {
         final String selectedTime = time;
         final String selectedContact = contact;
         final int selectedItemCount = itemCount;
-        final BookingPricing.Quote quote = BookingPricing.quote(weightKg, true);
+        double pricePerKg = getIntent().getDoubleExtra("price_per_kg", BookingPricing.PRICE_PER_KG);
+        final BookingPricing.Quote quote = BookingPricing.quote(weightKg, true, pricePerKg);
 
-        serviceTypeValueText.setText(selectedService);
+        String laundryService = getIntent().getStringExtra("selected_laundry_service");
+        serviceTypeValueText.setText(laundryService == null ? selectedService : laundryService);
         dateTimeValueText.setText(selectedDate + " • " + selectedTime + " • " + selectedContact);
         addressValueText.setText(selectedAddress);
         itemsValueText.setText(String.valueOf(selectedItemCount));
@@ -90,6 +92,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
 
         proceedPaymentButton.setOnClickListener(v -> {
             Intent intent = new Intent(OrderSummaryActivity.this, PaymentActivity.class);
+            intent.putExtras(getIntent());
             intent.putExtra("selected_service", selectedService);
             intent.putExtra("selected_address", selectedAddress);
             intent.putExtra("selected_date", selectedDate);

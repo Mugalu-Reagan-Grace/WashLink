@@ -17,6 +17,10 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 public class PickupSlotSelectionActivity extends AppCompatActivity {
 
     private ImageView backButton;
@@ -34,8 +38,8 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
     private boolean callSelected = true;
     private String selectedService = "Pickup & Delivery";
     private String selectedAddress = "Home address";
-    private String selectedDateLabel = "Today";
-    private String selectedTimeLabel = "10:00 AM";
+    private String selectedDateLabel = "";
+    private String selectedTimeLabel = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +115,7 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
             Toast.makeText(this, "Pickup slot selected", Toast.LENGTH_SHORT).show();
 
             Intent intent = new Intent(PickupSlotSelectionActivity.this, PickupConfirmationActivity.class);
+            intent.putExtras(getIntent());
             intent.putExtra("selected_service", selectedService);
             intent.putExtra("selected_address", selectedAddress);
             intent.putExtra("selected_date", selectedDateLabel);
@@ -119,6 +124,8 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        selectedDateLabel = getDateLabel(0);
+        selectedTimeLabel = getTimeLabel(2);
         selectDate(selectedDateIndex);
         selectTime(selectedTimeIndex);
         selectContact(callSelected);
@@ -160,28 +167,21 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
     }
 
     private String getDateLabel(int index) {
-        switch (index) {
-            case 0: return "Today";
-            case 1: return "Tue, Jun 7";
-            case 2: return "Wed, Jun 8";
-            case 3: return "Thu, Jun 9";
-            default: return "Today";
-        }
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dayFormat = new SimpleDateFormat("EEE", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d", Locale.getDefault());
+        calendar.add(Calendar.DAY_OF_YEAR, index);
+        String day = dayFormat.format(calendar.getTime());
+        String date = dateFormat.format(calendar.getTime());
+        return day + ", " + date;
     }
 
     private String getTimeLabel(int index) {
-        switch (index) {
-            case 0: return "8:00 AM";
-            case 1: return "9:00 AM";
-            case 2: return "10:00 AM";
-            case 3: return "11:00 AM";
-            case 4: return "12:00 PM";
-            case 5: return "1:00 PM";
-            case 6: return "2:00 PM";
-            case 7: return "3:00 PM";
-            case 8: return "4:00 PM";
-            case 9: return "5:00 PM";
-            default: return "10:00 AM";
-        }
+        String[] times = {
+                "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM",
+                "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM",
+                "4:00 PM", "5:00 PM"
+        };
+        return times[Math.max(0, Math.min(index, times.length - 1))];
     }
 }

@@ -41,14 +41,7 @@ public class SelectServiceActivity extends AppCompatActivity {
     }
 
     private void openNextScreen(String serviceName) {
-        Intent intent;
-
-        if ("Drop Off".equals(serviceName)) {
-            intent = new Intent(SelectServiceActivity.this, DropOffActivity.class);
-        } else {
-            intent = new Intent(SelectServiceActivity.this, NearbyProvidersActivity.class);
-        }
-
+        Intent intent = new Intent(SelectServiceActivity.this, NearbyProvidersActivity.class);
         intent.putExtra("selected_service", serviceName);
         startActivity(intent);
     }

@@ -1,9 +1,8 @@
 package com.example.washlink.data;
 
 /**
- * Facade to choose between real Firestore BookingService and in-memory stub.
- * Default is to use the stub so the app runs without Firebase configured.
- * Call BookingServiceFacade.setUseStub(false) after configuring Firebase.
+ * Access to the live Firestore booking service, with a legacy in-memory stub
+ * retained for development-only screens that explicitly opt into it.
  */
 public class BookingServiceFacade {
 
@@ -17,11 +16,11 @@ public class BookingServiceFacade {
         return BookingService.getInstance();
     }
 
-        public static BookingServiceStub getBookingServiceStub() {
-            return BookingServiceStub.getInstance();
-        }
-
-        public static boolean isUsingStub() {
-            return useStub;
-        }
+    public static BookingServiceStub getBookingServiceStub() {
+        return BookingServiceStub.getInstance();
     }
+
+    public static boolean isUsingStub() {
+        return useStub;
+    }
+}

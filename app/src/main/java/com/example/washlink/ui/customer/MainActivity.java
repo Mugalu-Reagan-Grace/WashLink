@@ -6,7 +6,9 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.example.washlink.NotificationPermissionHelper;
 import com.example.washlink.R;
+import com.example.washlink.data.PushTokenManager;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAB_HOME = "home";
@@ -20,6 +22,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        NotificationPermissionHelper.requestIfNeeded(this);
+        PushTokenManager.registerCurrentUser();
         if (savedInstanceState == null) {
             showTab(TAB_HOME);
         }

@@ -31,8 +31,8 @@ public class DropOffConfirmationActivity extends AppCompatActivity {
 
     private int itemCount = 15;
     private String selectedService = "Drop Off";
-    private String selectedDate = "Tue, Jun 7";
-    private String selectedTime = "10:00 AM";
+    private String selectedDate = "";
+    private String selectedTime = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,10 +50,12 @@ public class DropOffConfirmationActivity extends AppCompatActivity {
             selectedService = "Drop Off";
         }
         if (selectedDate == null || selectedDate.trim().isEmpty()) {
-            selectedDate = "Tue, Jun 7";
+            java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("EEE, MMM d", java.util.Locale.getDefault());
+            selectedDate = df.format(java.util.Calendar.getInstance().getTime());
         }
         if (selectedTime == null || selectedTime.trim().isEmpty()) {
-            selectedTime = "10:00 AM";
+            java.text.SimpleDateFormat tf = new java.text.SimpleDateFormat("h:mm a", java.util.Locale.getDefault());
+            selectedTime = tf.format(java.util.Calendar.getInstance().getTime());
         }
 
         backButton = findViewById(R.id.btn_back);
@@ -108,10 +110,12 @@ public class DropOffConfirmationActivity extends AppCompatActivity {
 
         continueSummaryButton.setOnClickListener(v -> {
             Intent intent = new Intent(DropOffConfirmationActivity.this, OrderSummaryDropOffActivity.class);
+            intent.putExtras(getIntent());
             intent.putExtra("selected_service", selectedService);
             intent.putExtra("selected_date", selectedDate);
             intent.putExtra("selected_time", selectedTime);
             intent.putExtra("item_count", itemCount);
+            intent.putExtra("weight_kg", com.example.washlink.data.BookingPricing.estimateWeightKg(itemCount));
             if (instructionInput != null && instructionInput.getText() != null) {
                 intent.putExtra("special_instructions", instructionInput.getText().toString().trim());
             }

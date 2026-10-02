@@ -2,9 +2,11 @@ package com.example.washlink;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
@@ -27,7 +29,6 @@ public final class BottomNavHelper {
             return;
         }
 
-        // detect active tab by activity class
         int activeTab = -1;
         Class<?> cls = activity.getClass();
         if (cls.equals(HomeActivity.class)) activeTab = TAB_HOME;
@@ -44,45 +45,78 @@ public final class BottomNavHelper {
 
         if (navHome != null) {
             navHome.setOnClickListener(v -> openScreen(activity, HomeActivity.class));
-            animateNavIcon(activity, navHome, activeTab == TAB_HOME);
+            updateNavState(activity, navHome, activeTab == TAB_HOME);
         }
         if (navServices != null) {
             navServices.setOnClickListener(v -> openScreen(activity, SelectServiceActivity.class));
-            animateNavIcon(activity, navServices, activeTab == TAB_SERVICES);
+            updateNavState(activity, navServices, activeTab == TAB_SERVICES);
         }
         if (navTracking != null) {
             navTracking.setOnClickListener(v -> openScreen(activity, OrderTrackingActivity.class));
-            animateNavIcon(activity, navTracking, activeTab == TAB_TRACKING);
+            updateNavState(activity, navTracking, activeTab == TAB_TRACKING);
         }
         if (navHistory != null) {
             navHistory.setOnClickListener(v -> openScreen(activity, HistoryActivity.class));
-            animateNavIcon(activity, navHistory, activeTab == TAB_HISTORY);
+            updateNavState(activity, navHistory, activeTab == TAB_HISTORY);
         }
         if (navProfile != null) {
             navProfile.setOnClickListener(v -> openScreen(activity, ProfileActivity.class));
-            animateNavIcon(activity, navProfile, activeTab == TAB_PROFILE);
+            updateNavState(activity, navProfile, activeTab == TAB_PROFILE);
         }
     }
 
-    private static void animateNavIcon(Activity activity, View navItem, boolean active) {
-        // navItem expected to be a ViewGroup with ImageView at index 0
+    private static void updateNavState(Activity activity, View navItem, boolean active) {
         if (!(navItem instanceof ViewGroup)) return;
-        ViewGroup vg = (ViewGroup) navItem;
-        if (vg.getChildCount() == 0) return;
-        View child = vg.getChildAt(0);
-        if (!(child instanceof ImageView)) return;
-        ImageView iv = (ImageView) child;
+        ViewGroup group = (ViewGroup) navItem;
 
-        int from = ContextCompat.getColor(activity, R.color.nav_inactive);
-        int to = active ? ContextCompat.getColor(activity, R.color.laundr_blue) : ContextCompat.getColor(activity, R.color.nav_inactive);
+        ImageView icon = findFirstImageView(group);
+        TextView label = findFirstTextView(group);
 
-        android.animation.ValueAnimator animator = android.animation.ValueAnimator.ofObject(new android.animation.ArgbEvaluator(), from, to);
-        animator.setDuration(220);
-        animator.addUpdateListener(anim -> {
-            int color = (int) anim.getAnimatedValue();
-            iv.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN);
-        });
-        animator.start();
+        int activeColor = ContextCompat.getColor(activity, R.color.laundr_blue);
+        int inactiveColor = ContextCompat.getColor(activity, R.color.nav_inactive);
+
+        if (icon != null) {
+            icon.setColorFilter(active ? activeColor : inactiveColor, PorterDuff.Mode.SRC_IN);
+            android.animation.ValueAnimator animator = android.animation.ValueAnimator.ofObject(
+                    new android.animation.ArgbEvaluator(),
+                    inactiveColor,
+                    active ? activeColor : inactiveColor);
+            animator.setDuration(180);
+            animator.addUpdateListener(anim ->
+                    icon.setColorFilter((int) anim.getAnimatedValue(), PorterDuff.Mode.SRC_IN));
+            animator.start();
+        }
+
+        if (label != null) {
+            label.setTextColor(active ? activeColor : inactiveColor);
+            label.setTypeface(null, active ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+        }
+
+        navItem.setBackgroundResource(active ? R.drawable.bg_card_selected_outline : 0);
+    }
+
+    private static ImageView findFirstImageView(ViewGroup parent) {
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            View child = parent.getChildAt(i);
+            if (child instanceof ImageView) return (ImageView) child;
+            if (child instanceof ViewGroup) {
+                ImageView nested = findFirstImageView((ViewGroup) child);
+                if (nested != null) return nested;
+            }
+        }
+        return null;
+    }
+
+    private static TextView findFirstTextView(ViewGroup parent) {
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            View child = parent.getChildAt(i);
+            if (child instanceof TextView) return (TextView) child;
+            if (child instanceof ViewGroup) {
+                TextView nested = findFirstTextView((ViewGroup) child);
+                if (nested != null) return nested;
+            }
+        }
+        return null;
     }
 
     private static void openScreen(Activity activity, Class<?> targetActivity) {

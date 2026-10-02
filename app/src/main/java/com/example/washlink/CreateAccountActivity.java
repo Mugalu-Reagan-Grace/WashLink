@@ -331,7 +331,8 @@ public class CreateAccountActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onSuccess(com.example.washlink.models.UserAccount account) {
                                                     Intent intent = new Intent(CreateAccountActivity.this,
-                                                            AddPhoneNumberActivity.class);
+                                                            OnboardingActivity.class);
+                                                    intent.putExtra(OnboardingActivity.EXTRA_SHOW_ONBOARDING, true);
                                                     intent.putExtra(AddPhoneNumberActivity.EXTRA_USER_NAME,
                                                             account.getName());
                                                     intent.putExtra(AddPhoneNumberActivity.EXTRA_USER_UID,

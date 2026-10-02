@@ -32,6 +32,8 @@ public class Booking {
     private double total;
     private String paymentMethod;     // e.g. "Visa •••• 4242"
     private String paymentStatus;     // PENDING, PAID, or FAILED
+    private String paymentProvider;
+    private String paymentReference;
     private double pickupFee;
     private double deliveryFee;
     private double serviceFee;
@@ -198,6 +200,22 @@ public class Booking {
 
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
+    }
+
+    public String getPaymentProvider() {
+        return paymentProvider;
+    }
+
+    public void setPaymentProvider(String paymentProvider) {
+        this.paymentProvider = paymentProvider;
+    }
+
+    public String getPaymentReference() {
+        return paymentReference;
+    }
+
+    public void setPaymentReference(String paymentReference) {
+        this.paymentReference = paymentReference;
     }
 
     public double getPickupFee() {

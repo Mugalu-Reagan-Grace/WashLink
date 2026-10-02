@@ -7,8 +7,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.washlink.DropOffActivity;
-import com.example.washlink.PickupAddressActivity;
+import com.example.washlink.NearbyProvidersActivity;
 import com.example.washlink.R;
 
 public class ServicesFragment extends CustomerTabFragment {
@@ -23,8 +22,14 @@ public class ServicesFragment extends CustomerTabFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         bindNavigation(view, MainActivity.TAB_SERVICES);
         view.findViewById(R.id.card_drop_off).setOnClickListener(v ->
-                startActivity(new Intent(requireContext(), DropOffActivity.class)));
+                openProviderList("Drop Off"));
         view.findViewById(R.id.card_pickup_delivery).setOnClickListener(v ->
-                startActivity(new Intent(requireContext(), PickupAddressActivity.class)));
+                openProviderList("Pickup & Delivery"));
+    }
+
+    private void openProviderList(String service) {
+        Intent intent = new Intent(requireContext(), NearbyProvidersActivity.class);
+        intent.putExtra("selected_service", service);
+        startActivity(intent);
     }
 }

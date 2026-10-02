@@ -27,6 +27,10 @@ service cloud.firestore {
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.role == resource.data.role;
       allow delete: if isAdmin();
+
+      match /notifications/{notificationId} {
+        allow read, delete: if signedIn() && request.auth.uid == uid;
+      }
     }
 
     match /providers/{uid} {
@@ -36,14 +40,13 @@ service cloud.firestore {
     }
 
     match /bookings/{bookingId} {
-      allow read, update, delete: if signedIn()
+      allow read: if signedIn()
         && (resource.data.customerId == request.auth.uid
           || resource.data.providerId == request.auth.uid
           || isAdmin());
-      allow create: if signedIn()
-        && (request.resource.data.customerId == request.auth.uid
-          || isProvider()
-          || isAdmin());
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     match /{document=**} {

@@ -9,7 +9,16 @@
     <string name="provider_location_saved">Business location selected</string>
     <string name="app_name">WashLink</string>
     <string name="app_name_with_logo">💧 WashLink</string>
+    <string name="notification_channel_name">Order updates</string>
+    <string name="notification_channel_description">Booking requests and laundry status changes</string>
+    <string name="notification_booking_update">There is an update to your WashLink booking.</string>
+    <string name="cancel_booking">Cancel booking</string>
+    <string name="cancel_booking_confirm_title">Cancel this booking?</string>
+    <string name="cancel_booking_confirm_message">You can cancel before payment starts and before the provider accepts. Payments already initiated or completed cannot be cancelled here.</string>
+    <string name="cancel_booking_unavailable">This booking can no longer be cancelled here. Contact support if payment was taken.</string>
+    <string name="booking_cancelled">Booking cancelled</string>
     <string name="laundry_delivery_image">Laundry provider carrying clean clothes</string>
+    <string name="default_web_client_id">484372548369-jk9tu2gdce6j98m25502415nk5gca12c.apps.googleusercontent.com</string>
 
     <!-- Splash -->
     <string name="splash_tagline">Clean clothes. Zero hassle.</string>
@@ -129,6 +138,7 @@
     <string name="address_home_value">123 Main Street, Apartment 4B, Kampala, Uganda</string>
     <string name="address_work_label">Work</string>
     <string name="address_work_value">456 Business Ave, Suite 200, Kampala, Uganda</string>
+    <string name="current_location_placeholder">Current location</string>
     <string name="add_new_address">Add New Address</string>
     <string name="label_field">Label (e.g Home)</string>
     <string name="full_address">Full Address</string>
@@ -226,6 +236,7 @@
     <string name="payment_status">Payment Status</string>
     <string name="payment_pending">Pending</string>
     <string name="payment_paid">Paid</string>
+    <string name="payment_failed">Payment failed</string>
     <string name="schedule">Schedule</string>
     <string name="date_pending">Date pending</string>
     <string name="view_receipt">View receipt</string>
