@@ -23,6 +23,45 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/bottom_sheet" />
 
+    <WebView
+        android:id="@+id/tracking_animation"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:overScrollMode="never"
+        android:scrollbars="none"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_sheet" />
+
+    <WebView
+        android:id="@+id/delivery_animation"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:overScrollMode="never"
+        android:scrollbars="none"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_sheet" />
+
+    <WebView
+        android:id="@+id/location_animation"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:overScrollMode="never"
+        android:scrollbars="none"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_sheet" />
+
     <!-- White bottom sheet -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_sheet"
@@ -117,6 +156,19 @@
                 android:layout_width="6dp"
                 android:layout_height="6dp"
                 android:layout_marginEnd="4dp"
+                android:background="@drawable/dot_inactive_indicator" />
+
+            <View
+                android:id="@+id/indicator_three"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/dot_inactive_indicator" />
+
+            <View
+                android:id="@+id/indicator_four"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
                 android:background="@drawable/dot_inactive_indicator" />
 
         </LinearLayout>

@@ -1,6 +1,7 @@
 package com.example.washlink;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import com.example.washlink.ui.customer.MainActivity;
 import android.widget.Button;
@@ -9,6 +10,8 @@ import android.widget.TextView;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +27,11 @@ public class OnboardingActivity extends AppCompatActivity {
     private TextView subtitle;
     private View indicatorOne;
     private View indicatorTwo;
+    private View indicatorThree;
+    private View indicatorFour;
+    private WebView trackingAnimation;
+    private WebView deliveryAnimation;
+    private WebView locationAnimation;
     private int currentPage;
     private float touchStartX;
 
@@ -47,6 +55,14 @@ public class OnboardingActivity extends AppCompatActivity {
         subtitle = findViewById(R.id.tv_subtitle);
         indicatorOne = findViewById(R.id.indicator_one);
         indicatorTwo = findViewById(R.id.indicator_two);
+        indicatorThree = findViewById(R.id.indicator_three);
+        indicatorFour = findViewById(R.id.indicator_four);
+        trackingAnimation = findViewById(R.id.tracking_animation);
+        deliveryAnimation = findViewById(R.id.delivery_animation);
+        locationAnimation = findViewById(R.id.location_animation);
+        configureTrackingAnimation();
+        configureDeliveryAnimation();
+        configureLocationAnimation();
 
         btn_get_started.setOnClickListener(v -> getStartedButtonClicked());
         btn_sign_in.setOnClickListener(v -> signInButtonClicked());
@@ -58,31 +74,59 @@ public class OnboardingActivity extends AppCompatActivity {
             if (event.getAction() == MotionEvent.ACTION_UP) {
                 float distance = event.getX() - touchStartX;
                 if (Math.abs(distance) > 80) {
-                    showPage(distance < 0 ? 1 : 0);
+                    showPage(distance < 0 ? currentPage + 1 : currentPage - 1);
                 }
                 return true;
             }
             return true;
         };
         heroImage.setOnTouchListener(swipeListener);
+        trackingAnimation.setOnTouchListener(swipeListener);
+        deliveryAnimation.setOnTouchListener(swipeListener);
+        locationAnimation.setOnTouchListener(swipeListener);
         indicatorOne.setOnClickListener(v -> showPage(0));
         indicatorTwo.setOnClickListener(v -> showPage(1));
+        indicatorThree.setOnClickListener(v -> showPage(2));
+        indicatorFour.setOnClickListener(v -> showPage(3));
     }
 
     private void showPage(int page) {
-        currentPage = page;
-        boolean secondPage = page == 1;
+        currentPage = Math.max(0, Math.min(page, 3));
+        boolean secondPage = currentPage == 1;
+        boolean thirdPage = currentPage == 2;
+        boolean fourthPage = currentPage == 3;
+        heroImage.setVisibility(secondPage || thirdPage || fourthPage ? View.GONE : View.VISIBLE);
+        deliveryAnimation.setVisibility(secondPage ? View.VISIBLE : View.GONE);
+        trackingAnimation.setVisibility(thirdPage ? View.VISIBLE : View.GONE);
+        locationAnimation.setVisibility(fourthPage ? View.VISIBLE : View.GONE);
+        if (secondPage) {
+            deliveryAnimation.reload();
+        }
+        if (thirdPage) {
+            trackingAnimation.reload();
+        }
+        if (fourthPage) {
+            locationAnimation.reload();
+        }
         heroImage.animate()
                 .alpha(0f)
                 .setDuration(120)
                 .withEndAction(() -> {
-                    heroImage.setImageResource(secondPage
-                            ? R.drawable.img_onboarding_hero
-                            : R.drawable.man_carrying_clothes_one_hand);
-                    title.setText(secondPage
+                    if (!secondPage && !thirdPage && !fourthPage) {
+                        heroImage.setImageResource(R.drawable.man_carrying_clothes_one_hand);
+                    }
+                    title.setText(fourthPage
+                            ? R.string.onboarding_slide_four_title
+                            : thirdPage
+                            ? R.string.onboarding_slide_three_title
+                            : secondPage
                             ? R.string.onboarding_slide_two_title
                             : R.string.onboarding_title);
-                    subtitle.setText(secondPage
+                    subtitle.setText(fourthPage
+                            ? R.string.onboarding_slide_four_subtitle
+                            : thirdPage
+                            ? R.string.onboarding_slide_three_subtitle
+                            : secondPage
                             ? R.string.onboarding_slide_two_subtitle
                             : R.string.onboarding_subtitle);
                     heroImage.animate()
@@ -95,6 +139,37 @@ public class OnboardingActivity extends AppCompatActivity {
                 ? R.drawable.dot_inactive_indicator : R.drawable.dot_active_indicator);
         indicatorTwo.setBackgroundResource(secondPage
                 ? R.drawable.dot_active_indicator : R.drawable.dot_inactive_indicator);
+        indicatorThree.setBackgroundResource(thirdPage
+                ? R.drawable.dot_active_indicator : R.drawable.dot_inactive_indicator);
+        indicatorFour.setBackgroundResource(fourthPage
+                ? R.drawable.dot_active_indicator : R.drawable.dot_inactive_indicator);
+    }
+
+    private void configureTrackingAnimation() {
+        WebSettings settings = trackingAnimation.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(false);
+        trackingAnimation.setBackgroundColor(Color.TRANSPARENT);
+        trackingAnimation.loadUrl("file:///android_asset/onboarding_tracking.svg");
+    }
+
+    private void configureDeliveryAnimation() {
+        WebSettings settings = deliveryAnimation.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(false);
+        deliveryAnimation.setBackgroundColor(Color.TRANSPARENT);
+        deliveryAnimation.loadUrl("file:///android_asset/onboarding_delivered.svg");
+    }
+
+    private void configureLocationAnimation() {
+        WebSettings settings = locationAnimation.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(false);
+        locationAnimation.setBackgroundColor(Color.TRANSPARENT);
+        locationAnimation.loadUrl("file:///android_asset/onboarding_location_review.svg");
     }
 
     private void getStartedButtonClicked() {

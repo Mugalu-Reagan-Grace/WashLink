@@ -18,7 +18,11 @@
     <string name="onboarding_title">Laundry Simplified</string>
     <string name="onboarding_subtitle">Schedule pickups, track washes, and enjoy fresh clothes, hassle free</string>
     <string name="onboarding_slide_two_title">Fresh laundry, delivered</string>
-    <string name="onboarding_slide_two_subtitle">Book a trusted laundry provider and get your clean clothes back with less effort.</string>
+    <string name="onboarding_slide_two_subtitle">WashLink picks up your laundry and brings it back clean, fresh, and ready to wear.</string>
+    <string name="onboarding_slide_three_title">Track every step</string>
+    <string name="onboarding_slide_three_subtitle">Follow your laundry from pickup to delivery with real-time updates.</string>
+    <string name="onboarding_slide_four_title">Find laundry near you</string>
+    <string name="onboarding_slide_four_subtitle">Compare prices and customer reviews to choose the right laundry business.</string>
     <string name="get_started">Get Started</string>
     <string name="login">Sign In</string>
 
