@@ -58,9 +58,33 @@ public class TrackingFragment extends CustomerTabFragment {
         }
 
         String bookingId = getArguments() == null ? null : getArguments().getString("booking_id");
-        if (bookingId != null && !bookingId.isEmpty()) {
-            registration = BookingServiceFacade.getBookingService().addBookingListener(bookingId,
-                    new BookingService.BookingListener() {
+        loadBookingData(bookingId);
+    }
+
+    private void loadBookingData(String requestedBookingId) {
+        if (registration != null) registration.remove();
+        registration = null;
+        View root = getView();
+        if (root == null) return;
+        TextView orderId = root.findViewById(R.id.tv_order_id);
+        TextView status = root.findViewById(R.id.tv_order_status);
+        View timeline = root.findViewById(R.id.timeline);
+        View call = root.findViewById(R.id.btn_call_provider);
+        View cancel = root.findViewById(R.id.btn_cancel_booking);
+        providerPhone = null;
+        if (status != null) {
+            status.setText("Loading order updates...");
+            status.setOnClickListener(null);
+        }
+        if (call != null) {
+            call.setEnabled(false);
+            call.setVisibility(View.GONE);
+        }
+        if (cancel != null) cancel.setVisibility(View.GONE);
+
+        if (requestedBookingId != null && !requestedBookingId.isEmpty()) {
+            registration = BookingServiceFacade.getBookingService().addBookingListener(
+                    requestedBookingId, new BookingService.BookingListener() {
                         @Override public void onBookingLoaded(Booking booking) {
                             if (!isAdded() || getView() == null) return;
                             OrderTrackingRenderer.render(requireContext(), getView(), booking);
@@ -68,13 +92,13 @@ public class TrackingFragment extends CustomerTabFragment {
                                     requireContext(), cancel, booking);
                             loadProviderContact(booking, call);
                         }
+
                         @Override public void onError(String message) {
-                            if (status != null) status.setText("Unavailable");
+                            showRetryError(orderId, status, timeline, call, cancel);
                         }
                     });
         } else if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             String customerId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            if (status != null) status.setText("Loading...");
             registration = BookingServiceFacade.getBookingService().addCustomerBookingsListener(
                     customerId, new BookingService.CustomerBookingsListener() {
                         @Override public void onBookingsChanged(java.util.List<Booking> bookings) {
@@ -89,38 +113,86 @@ public class TrackingFragment extends CustomerTabFragment {
                                 }
                             }
                             if (orderId != null) orderId.setText("No active order");
-                            if (status != null) status.setText("Book a service to track an order");
+                            if (status != null) {
+                                status.setText("Book a service to track an order");
+                                status.setOnClickListener(null);
+                            }
                             if (timeline != null) timeline.setVisibility(View.GONE);
                             if (call != null) call.setVisibility(View.GONE);
                             if (cancel != null) cancel.setVisibility(View.GONE);
                         }
+
                         @Override public void onError(String message) {
-                            if (status != null) status.setText("Could not load order updates");
-                            if (isAdded()) Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+                            showRetryError(orderId, status, timeline, call, cancel);
                         }
                     });
         } else {
             if (orderId != null) orderId.setText("Sign in to view orders");
-            if (status != null) status.setText("No active booking");
+            if (status != null) {
+                status.setText("No active booking");
+                status.setOnClickListener(null);
+            }
             if (timeline != null) timeline.setVisibility(View.GONE);
             if (call != null) call.setVisibility(View.GONE);
             if (cancel != null) cancel.setVisibility(View.GONE);
         }
     }
 
+    private void showRetryError(TextView orderId, TextView status, View timeline,
+                                View call, View cancel) {
+        if (!isAdded()) return;
+        if (orderId != null) orderId.setText("Could not load this order");
+        if (status != null) {
+            status.setText("Tap to retry loading order updates");
+            status.setOnClickListener(v -> {
+                String bookingId = getArguments() == null
+                        ? null : getArguments().getString("booking_id");
+                loadBookingData(bookingId);
+            });
+        }
+        if (timeline != null) timeline.setVisibility(View.GONE);
+        if (call != null) call.setVisibility(View.GONE);
+        if (cancel != null) cancel.setVisibility(View.GONE);
+    }
+
     private void loadProviderContact(Booking booking, View call) {
-        if (booking.getProviderId() == null || booking.getProviderId().trim().isEmpty()) return;
+        if (booking.getProviderId() == null || booking.getProviderId().trim().isEmpty()) {
+            showContactState(call, booking, "Provider details unavailable", false);
+            return;
+        }
         FirebaseFirestore.getInstance().collection("providers").document(booking.getProviderId()).get()
                 .addOnSuccessListener(document -> {
                     Object phone = document.get("phone");
                     if (phone instanceof String && !((String) phone).trim().isEmpty() && isAdded()) {
                         providerPhone = (String) phone;
                         if (call != null) {
+                            if (call instanceof TextView) {
+                                ((TextView) call).setText(R.string.call_provider);
+                            }
+                            call.setOnClickListener(v -> {
+                                Intent dial = new Intent(Intent.ACTION_DIAL,
+                                        Uri.parse("tel:" + providerPhone));
+                                if (dial.resolveActivity(requireContext().getPackageManager()) != null) {
+                                    startActivity(dial);
+                                }
+                            });
                             call.setVisibility(View.VISIBLE);
                             call.setEnabled(true);
                         }
+                    } else {
+                        showContactState(call, booking, "Provider contact unavailable", false);
                     }
-                });
+                })
+                .addOnFailureListener(error -> showContactState(
+                        call, booking, "Contact unavailable. Tap to retry", true));
+    }
+
+    private void showContactState(View call, Booking booking, String message, boolean retry) {
+        if (!isAdded() || call == null) return;
+        if (call instanceof TextView) ((TextView) call).setText(message);
+        call.setVisibility(View.VISIBLE);
+        call.setEnabled(retry);
+        call.setOnClickListener(retry ? v -> loadProviderContact(booking, call) : null);
     }
 
     @Override

@@ -237,6 +237,8 @@
     <string name="payment_pending">Pending</string>
     <string name="payment_paid">Paid</string>
     <string name="payment_failed">Payment failed</string>
+    <string name="payment_refund_pending">Refund pending</string>
+    <string name="payment_refunded">Refunded</string>
     <string name="schedule">Schedule</string>
     <string name="date_pending">Date pending</string>
     <string name="view_receipt">View receipt</string>
@@ -276,23 +278,23 @@
 
     <!-- Order Tracking -->
     <string name="order_tracking_title">Order Tracking</string>
-    <string name="tracking_order_id">Order #LF-2941</string>
-    <string name="tracking_status_in_progress">In Progress</string>
+    <string name="tracking_order_id">Order details loading</string>
+    <string name="tracking_status_in_progress">Loading status</string>
     <string name="tracking_step_pickup">Pickup</string>
     <string name="tracking_step_cleaning">Cleaning</string>
     <string name="tracking_step_delivery">Delivery</string>
-    <string name="tracking_estimated_arrival">Estimated Arrival</string>
-    <string name="tracking_arrival_value">Tomorrow, 10:00 AM</string>
+    <string name="tracking_estimated_arrival">Scheduled time</string>
+    <string name="tracking_arrival_value">Not scheduled</string>
     <string name="tracking_step_scheduled_title">Scheduled</string>
-    <string name="tracking_step_scheduled_desc">Jan 5, 2026 · 2:00 PM · Your order is confirmed</string>
+    <string name="tracking_step_scheduled_desc">Schedule information will appear here.</string>
     <string name="tracking_step_pickedup_title">Picked Up</string>
-    <string name="tracking_step_pickedup_desc">Jan 5, 2026 · 2:00 PM · Items collected by our driver</string>
+    <string name="tracking_step_pickedup_desc">Pickup or drop-off details will appear here.</string>
     <string name="tracking_step_washing_title">Washing</string>
-    <string name="tracking_step_washing_desc">In progress · Your items are being professionally cleaned</string>
+    <string name="tracking_step_washing_desc">Washing status will appear here.</string>
     <string name="tracking_step_drying_title">Drying</string>
-    <string name="tracking_step_drying_desc">Pending · Items will be dried and prepared</string>
+    <string name="tracking_step_drying_desc">Drying status will appear here.</string>
     <string name="tracking_step_outfordelivery_title">Out for Delivery</string>
-    <string name="tracking_step_outfordelivery_desc">Pending · Out for delivery</string>
+    <string name="tracking_step_outfordelivery_desc">Delivery or collection status will appear here.</string>
     <string name="call_provider">Call Provider</string>
 
     <!-- Profile -->

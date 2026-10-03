@@ -3,6 +3,7 @@
     "source": "functions"
   },
   "firestore": {
+    "indexes": "firestore.indexes.json",
     "rules": "firestore.rules"
   }
 }

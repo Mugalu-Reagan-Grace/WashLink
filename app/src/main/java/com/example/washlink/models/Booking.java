@@ -31,7 +31,7 @@ public class Booking {
     private double tax;
     private double total;
     private String paymentMethod;     // e.g. "Visa •••• 4242"
-    private String paymentStatus;     // PENDING, PAID, or FAILED
+    private String paymentStatus;     // PENDING, PAID, FAILED, or REFUND_PENDING
     private String paymentProvider;
     private String paymentReference;
     private double pickupFee;

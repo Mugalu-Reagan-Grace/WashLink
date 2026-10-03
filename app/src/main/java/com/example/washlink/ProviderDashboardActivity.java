@@ -24,6 +24,7 @@ import java.util.List;
 
 public class ProviderDashboardActivity extends AppCompatActivity {
     private ListenerRegistration bookingsRegistration;
+    private String providerId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +46,20 @@ public class ProviderDashboardActivity extends AppCompatActivity {
         TextView rating = findViewById(R.id.tv_stat_rating_value);
         if (rating != null) rating.setText("—");
 
-        String providerId = AuthRepository.getInstance().getCurrentUserId();
+        providerId = AuthRepository.getInstance().getCurrentUserId();
         if (providerId == null) {
             showBookingsState("Sign in as a provider to load dashboard data.");
             return;
         }
         loadBusinessName(providerId);
+        listenForBookings();
+    }
+
+    private void listenForBookings() {
+        if (bookingsRegistration != null) {
+            bookingsRegistration.remove();
+            bookingsRegistration = null;
+        }
         showBookingsState("Loading provider bookings...");
         bookingsRegistration = BookingService.getInstance().addProviderBookingsListener(
                 providerId, new BookingService.ProviderBookingsListener() {
@@ -61,7 +70,12 @@ public class ProviderDashboardActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(String message) {
-                        showBookingsState("Could not load dashboard data. " + message);
+                        showBookingsState("Could not load dashboard data. Tap to retry.");
+                        TextView state = findViewById(R.id.tv_dashboard_bookings_state);
+                        if (state != null) {
+                            state.setClickable(true);
+                            state.setOnClickListener(v -> listenForBookings());
+                        }
                     }
                 });
     }
@@ -98,7 +112,12 @@ public class ProviderDashboardActivity extends AppCompatActivity {
             if (status == OrderStatus.BOOKED) pendingCount++;
             if (status == OrderStatus.DELIVERED
                     && booking.getUpdatedAt() >= weekAgo.getTimeInMillis()) {
-                weeklyEarnings += booking.getTotal();
+                if ("cash".equalsIgnoreCase(booking.getPaymentProvider())) {
+                    weeklyEarnings += booking.getTotal();
+                } else if ("flutterwave".equalsIgnoreCase(booking.getPaymentProvider())
+                        && "PAID".equalsIgnoreCase(booking.getPaymentStatus())) {
+                    weeklyEarnings += booking.getSubtotal();
+                }
             }
         }
 
@@ -146,6 +165,8 @@ public class ProviderDashboardActivity extends AppCompatActivity {
         if (state != null) {
             state.setText(message);
             state.setVisibility(View.VISIBLE);
+            state.setClickable(false);
+            state.setOnClickListener(null);
         }
     }
 

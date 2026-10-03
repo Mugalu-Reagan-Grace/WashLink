@@ -9,11 +9,16 @@ const { defineSecret } = require("firebase-functions/params");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions");
 const { onRequest } = require("firebase-functions/v2/https");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const {
   quoteBooking,
   isVerifiedFlutterwavePayment,
   isValidStatusTransition,
   canCancelBooking,
+  isEligibleForProviderPayout,
+  isEligibleForProviderRejectionRefund,
+  canClaimProviderPayout,
 } = require("./domain");
 
 initializeApp();
@@ -21,6 +26,7 @@ const db = getFirestore();
 const FLUTTERWAVE_SECRET_KEY = defineSecret("FLUTTERWAVE_SECRET_KEY");
 const FLUTTERWAVE_WEBHOOK_HASH = defineSecret("FLUTTERWAVE_WEBHOOK_HASH");
 const REGION = "us-central1";
+const AUTOMATED_PAYOUTS_ENABLED = false;
 
 function requireBookingId(value) {
   if (typeof value !== "string" || !/^[A-Za-z0-9]{10,40}$/.test(value)) {
@@ -78,6 +84,242 @@ async function flutterwaveRequest(path, body) {
     throw new HttpsError("unavailable", "The payment provider could not process the request.");
   }
   return payload.data;
+}
+
+function validPayoutProfile(profile) {
+  if (!profile || typeof profile !== "object"
+      || typeof profile.beneficiaryName !== "string"
+      || profile.beneficiaryName.trim().length < 2
+      || typeof profile.accountNumber !== "string"
+      || profile.accountNumber.length < 5
+      || profile.accountNumber.length > 32) {
+    return false;
+  }
+  if (profile.destinationType === "bank") {
+    return typeof profile.accountBank === "string"
+      && profile.accountBank.length > 0
+      && (profile.destinationBranchCode == null
+        || typeof profile.destinationBranchCode === "string");
+  }
+  return profile.destinationType === "airtel" || profile.destinationType === "mtn";
+}
+
+function payoutTransferStatus(status) {
+  if (status === "SUCCESSFUL") return "SUCCESSFUL";
+  if (status === "FAILED") return "FAILED";
+  return "PROCESSING";
+}
+
+function payoutAttemptRef(providerId, bookingId) {
+  return db.collection("users").doc(providerId)
+    .collection("payoutAttempts").doc(bookingId);
+}
+
+async function transferByReference(reference) {
+  const result = await flutterwaveRequest(
+    `transfers?reference=${encodeURIComponent(reference)}`
+  );
+  if (Array.isArray(result)) {
+    return result.find((transfer) => transfer && transfer.reference === reference) || null;
+  }
+  return result && result.reference === reference ? result : null;
+}
+
+async function processProviderPayout(providerId, bookingId) {
+  const attemptRef = payoutAttemptRef(providerId, bookingId);
+  const claim = randomBytes(12).toString("hex");
+  let attempt;
+  const claimed = await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(attemptRef);
+    if (!snapshot.exists) return false;
+    attempt = snapshot.data();
+    if (!canClaimProviderPayout(attempt, Date.now())) return false;
+    transaction.update(attemptRef, {
+      state: "PROCESSING",
+      claim,
+      claimedAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+    return true;
+  });
+  if (!claimed) return;
+
+  try {
+    let transfer = attempt.transferId
+      ? await flutterwaveRequest(`transfers/${attempt.transferId}`)
+      : await transferByReference(attempt.reference);
+    if (!transfer) {
+      const details = {
+        amount: attempt.amount,
+        currency: "UGX",
+        account_bank: attempt.accountBank,
+        account_number: attempt.accountNumber,
+        beneficiary_name: attempt.beneficiaryName,
+        reference: attempt.reference,
+        narration: `WashLink booking ${bookingId}`,
+      };
+      if (attempt.destinationBranchCode) {
+        details.destination_branch_code = attempt.destinationBranchCode;
+      }
+      transfer = await flutterwaveRequest("transfers", details);
+    }
+    if (transfer.reference !== attempt.reference
+        || Number(transfer.amount) !== attempt.amount
+        || transfer.currency !== "UGX") {
+      throw new Error("Flutterwave returned a transfer that does not match the payout.");
+    }
+    await db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(attemptRef);
+      if (snapshot.exists && snapshot.get("claim") === claim) {
+        transaction.update(attemptRef, {
+          state: payoutTransferStatus(transfer.status),
+          transferId: String(transfer.id),
+          providerStatus: transfer.status,
+          claim: FieldValue.delete(),
+          updatedAt: Date.now(),
+        });
+      }
+    });
+  } catch (error) {
+    let existingTransfer = null;
+    try {
+      existingTransfer = await transferByReference(attempt.reference);
+    } catch (lookupError) {
+      logger.warn("Could not reconcile a provider payout", {
+        bookingId,
+        error: lookupError.message,
+      });
+    }
+    if (existingTransfer && existingTransfer.reference === attempt.reference) {
+      await db.runTransaction(async (transaction) => {
+        const snapshot = await transaction.get(attemptRef);
+        if (snapshot.exists && snapshot.get("claim") === claim) {
+          transaction.update(attemptRef, {
+            state: payoutTransferStatus(existingTransfer.status),
+            transferId: String(existingTransfer.id),
+            providerStatus: existingTransfer.status,
+            claim: FieldValue.delete(),
+            updatedAt: Date.now(),
+          });
+        }
+      });
+      return;
+    }
+    await db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(attemptRef);
+      if (snapshot.exists && snapshot.get("claim") === claim) {
+        transaction.update(attemptRef, {
+          state: "UNKNOWN",
+          claim: FieldValue.delete(),
+          lastError: "Transfer status could not be confirmed.",
+          updatedAt: Date.now(),
+        });
+      }
+    });
+    logger.error("Provider payout needs reconciliation", { bookingId, error: error.message });
+  }
+}
+
+async function processProviderRefund(bookingId) {
+  const refundRef = db.collection("refundAttempts").doc(bookingId);
+  const claim = randomBytes(12).toString("hex");
+  let refund;
+  const claimed = await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(refundRef);
+    if (!snapshot.exists || snapshot.get("state") !== "REQUESTED") return false;
+    refund = snapshot.data();
+    transaction.update(refundRef, {
+      state: "PROCESSING",
+      claim,
+      claimedAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+    return true;
+  });
+  if (!claimed) return;
+  try {
+    const response = await flutterwaveRequest(
+      `transactions/${refund.transactionId}/refund`,
+      {
+        amount: refund.amount,
+        comments: `WashLink provider rejection: booking ${bookingId}`,
+      }
+    );
+    const finalRefundStatuses = [
+      "completed-bank-transfer",
+      "completed-momo",
+      "completed-mpgs",
+      "completed-offline",
+      "completed-preauth",
+    ];
+    const refunded = finalRefundStatuses.includes(response.status);
+    await db.runTransaction(async (transaction) => {
+      const [attemptSnapshot, bookingSnapshot] = await Promise.all([
+        transaction.get(refundRef),
+        transaction.get(db.collection("bookings").doc(bookingId)),
+      ]);
+      if (!attemptSnapshot.exists || attemptSnapshot.get("claim") !== claim
+          || !bookingSnapshot.exists) return;
+      transaction.update(refundRef, {
+        state: refunded ? "REFUNDED" : "INITIATED",
+        refundId: response.tx_id == null ? null : String(response.tx_id),
+        providerStatus: response.status || "unknown",
+        claim: FieldValue.delete(),
+        updatedAt: Date.now(),
+      });
+      transaction.update(db.collection("bookings").doc(bookingId), {
+        paymentStatus: refunded ? "REFUNDED" : "REFUND_PENDING",
+        updatedAt: Date.now(),
+      });
+    });
+  } catch (error) {
+    await db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(refundRef);
+      if (snapshot.exists && snapshot.get("claim") === claim) {
+        transaction.update(refundRef, {
+          state: "UNKNOWN",
+          claim: FieldValue.delete(),
+          lastAttemptAt: Date.now(),
+          lastError: "Refund status could not be confirmed.",
+          updatedAt: Date.now(),
+        });
+      }
+    });
+    logger.error("Provider rejection refund needs reconciliation", {
+      bookingId,
+      error: error.message,
+    });
+  }
+}
+
+async function reconcileProviderTransfer(data) {
+  const reference = data && data.reference;
+  const match = typeof reference === "string"
+    && reference.match(/^washlink_payout_([A-Za-z0-9]{10,40})$/);
+  const transferId = data && String(data.id || "");
+  if (!match || !/^\d{1,30}$/.test(transferId)) return false;
+
+  const bookingId = match[1];
+  const booking = await db.collection("bookings").doc(bookingId).get();
+  if (!booking.exists || typeof booking.get("providerId") !== "string") return false;
+  const providerId = booking.get("providerId");
+  const attemptRef = payoutAttemptRef(providerId, bookingId);
+  const attempt = await attemptRef.get();
+  if (!attempt.exists || attempt.get("reference") !== reference) return false;
+  const transfer = await flutterwaveRequest(`transfers/${transferId}`);
+  if (transfer.reference !== reference
+      || Number(transfer.amount) !== attempt.get("amount")
+      || transfer.currency !== "UGX") {
+    return false;
+  }
+  await attemptRef.update({
+    state: payoutTransferStatus(transfer.status),
+    transferId,
+    providerStatus: transfer.status,
+    claim: FieldValue.delete(),
+    updatedAt: Date.now(),
+  });
+  return true;
 }
 
 async function sendPushNotification(uid, title, body, bookingId, audience) {
@@ -283,6 +525,130 @@ exports.createBooking = onCall({ region: REGION }, async (request) => {
   return { bookingId };
 });
 
+exports.getUgandaPayoutBanks = onCall(
+  { region: REGION, secrets: [FLUTTERWAVE_SECRET_KEY] },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in to configure payouts.");
+    }
+    const user = await db.collection("users").doc(request.auth.uid).get();
+    if (!user.exists || user.get("role") !== "provider") {
+      throw new HttpsError("permission-denied", "Only providers can configure payouts.");
+    }
+    const banks = await flutterwaveRequest("banks/UG");
+    if (!Array.isArray(banks)) {
+      throw new HttpsError("unavailable", "Uganda bank options are unavailable.");
+    }
+    return banks.filter((bank) => bank && typeof bank.code === "string")
+      .map((bank) => ({
+        id: String(bank.id),
+        code: bank.code,
+        name: bank.name,
+        hasBranches: bank.has_branches === true,
+      }));
+  }
+);
+
+exports.getUgandaPayoutBranches = onCall(
+  { region: REGION, secrets: [FLUTTERWAVE_SECRET_KEY] },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in to configure payouts.");
+    }
+    const user = await db.collection("users").doc(request.auth.uid).get();
+    if (!user.exists || user.get("role") !== "provider") {
+      throw new HttpsError("permission-denied", "Only providers can configure payouts.");
+    }
+    const bankId = inputText(request.data && request.data.bankId, "Bank", 30);
+    if (!/^\d{1,20}$/.test(bankId)) {
+      throw new HttpsError("invalid-argument", "The selected bank is invalid.");
+    }
+    const branches = await flutterwaveRequest(`banks/${bankId}/branches`);
+    if (!Array.isArray(branches)) {
+      throw new HttpsError("unavailable", "Bank branch options are unavailable.");
+    }
+    return branches.filter((branch) => branch && typeof branch.code === "string")
+      .map((branch) => ({ code: branch.code, name: branch.name }));
+  }
+);
+
+exports.saveProviderPayoutProfile = onCall(
+  { region: REGION, secrets: [FLUTTERWAVE_SECRET_KEY] },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in to configure payouts.");
+    }
+    const uid = request.auth.uid;
+    const user = await db.collection("users").doc(uid).get();
+    if (!user.exists || user.get("role") !== "provider") {
+      throw new HttpsError("permission-denied", "Only providers can configure payouts.");
+    }
+    const data = request.data || {};
+    const destinationType = data.destinationType;
+    const beneficiaryName = inputText(data.beneficiaryName, "Beneficiary name", 100);
+    const accountNumber = inputText(data.accountNumber, "Account number", 32);
+    let accountBank;
+    let destinationBranchCode;
+    if (destinationType === "bank") {
+      accountBank = inputText(data.accountBank, "Bank", 30);
+      destinationBranchCode = data.destinationBranchCode == null
+        ? null : inputText(data.destinationBranchCode, "Bank branch", 30);
+      const banks = await flutterwaveRequest("banks/UG");
+      if (!Array.isArray(banks)) {
+        throw new HttpsError("unavailable", "Uganda bank options are unavailable.");
+      }
+      const bank = banks.find((item) => item && item.code === accountBank);
+      if (!bank) {
+        throw new HttpsError("invalid-argument", "Choose a valid Uganda bank.");
+      }
+      if (bank.has_branches === true) {
+        if (!destinationBranchCode) {
+          throw new HttpsError("invalid-argument", "Choose a bank branch.");
+        }
+        const branches = await flutterwaveRequest(`banks/${bank.id}/branches`);
+        if (!Array.isArray(branches)
+            || !branches.some((item) => item && item.code === destinationBranchCode)) {
+          throw new HttpsError("invalid-argument", "Choose a valid bank branch.");
+        }
+      } else if (destinationBranchCode) {
+        throw new HttpsError("invalid-argument", "This bank does not use branch codes.");
+      }
+    } else if (destinationType === "airtel" || destinationType === "mtn") {
+      if (!/^2567\d{8}$/.test(accountNumber)) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Enter the mobile money number in Uganda format, for example 2567XXXXXXXX."
+        );
+      }
+      accountBank = destinationType === "airtel" ? "AIRTEL" : "MTN";
+    } else {
+      throw new HttpsError("invalid-argument", "Choose a bank, Airtel Money, or MTN Mobile Money.");
+    }
+    const profile = {
+      destinationType,
+      beneficiaryName,
+      accountNumber,
+      accountBank,
+      destinationBranchCode: destinationBranchCode || null,
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+    if (!validPayoutProfile(profile)) {
+      throw new HttpsError("invalid-argument", "The payout details are invalid.");
+    }
+    const pending = await db.collection("users").doc(uid)
+      .collection("payoutAttempts").where("state", "in", ["REQUESTED", "PROCESSING", "UNKNOWN"])
+      .limit(1).get();
+    if (!pending.empty) {
+      throw new HttpsError(
+        "failed-precondition",
+        "A payout is being processed. Try changing payout details after it is resolved."
+      );
+    }
+    await db.collection("users").doc(uid).collection("payoutProfile").doc("default").set(profile);
+    return { saved: true };
+  }
+);
+
 exports.updateBookingStatus = onCall({ region: REGION }, async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Sign in as a provider to update a booking.");
@@ -300,12 +666,21 @@ exports.updateBookingStatus = onCall({ region: REGION }, async (request) => {
   const bookingRef = db.collection("bookings").doc(bookingId);
   const notificationId = db.collection("users").doc().id;
   const timestamp = Date.now();
+  const payoutProfileRef = db.collection("users").doc(request.auth.uid)
+    .collection("payoutProfile").doc("default");
+  const payoutRef = payoutAttemptRef(request.auth.uid, bookingId);
+  const refundRef = db.collection("refundAttempts").doc(bookingId);
   let pushDetails;
+  let payoutRequired = false;
+  let refundRequired = false;
 
   await db.runTransaction(async (transaction) => {
-    const [userSnapshot, bookingSnapshot] = await Promise.all([
+    const [userSnapshot, bookingSnapshot, payoutProfileSnapshot, payoutSnapshot, refundSnapshot] = await Promise.all([
       transaction.get(userRef),
       transaction.get(bookingRef),
+      transaction.get(payoutProfileRef),
+      transaction.get(payoutRef),
+      transaction.get(refundRef),
     ]);
     if (!userSnapshot.exists || userSnapshot.get("role") !== "provider") {
       throw new HttpsError("permission-denied", "Only providers can update booking status.");
@@ -325,6 +700,25 @@ exports.updateBookingStatus = onCall({ region: REGION }, async (request) => {
         "This booking cannot move to the requested status."
       );
     }
+    const payoutBooking = { ...booking, status: nextStatus };
+    payoutRequired = AUTOMATED_PAYOUTS_ENABLED
+      && isEligibleForProviderPayout(payoutBooking);
+    if (payoutRequired) {
+      if (!payoutProfileSnapshot.exists || !validPayoutProfile(payoutProfileSnapshot.data())) {
+        throw new HttpsError(
+          "failed-precondition",
+          "Add valid payout details before marking this paid online order delivered."
+        );
+      }
+      if (payoutSnapshot.exists) {
+        throw new HttpsError("failed-precondition", "A payout attempt already exists for this booking.");
+      }
+    }
+    refundRequired = AUTOMATED_PAYOUTS_ENABLED
+      && isEligibleForProviderRejectionRefund(booking, nextStatus);
+    if (refundRequired && refundSnapshot.exists) {
+      throw new HttpsError("failed-precondition", "A refund attempt already exists for this booking.");
+    }
     const customerId = booking.customerId;
     if (typeof customerId !== "string" || customerId.length === 0) {
       throw new HttpsError("failed-precondition", "Booking customer is missing.");
@@ -333,8 +727,39 @@ exports.updateBookingStatus = onCall({ region: REGION }, async (request) => {
       .collection("notifications").doc(notificationId);
     transaction.update(bookingRef, {
       status: nextStatus,
+      ...(refundRequired ? { paymentStatus: "REFUND_PENDING" } : {}),
       updatedAt: timestamp,
     });
+    if (payoutRequired) {
+      const profile = payoutProfileSnapshot.data();
+      transaction.set(payoutRef, {
+        bookingId,
+        providerId: request.auth.uid,
+        amount: booking.subtotal,
+        currency: "UGX",
+        accountBank: profile.accountBank,
+        accountNumber: profile.accountNumber,
+        beneficiaryName: profile.beneficiaryName,
+        destinationBranchCode: profile.destinationBranchCode || null,
+        reference: `washlink_payout_${bookingId}`,
+        state: "REQUESTED",
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
+    }
+    if (refundRequired) {
+      transaction.set(refundRef, {
+        bookingId,
+        providerId: request.auth.uid,
+        customerId,
+        transactionId: booking.paymentTransactionId,
+        amount: booking.paymentAmount,
+        currency: "UGX",
+        state: "REQUESTED",
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
+    }
     transaction.set(customerNotificationRef, {
       bookingId,
       customerId,
@@ -360,8 +785,71 @@ exports.updateBookingStatus = onCall({ region: REGION }, async (request) => {
     bookingId,
     "customer"
   );
-  return { status: nextStatus };
+  return {
+    status: nextStatus,
+    payoutInitiated: payoutRequired,
+    refundInitiated: refundRequired,
+  };
 });
+
+exports.initiateProviderPayout = onDocumentCreated(
+  {
+    document: "users/{providerId}/payoutAttempts/{bookingId}",
+    region: REGION,
+    secrets: [FLUTTERWAVE_SECRET_KEY],
+  },
+  async (event) => {
+    const { providerId, bookingId } = event.params;
+    await processProviderPayout(providerId, bookingId);
+  }
+);
+
+exports.initiateProviderRejectionRefund = onDocumentCreated(
+  {
+    document: "refundAttempts/{bookingId}",
+    region: REGION,
+    secrets: [FLUTTERWAVE_SECRET_KEY],
+  },
+  async (event) => {
+    await processProviderRefund(event.params.bookingId);
+  }
+);
+
+exports.processPendingProviderPayouts = onSchedule(
+  { schedule: "every 15 minutes", region: REGION, secrets: [FLUTTERWAVE_SECRET_KEY] },
+  async () => {
+    const attempts = await db.collectionGroup("payoutAttempts")
+      .where("state", "in", ["REQUESTED", "PROCESSING", "UNKNOWN"])
+      .limit(100)
+      .get();
+    for (const attempt of attempts.docs) {
+      const data = attempt.data();
+      if (typeof data.providerId === "string" && typeof data.bookingId === "string") {
+        await processProviderPayout(data.providerId, data.bookingId);
+      }
+    }
+  }
+);
+
+exports.flutterwaveTransferWebhook = onRequest(
+  { region: REGION, secrets: [FLUTTERWAVE_SECRET_KEY, FLUTTERWAVE_WEBHOOK_HASH] },
+  async (request, response) => {
+    if (request.method !== "POST"
+        || !validWebhookHash(request.get("verif-hash"), FLUTTERWAVE_WEBHOOK_HASH.value())) {
+      response.sendStatus(401);
+      return;
+    }
+    try {
+      const data = request.body && request.body.data;
+      response.sendStatus(await reconcileProviderTransfer(data) ? 200 : 400);
+    } catch (error) {
+      logger.error("Flutterwave transfer webhook could not be reconciled", {
+        error: error.message,
+      });
+      response.sendStatus(500);
+    }
+  }
+);
 
 exports.cancelBooking = onCall({ region: REGION }, async (request) => {
   if (!request.auth) {
@@ -582,6 +1070,18 @@ exports.flutterwaveWebhook = onRequest(
       return;
     }
     const data = request.body && request.body.data;
+    if (data && typeof data.reference === "string"
+        && data.reference.startsWith("washlink_payout_")) {
+      try {
+        response.sendStatus(await reconcileProviderTransfer(data) ? 200 : 400);
+      } catch (error) {
+        logger.error("Flutterwave transfer webhook could not be reconciled", {
+          error: error.message,
+        });
+        response.sendStatus(500);
+      }
+      return;
+    }
     const bookingId = referenceBookingId(data && data.tx_ref);
     const transactionId = data && String(data.id || "");
     if (!bookingId || !/^\d{1,30}$/.test(transactionId)) {

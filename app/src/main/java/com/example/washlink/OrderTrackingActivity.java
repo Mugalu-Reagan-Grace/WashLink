@@ -58,11 +58,27 @@ public class OrderTrackingActivity extends AppCompatActivity {
             return;
         }
 
-        if (status != null) status.setText("Loading...");
+        loadBooking(bookingId, orderId, status, call, cancel);
+    }
+
+    private void loadBooking(String bookingId, TextView orderId, TextView status,
+                             MaterialButton call, View cancel) {
+        if (registration != null) registration.remove();
+        providerPhone = null;
+        if (status != null) {
+            status.setText("Loading order updates...");
+            status.setOnClickListener(null);
+        }
+        if (call != null) {
+            call.setEnabled(false);
+            call.setVisibility(android.view.View.GONE);
+        }
+        if (cancel != null) cancel.setVisibility(android.view.View.GONE);
         registration = BookingServiceFacade.getBookingService().addBookingListener(bookingId,
                 new BookingService.BookingListener() {
                     @Override
                     public void onBookingLoaded(Booking booking) {
+                        if (isFinishing() || isDestroyed()) return;
                         if (booking == null) {
                             if (status != null) status.setText("Unavailable");
                             return;
@@ -76,25 +92,54 @@ public class OrderTrackingActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(String message) {
-                        if (status != null) status.setText("Unavailable");
+                        if (isFinishing() || isDestroyed()) return;
+                        if (orderId != null) orderId.setText("Could not load this order");
+                        if (status != null) {
+                            status.setText("Tap to retry loading order updates");
+                            status.setOnClickListener(v ->
+                                    loadBooking(bookingId, orderId, status, call, cancel));
+                        }
                     }
                 });
-
     }
 
     private void loadProviderContact(Booking booking, MaterialButton call) {
-        if (booking.getProviderId() == null || booking.getProviderId().trim().isEmpty()) return;
+        if (booking.getProviderId() == null || booking.getProviderId().trim().isEmpty()) {
+            setContactUnavailable(call, booking, "Provider details unavailable");
+            return;
+        }
         FirebaseFirestore.getInstance().collection("providers").document(booking.getProviderId()).get()
                 .addOnSuccessListener(document -> {
+                    if (isFinishing() || isDestroyed()) return;
                     Object phone = document.get("phone");
                     if (phone instanceof String && !((String) phone).trim().isEmpty()) {
                         providerPhone = (String) phone;
                         if (call != null) {
+                            call.setText(R.string.call_provider);
                             call.setVisibility(android.view.View.VISIBLE);
                             call.setEnabled(true);
+                            call.setOnClickListener(v -> {
+                                Intent dial = new Intent(Intent.ACTION_DIAL,
+                                        Uri.parse("tel:" + providerPhone));
+                                if (dial.resolveActivity(getPackageManager()) != null) {
+                                    startActivity(dial);
+                                }
+                            });
                         }
+                    } else {
+                        setContactUnavailable(call, booking, "Provider contact unavailable");
                     }
-                });
+                })
+                .addOnFailureListener(error ->
+                        setContactUnavailable(call, booking, "Contact unavailable. Tap to retry"));
+    }
+
+    private void setContactUnavailable(MaterialButton call, Booking booking, String message) {
+        if (call == null || isFinishing() || isDestroyed()) return;
+        call.setText(message);
+        call.setVisibility(android.view.View.VISIBLE);
+        call.setEnabled(message.contains("retry"));
+        call.setOnClickListener(v -> loadProviderContact(booking, call));
     }
 
     @Override

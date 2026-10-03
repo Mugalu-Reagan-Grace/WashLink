@@ -16,7 +16,8 @@ public enum OrderStatus {
     OUT_FOR_DELIVERY(6, "Out for Delivery"),
     DELIVERED(7, "Delivered"),
     REJECTED(-1, "Rejected"),
-    CANCELLED(-2, "Cancelled");
+    CANCELLED(-2, "Cancelled"),
+    UNKNOWN(-3, "Status unavailable");
 
     private final int sequence;
     private final String displayName;
@@ -35,7 +36,8 @@ public enum OrderStatus {
     }
 
     public boolean isTerminal() {
-        return this == DELIVERED || this == REJECTED || this == CANCELLED;
+        return this == DELIVERED || this == REJECTED || this == CANCELLED
+                || this == UNKNOWN;
     }
 
     public static List<OrderStatus> getRemainingForwardStatuses(OrderStatus current) {
@@ -52,11 +54,11 @@ public enum OrderStatus {
     }
 
     public static OrderStatus fromString(String value) {
-        if (value == null) return BOOKED;
+        if (value == null) return UNKNOWN;
         try {
             return OrderStatus.valueOf(value);
         } catch (IllegalArgumentException e) {
-            return BOOKED;
+            return UNKNOWN;
         }
     }
 }

@@ -80,7 +80,11 @@ public class ManageServicesActivity extends AppCompatActivity {
                     if (services.isEmpty()) showState("No services yet. Add your first service.");
                     else showList();
                 })
-                .addOnFailureListener(error -> showState("Could not load services. " + error.getMessage()));
+                .addOnFailureListener(error -> {
+                    showState("Could not load services. Tap to retry.");
+                    stateView.setClickable(true);
+                    stateView.setOnClickListener(v -> loadServices());
+                });
     }
 
     private void showServiceDialog(int position) {
@@ -167,11 +171,15 @@ public class ManageServicesActivity extends AppCompatActivity {
     private void showState(String message) {
         stateView.setText(message);
         stateView.setVisibility(View.VISIBLE);
+        stateView.setClickable(false);
+        stateView.setOnClickListener(null);
         recyclerView.setVisibility(View.GONE);
     }
 
     private void showList() {
         stateView.setVisibility(View.GONE);
+        stateView.setClickable(false);
+        stateView.setOnClickListener(null);
         recyclerView.setVisibility(View.VISIBLE);
     }
 

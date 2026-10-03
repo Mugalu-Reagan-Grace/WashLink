@@ -84,6 +84,15 @@ public class NotificationsActivity extends AppCompatActivity {
             return;
         }
 
+        loadNotifications(uid);
+
+        BottomNavHelper.bind(this);
+    }
+
+    private void loadNotifications(String uid) {
+        if (registration != null) registration.remove();
+        notifications.clear();
+        adapter.notifyDataSetChanged();
         showState("Loading notifications...");
         registration = BookingServiceFacade.getBookingService().addCustomerNotificationsListener(uid,
                 new BookingService.CustomerNotificationsListener() {
@@ -98,11 +107,14 @@ public class NotificationsActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(String message) {
-                        showState("Could not load notifications. " + message);
+                        showState("Could not load notifications. Tap to retry.");
+                        if (stateView != null) {
+                            stateView.setClickable(true);
+                            stateView.setFocusable(true);
+                            stateView.setOnClickListener(v -> loadNotifications(uid));
+                        }
                     }
                 });
-
-        BottomNavHelper.bind(this);
     }
 
     private String formatNotification(BookingNotification notification) {
@@ -119,12 +131,20 @@ public class NotificationsActivity extends AppCompatActivity {
         if (stateView != null) {
             stateView.setText(message);
             stateView.setVisibility(android.view.View.VISIBLE);
+            stateView.setClickable(false);
+            stateView.setFocusable(false);
+            stateView.setOnClickListener(null);
         }
         if (listView != null) listView.setVisibility(android.view.View.GONE);
     }
 
     private void showList() {
-        if (stateView != null) stateView.setVisibility(android.view.View.GONE);
+        if (stateView != null) {
+            stateView.setVisibility(android.view.View.GONE);
+            stateView.setClickable(false);
+            stateView.setFocusable(false);
+            stateView.setOnClickListener(null);
+        }
         if (listView != null) listView.setVisibility(android.view.View.VISIBLE);
     }
 

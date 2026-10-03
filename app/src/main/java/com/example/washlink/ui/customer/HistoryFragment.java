@@ -3,7 +3,6 @@ package com.example.washlink.ui.customer;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,7 +13,6 @@ import com.example.washlink.data.BookingService;
 import com.example.washlink.data.BookingServiceFacade;
 import com.example.washlink.data.ListenerRegistration;
 import com.example.washlink.models.Booking;
-import com.example.washlink.OrderTrackingActivity;
 import com.example.washlink.R;
 import com.google.firebase.auth.FirebaseAuth;
 import java.util.ArrayList;
@@ -27,6 +25,8 @@ public class HistoryFragment extends CustomerTabFragment {
     private TextView emptyState;
     private String filter = "active";
     private ListenerRegistration registration;
+    private boolean loaded;
+    private boolean loadFailed;
 
     @Override
     public View onCreateView(@NonNull android.view.LayoutInflater inflater,
@@ -47,23 +47,42 @@ public class HistoryFragment extends CustomerTabFragment {
         bindFilter(view, R.id.filter_active, "active");
         bindFilter(view, R.id.filter_completed, "completed");
         bindFilter(view, R.id.filter_all, "all");
-        updateEmptyState();
+        emptyState.setOnClickListener(v -> {
+            if (loadFailed) loadBookings();
+        });
+        loadBookings();
+    }
 
+    private void loadBookings() {
+        if (registration != null) registration.remove();
+        registration = null;
+        loaded = false;
+        loadFailed = false;
+        allBookings.clear();
+        adapter.replace(filteredBookings());
+        updateEmptyState();
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            Toast.makeText(requireContext(), "Sign in to view your orders", Toast.LENGTH_SHORT).show();
+            loaded = true;
+            updateEmptyState();
             return;
         }
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         registration = BookingServiceFacade.getBookingService().addCustomerBookingsListener(
-                FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                new BookingService.CustomerBookingsListener() {
+                uid, new BookingService.CustomerBookingsListener() {
                     @Override public void onBookingsChanged(List<Booking> bookings) {
+                        if (!isAdded()) return;
+                        loaded = true;
+                        loadFailed = false;
                         allBookings.clear();
                         allBookings.addAll(bookings);
                         adapter.replace(filteredBookings());
                         updateEmptyState();
                     }
                     @Override public void onError(String message) {
-                        if (isAdded()) Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+                        if (!isAdded()) return;
+                        loaded = false;
+                        loadFailed = true;
+                        updateEmptyState();
                     }
                 });
     }
@@ -94,6 +113,22 @@ public class HistoryFragment extends CustomerTabFragment {
         boolean hasItems = adapter.getItemCount() > 0;
         recyclerView.setVisibility(hasItems ? View.VISIBLE : View.GONE);
         emptyState.setVisibility(hasItems ? View.GONE : View.VISIBLE);
+        if (hasItems) return;
+        if (loadFailed) {
+            emptyState.setText("Could not load orders. Tap to retry.");
+        } else if (!loaded) {
+            emptyState.setText("Loading orders...");
+        } else if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            emptyState.setText("Sign in to view your orders.");
+        } else if ("completed".equals(filter) && !allBookings.isEmpty()) {
+            emptyState.setText("No completed orders yet.");
+        } else if ("active".equals(filter) && !allBookings.isEmpty()) {
+            emptyState.setText("No active orders.");
+        } else {
+            emptyState.setText("No orders yet.");
+        }
+        emptyState.setClickable(loadFailed);
+        emptyState.setFocusable(loadFailed);
     }
 
     @Override

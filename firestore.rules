@@ -31,6 +31,14 @@ service cloud.firestore {
       match /notifications/{notificationId} {
         allow read, delete: if signedIn() && request.auth.uid == uid;
       }
+
+      match /payoutProfile/{profileId} {
+        allow read: if signedIn() && request.auth.uid == uid;
+      }
+
+      match /payoutAttempts/{bookingId} {
+        allow read: if signedIn() && request.auth.uid == uid;
+      }
     }
 
     match /providers/{uid} {

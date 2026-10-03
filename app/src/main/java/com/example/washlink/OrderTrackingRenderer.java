@@ -18,19 +18,31 @@ public final class OrderTrackingRenderer {
     public static void render(Context context, View root, Booking booking) {
         OrderStatus status = OrderStatus.fromString(booking.getStatus());
         boolean dropOff = Booking.SERVICE_TYPE_DROPOFF.equals(booking.getServiceType());
+        String providerName = booking.getProviderName();
+        String address = booking.getAddress();
         setText(root, R.id.tv_order_title,
-                booking.getServiceName() == null ? "Laundry service" : booking.getServiceName());
-        setText(root, R.id.tv_order_id, "Order #" + booking.getId());
+                isMissing(booking.getServiceName()) ? "Laundry service" : booking.getServiceName());
+        setText(root, R.id.tv_order_id, isMissing(booking.getId())
+                ? "Order details unavailable" : "Order #" + booking.getId());
         setText(root, R.id.tv_order_status, status.getDisplayName());
         setText(root, R.id.tv_eta_value,
-                booking.getScheduledDateTime() == null ? "Schedule pending" : booking.getScheduledDateTime());
+                isMissing(booking.getScheduledDateTime())
+                        ? "Not scheduled" : booking.getScheduledDateTime());
+        setText(root, R.id.tv_tracking_provider, "Provider: "
+                + (isMissing(providerName) ? "Details unavailable" : providerName));
+        setText(root, R.id.tv_tracking_address,
+                (dropOff ? "Drop-off/collection: " : "Pickup/delivery: ")
+                        + (isMissing(address) ? "Address unavailable" : address));
 
-        if (status == OrderStatus.CANCELLED || status == OrderStatus.REJECTED) {
+        if (status == OrderStatus.CANCELLED || status == OrderStatus.REJECTED
+                || status == OrderStatus.UNKNOWN) {
             View timeline = root.findViewById(R.id.timeline);
             if (timeline != null) timeline.setVisibility(View.GONE);
+            setSummaryProgressVisibility(root, false);
             return;
         }
 
+        setSummaryProgressVisibility(root, true);
         View timeline = root.findViewById(R.id.timeline);
         if (timeline != null) timeline.setVisibility(View.VISIBLE);
 
@@ -59,10 +71,15 @@ public final class OrderTrackingRenderer {
                 R.id.timeline_delivery_desc
         };
         String[] descriptions = stepDescriptions(status, booking, dropOff);
+        setText(root, R.id.timeline_scheduled_title, status == OrderStatus.BOOKED
+                ? "Booking received" : status == OrderStatus.ACCEPTED
+                ? "Provider accepted" : "Booking scheduled");
         if (dropOff) {
             setText(root, R.id.tv_label_pickup, "Drop-off");
             setText(root, R.id.tv_label_delivery, "Collection");
-            setText(root, R.id.timeline_scheduled_title, "Drop-off scheduled");
+            setText(root, R.id.timeline_scheduled_title, status == OrderStatus.BOOKED
+                    ? "Drop-off booked" : status == OrderStatus.ACCEPTED
+                    ? "Provider accepted" : "Drop-off scheduled");
             setText(root, R.id.timeline_pickup_title, "Received by provider");
             setText(root, R.id.timeline_delivery_title,
                     status == OrderStatus.READY ? "Ready for collection" : "Collection");
@@ -131,6 +148,24 @@ public final class OrderTrackingRenderer {
         if (view != null) view.setBackgroundResource(drawableId);
     }
 
+    private static void setSummaryProgressVisibility(View root, boolean visible) {
+        int visibility = visible ? View.VISIBLE : View.GONE;
+        int[] ids = {
+                R.id.progress_track_bg,
+                R.id.progress_track_fill,
+                R.id.dot_pickup,
+                R.id.dot_cleaning,
+                R.id.dot_delivery,
+                R.id.tv_label_pickup,
+                R.id.tv_label_cleaning,
+                R.id.tv_label_delivery,
+        };
+        for (int id : ids) {
+            View view = root.findViewById(id);
+            if (view != null) view.setVisibility(visibility);
+        }
+    }
+
     private static int currentStep(OrderStatus status) {
         switch (status) {
             case BOOKED:
@@ -152,8 +187,12 @@ public final class OrderTrackingRenderer {
     }
 
     private static String[] stepDescriptions(OrderStatus status, Booking booking, boolean dropOff) {
-        String scheduled = booking.getScheduledDateTime() == null
-                ? "Schedule confirmed" : booking.getScheduledDateTime();
+        String schedule = isMissing(booking.getScheduledDateTime())
+                ? "Schedule not set" : "Scheduled for " + booking.getScheduledDateTime();
+        String scheduled = status == OrderStatus.BOOKED
+                ? "Waiting for provider confirmation. " + schedule
+                : status == OrderStatus.ACCEPTED
+                ? "Accepted by your provider. " + schedule : schedule;
         String pickup = status.getSequence() >= OrderStatus.PICKED_UP.getSequence()
                 ? (dropOff ? "Items checked in at the provider" : "Items collected by your provider")
                 : (dropOff ? "Waiting for drop-off" : "Waiting for collection");
@@ -194,5 +233,9 @@ public final class OrderTrackingRenderer {
     private static void setText(View root, int id, String value) {
         TextView text = root.findViewById(id);
         if (text != null) text.setText(value);
+    }
+
+    private static boolean isMissing(String value) {
+        return value == null || value.trim().isEmpty();
     }
 }

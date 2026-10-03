@@ -41,6 +41,8 @@ public class NearbyProvidersActivity extends AppCompatActivity {
     private String query = "";
     private String selectedService;
     private Location userLocation;
+    private boolean providersLoaded;
+    private boolean providerLoadFailed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,9 +135,15 @@ public class NearbyProvidersActivity extends AppCompatActivity {
     }
 
     private void loadProviders() {
+        providersLoaded = false;
+        providerLoadFailed = false;
+        if (adapter != null) adapter.replace(Collections.emptyList());
+        if (resultCount != null) resultCount.setText("Loading providers...");
         showState("Loading providers...");
         FirebaseFirestore.getInstance().collection("providers").get()
                 .addOnSuccessListener(snapshot -> {
+                    providersLoaded = true;
+                    providerLoadFailed = false;
                     allProviders.clear();
                     for (DocumentSnapshot document : snapshot.getDocuments()) {
                         String name = stringValue(document.get("businessName"));
@@ -184,7 +192,12 @@ public class NearbyProvidersActivity extends AppCompatActivity {
                     }
                     applyFilter();
                 })
-                .addOnFailureListener(error -> showState("Could not load providers. " + error.getMessage()));
+                .addOnFailureListener(error -> {
+                    allProviders.clear();
+                    providerLoadFailed = true;
+                    if (resultCount != null) resultCount.setText("Providers unavailable");
+                    showState("Could not load providers. Tap to retry.");
+                });
     }
 
     private void requestNearestLocation() {
@@ -239,7 +252,7 @@ public class NearbyProvidersActivity extends AppCompatActivity {
     }
 
     private void applyFilter() {
-        if (adapter == null) return;
+        if (adapter == null || !providersLoaded) return;
         List<Provider> visible = new ArrayList<>();
         for (Provider provider : allProviders) {
             if (query.isEmpty() || provider.name.toLowerCase(Locale.ROOT).contains(query)) {
@@ -266,6 +279,9 @@ public class NearbyProvidersActivity extends AppCompatActivity {
         if (stateView != null) {
             stateView.setText(message);
             stateView.setVisibility(View.VISIBLE);
+            stateView.setClickable(providerLoadFailed);
+            stateView.setFocusable(providerLoadFailed);
+            stateView.setOnClickListener(providerLoadFailed ? v -> loadProviders() : null);
         }
         if (recyclerView != null) recyclerView.setVisibility(View.GONE);
     }

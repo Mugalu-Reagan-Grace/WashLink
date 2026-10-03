@@ -101,7 +101,7 @@ public class ProviderDetailsActivity extends AppCompatActivity {
 
         if (serviceSpinner != null && providerId != null && !providerId.trim().isEmpty()) {
             loadProviderServices(providerId, serviceSpinner, bookBtn,
-                    !"Closed".equalsIgnoreCase(status));
+                    !"Closed".equalsIgnoreCase(status), status, statusTv);
         } else if (bookBtn != null) {
             bookBtn.setEnabled(false);
         }
@@ -110,7 +110,9 @@ public class ProviderDetailsActivity extends AppCompatActivity {
     }
 
     private void loadProviderServices(String providerId, Spinner spinner, Button bookButton,
-                                      boolean providerOpen) {
+                                      boolean providerOpen, String providerStatus,
+                                      TextView statusView) {
+        if (bookButton != null) bookButton.setEnabled(false);
         FirebaseFirestore.getInstance().collection("providers").document(providerId).get()
                 .addOnSuccessListener(document -> {
                     serviceOptions.clear();
@@ -138,14 +140,27 @@ public class ProviderDetailsActivity extends AppCompatActivity {
                     boolean hasServices = !serviceOptions.isEmpty();
                     spinner.setEnabled(hasServices);
                     if (bookButton != null) bookButton.setEnabled(hasServices && providerOpen);
+                    if (statusView != null) {
+                        statusView.setText(providerStatus);
+                        statusView.setClickable(false);
+                        statusView.setFocusable(false);
+                        statusView.setOnClickListener(null);
+                    }
                     if (!hasServices) {
                         TextView price = findViewById(R.id.tv_provider_price);
                         if (price != null) price.setText("No services listed");
                     }
                 })
-                .addOnFailureListener(error ->
-                        Toast.makeText(this, "Could not load provider services: " + error.getMessage(),
-                                Toast.LENGTH_LONG).show());
+                .addOnFailureListener(error -> {
+                    if (statusView != null) {
+                        statusView.setText("Could not load services. Tap to retry.");
+                        statusView.setClickable(true);
+                        statusView.setFocusable(true);
+                        statusView.setOnClickListener(v -> loadProviderServices(
+                                providerId, spinner, bookButton, providerOpen,
+                                providerStatus, statusView));
+                    }
+                });
     }
 
     private static final class ProviderServiceOption {

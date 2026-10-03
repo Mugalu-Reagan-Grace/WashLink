@@ -10,7 +10,6 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -266,6 +265,10 @@ public class AuthRepository {
         }
         db.collection("users").document(firebaseUser.getUid()).get()
                 .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) {
+                        callback.onError("Account data not found.");
+                        return;
+                    }
                     UserAccount user = doc.toObject(UserAccount.class);
                     if (user == null) {
                         callback.onError("Account data not found.");
@@ -273,16 +276,8 @@ public class AuthRepository {
                         callback.onSuccess(user);
                     }
                 })
-                .addOnFailureListener(e -> {
-                    String name = firebaseUser.getDisplayName() == null
-                            ? "" : firebaseUser.getDisplayName();
-                    String email = firebaseUser.getEmail() == null
-                            ? "" : firebaseUser.getEmail();
-                    UserAccount fallback = new UserAccount(
-                            firebaseUser.getUid(), name, email, "",
-                            UserAccount.ROLE_CUSTOMER);
-                    callback.onSuccess(fallback);
-                });
+                .addOnFailureListener(e -> callback.onError(e.getMessage() == null
+                        ? "Could not load account data." : e.getMessage()));
     }
 
     public void updateCustomerProfile(String name, String phone, String address,
@@ -310,8 +305,11 @@ public class AuthRepository {
                 .addOnSuccessListener(unused -> {
                     firebaseUser.updateProfile(new UserProfileChangeRequest.Builder()
                             .setDisplayName(name)
-                            .build());
-                    callback.onSuccess();
+                            .build())
+                            .addOnSuccessListener(profileUpdate -> callback.onSuccess())
+                            .addOnFailureListener(e -> callback.onError(
+                                    "Your account details were saved, but the sign-in profile "
+                                            + "could not be synchronized: " + e.getMessage()));
                 })
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
@@ -339,10 +337,74 @@ public class AuthRepository {
             callback.onError("Address cannot be empty.");
             return;
         }
-        db.collection("users").document(firebaseUser.getUid())
-                .update("savedAddresses", FieldValue.arrayUnion(normalizedAddress))
-                .addOnSuccessListener(unused -> callback.onSuccess())
-                .addOnFailureListener(e -> callback.onError(e.getMessage()));
+        com.google.firebase.firestore.DocumentReference userRef =
+                db.collection("users").document(firebaseUser.getUid());
+        db.runTransaction(transaction -> {
+            com.google.firebase.firestore.DocumentSnapshot snapshot = transaction.get(userRef);
+            if (!snapshot.exists()
+                    || !UserAccount.ROLE_CUSTOMER.equals(snapshot.getString("role"))) {
+                throw new IllegalStateException("Customer account data not found.");
+            }
+            List<String> addresses = normalizedAddresses(snapshot.get("savedAddresses"));
+            addUniqueAddress(addresses, normalizedAddress);
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("savedAddresses", addresses);
+            String primary = snapshot.getString("address");
+            if (primary == null || primary.trim().isEmpty()) {
+                updates.put("address", normalizedAddress);
+            }
+            transaction.update(userRef, updates);
+            return null;
+        }).addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onError(e.getMessage() == null
+                        ? "Could not save the address." : e.getMessage()));
+    }
+
+    public void updateCustomerAddresses(List<String> savedAddresses, String primaryAddress,
+                                        SimpleCallback callback) {
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+        if (firebaseUser == null) {
+            callback.onError("You are not signed in.");
+            return;
+        }
+        List<String> normalized = normalizedAddresses(savedAddresses);
+        String primary = primaryAddress == null ? "" : primaryAddress.trim();
+        if (!primary.isEmpty()) addUniqueAddress(normalized, primary);
+        com.google.firebase.firestore.DocumentReference userRef =
+                db.collection("users").document(firebaseUser.getUid());
+        db.runTransaction(transaction -> {
+            com.google.firebase.firestore.DocumentSnapshot snapshot = transaction.get(userRef);
+            if (!snapshot.exists()
+                    || !UserAccount.ROLE_CUSTOMER.equals(snapshot.getString("role"))) {
+                throw new IllegalStateException("Customer account data not found.");
+            }
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("savedAddresses", normalized);
+            updates.put("address", primary);
+            transaction.update(userRef, updates);
+            return null;
+        }).addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(e -> callback.onError(e.getMessage() == null
+                        ? "Could not save your addresses." : e.getMessage()));
+    }
+
+    private List<String> normalizedAddresses(Object value) {
+        List<String> result = new ArrayList<>();
+        if (value instanceof List<?>) {
+            for (Object item : (List<?>) value) {
+                if (item instanceof String) addUniqueAddress(result, (String) item);
+            }
+        }
+        return result;
+    }
+
+    private void addUniqueAddress(List<String> addresses, String value) {
+        if (value == null || value.trim().isEmpty()) return;
+        String normalized = value.trim();
+        for (String address : addresses) {
+            if (normalized.equalsIgnoreCase(address)) return;
+        }
+        addresses.add(normalized);
     }
 
     public void sendPasswordReset(SimpleCallback callback) {

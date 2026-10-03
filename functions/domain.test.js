@@ -7,6 +7,9 @@ const {
   isVerifiedFlutterwavePayment,
   isValidStatusTransition,
   canCancelBooking,
+  isEligibleForProviderPayout,
+  isEligibleForProviderRejectionRefund,
+  canClaimProviderPayout,
 } = require("./domain");
 
 const provider = { services: [{ name: "Wash & Fold", pricePerKg: 5000 }] };
@@ -85,4 +88,55 @@ test("only allows cancellation of booked orders before payment begins", () => {
     status: "ACCEPTED",
     paymentStatus: "PENDING",
   }), false);
+});
+
+test("pays only delivered, verified online bookings and uses subtotal before service fee", () => {
+  const delivered = {
+    status: "DELIVERED",
+    paymentProvider: "flutterwave",
+    paymentStatus: "PAID",
+    subtotal: 45000,
+    serviceFee: 1350,
+  };
+  assert.equal(isEligibleForProviderPayout(delivered), true);
+  assert.equal(isEligibleForProviderPayout({ ...delivered, paymentProvider: "cash" }), false);
+  assert.equal(isEligibleForProviderPayout({ ...delivered, paymentStatus: "PENDING" }), false);
+  assert.equal(isEligibleForProviderPayout({ ...delivered, subtotal: 45000.5 }), false);
+});
+
+test("refunds only paid online bookings rejected before work with a matching transaction amount", () => {
+  const rejected = {
+    status: "BOOKED",
+    paymentProvider: "flutterwave",
+    paymentStatus: "PAID",
+    paymentTransactionId: "123456",
+    paymentAmount: 46350,
+    total: 46350,
+  };
+  assert.equal(isEligibleForProviderRejectionRefund(rejected, "REJECTED"), true);
+  assert.equal(isEligibleForProviderRejectionRefund(
+    { ...rejected, status: "ACCEPTED" }, "REJECTED"
+  ), false);
+  assert.equal(isEligibleForProviderRejectionRefund(
+    { ...rejected, paymentProvider: "cash" }, "REJECTED"
+  ), false);
+  assert.equal(isEligibleForProviderRejectionRefund(
+    { ...rejected, paymentAmount: 1 }, "REJECTED"
+  ), false);
+});
+
+test("payout retries reclaim uncertain or stale attempts but never duplicate active or terminal attempts", () => {
+  const now = 1_000_000;
+  assert.equal(canClaimProviderPayout({ state: "REQUESTED" }, now), true);
+  assert.equal(canClaimProviderPayout({ state: "UNKNOWN" }, now), true);
+  assert.equal(canClaimProviderPayout({
+    state: "PROCESSING",
+    claimedAt: now - 6 * 60 * 1000,
+  }, now), true);
+  assert.equal(canClaimProviderPayout({
+    state: "PROCESSING",
+    claimedAt: now - 60 * 1000,
+  }, now), false);
+  assert.equal(canClaimProviderPayout({ state: "SUCCESSFUL" }, now), false);
+  assert.equal(canClaimProviderPayout({ state: "FAILED" }, now), false);
 });

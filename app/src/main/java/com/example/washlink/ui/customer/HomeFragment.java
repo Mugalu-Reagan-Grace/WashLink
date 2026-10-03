@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +22,7 @@ import java.util.List;
 public class HomeFragment extends CustomerTabFragment {
     private ListenerRegistration bookingsRegistration;
     private String activeBookingId;
+    private boolean loadFailed;
 
     @Override
     public View onCreateView(@NonNull android.view.LayoutInflater inflater,
@@ -62,11 +62,22 @@ public class HomeFragment extends CustomerTabFragment {
             details.setOnClickListener(v -> openActiveOrder());
         }
 
+        View.OnClickListener openOrRetry = v -> {
+            if (loadFailed) loadLatestBooking(orderTitle, orderId, orderStatus, etaValue, details);
+            else openActiveOrder();
+        };
+        if (activeCard != null) activeCard.setOnClickListener(openOrRetry);
+        if (details != null) details.setOnClickListener(openOrRetry);
         loadLatestBooking(orderTitle, orderId, orderStatus, etaValue, details);
     }
 
     private void loadLatestBooking(TextView orderTitle, TextView orderId,
                                    TextView orderStatus, TextView etaValue, TextView details) {
+        if (bookingsRegistration != null) bookingsRegistration.remove();
+        bookingsRegistration = null;
+        loadFailed = false;
+        if (orderId != null) orderId.setText("Loading orders...");
+        if (orderStatus != null) orderStatus.setText("Loading");
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             showNoActiveOrder(orderTitle, orderId, orderStatus, etaValue, details);
             return;
@@ -77,6 +88,7 @@ public class HomeFragment extends CustomerTabFragment {
                     @Override
                     public void onBookingsChanged(List<Booking> bookings) {
                         if (!isAdded()) return;
+                        loadFailed = false;
                         Booking active = null;
                         for (Booking booking : bookings) {
                             if (!OrderStatus.fromString(booking.getStatus()).isTerminal()) {
@@ -102,10 +114,13 @@ public class HomeFragment extends CustomerTabFragment {
                     @Override
                     public void onError(String message) {
                         if (!isAdded()) return;
+                        loadFailed = true;
+                        activeBookingId = null;
+                        if (orderTitle != null) orderTitle.setText("Orders unavailable");
                         if (orderId != null) orderId.setText("Could not load your orders");
-                        if (orderStatus != null) orderStatus.setText("Unavailable");
+                        if (orderStatus != null) orderStatus.setText("Tap Retry to try again");
+                        if (etaValue != null) etaValue.setText(" ");
                         if (details != null) details.setText("Retry");
-                        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
                     }
                 });
     }

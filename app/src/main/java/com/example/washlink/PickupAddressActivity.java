@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -41,7 +42,11 @@ public class PickupAddressActivity extends AppCompatActivity {
     private MaterialButton continueCheckoutButton;
     private ConstraintLayout homeAddressCard;
     private ConstraintLayout workAddressCard;
-    private TextInputEditText newLabelInput;
+    private TextView savedAddressTitle;
+    private TextView homeAddressValue;
+    private TextView workAddressValue;
+    private TextView homeAddressLabel;
+    private TextView workAddressLabel;
     private MaterialAutoCompleteTextView fullAddressInput;
 
     private String selectedAddress = null;
@@ -62,9 +67,19 @@ public class PickupAddressActivity extends AppCompatActivity {
         continueCheckoutButton = findViewById(R.id.btn_continue_checkout);
         homeAddressCard = findViewById(R.id.card_address_home);
         workAddressCard = findViewById(R.id.card_address_work);
-        newLabelInput = findViewById(R.id.et_new_address_label);
+        savedAddressTitle = findViewById(R.id.tv_saved_label);
+        homeAddressValue = findViewById(R.id.tv_home_value);
+        workAddressValue = findViewById(R.id.tv_work_value);
+        homeAddressLabel = findViewById(R.id.tv_home_label);
+        workAddressLabel = findViewById(R.id.tv_work_label);
         fullAddressInput = findViewById(R.id.et_full_address);
+        findViewById(R.id.label_new_label).setVisibility(View.GONE);
+        findViewById(R.id.til_new_label).setVisibility(View.GONE);
 
+        homeAddressCard.setVisibility(View.GONE);
+        workAddressCard.setVisibility(View.GONE);
+        savedAddressTitle.setVisibility(View.GONE);
+        continueCheckoutButton.setEnabled(false);
         updateAddressSuggestions();
         loadPrimaryAddress();
         fullAddressInput.setOnItemClickListener((parent, view, position, id) -> {
@@ -118,36 +133,40 @@ public class PickupAddressActivity extends AppCompatActivity {
         });
 
         homeAddressCard.setOnClickListener(v -> {
-            selectedAddress = getString(R.string.address_home_label);
+            selectedAddress = homeAddressValue.getText().toString();
+            fullAddressInput.setText(selectedAddress, false);
             enableContinue();
         });
 
         workAddressCard.setOnClickListener(v -> {
-            selectedAddress = getString(R.string.address_work_label);
+            selectedAddress = workAddressValue.getText().toString();
+            fullAddressInput.setText(selectedAddress, false);
             enableContinue();
         });
 
         addNewAddressButton.setOnClickListener(v -> {
-            Toast.makeText(this, "Add a new address below", Toast.LENGTH_SHORT).show();
+            fullAddressInput.requestFocus();
         });
 
         addAddressButton.setOnClickListener(v -> {
-            String label = newLabelInput.getText() != null ? newLabelInput.getText().toString().trim() : "";
             String address = fullAddressInput.getText() != null ? fullAddressInput.getText().toString().trim() : "";
 
-            if (label.isEmpty() || address.isEmpty()) {
-                Toast.makeText(this, "Please fill in the address details", Toast.LENGTH_SHORT).show();
+            if (address.isEmpty()) {
+                Toast.makeText(this, "Enter an address to save.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            selectedAddress = label + " - " + address;
-            enableContinue();
+            addAddressButton.setEnabled(false);
             AuthRepository.getInstance().addSavedAddress(address,
                     new AuthRepository.SimpleCallback() {
                         @Override
                         public void onSuccess() {
-                            if (!savedAddresses.contains(address)) savedAddresses.add(address);
+                            addUniqueAddress(address);
+                            selectedAddress = address;
+                            fullAddressInput.setText(address, false);
                             updateAddressSuggestions();
+                            enableContinue();
+                            addAddressButton.setEnabled(true);
                             Toast.makeText(PickupAddressActivity.this,
                                     "Address added to your saved addresses",
                                     Toast.LENGTH_SHORT).show();
@@ -155,6 +174,7 @@ public class PickupAddressActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(String message) {
+                            addAddressButton.setEnabled(true);
                             Toast.makeText(PickupAddressActivity.this,
                                     "Could not save address: " + message,
                                     Toast.LENGTH_LONG).show();
@@ -194,10 +214,11 @@ public class PickupAddressActivity extends AppCompatActivity {
             public void onSuccess(UserAccount user) {
                 if (user.getSavedAddresses() != null) {
                     savedAddresses.clear();
-                    savedAddresses.addAll(user.getSavedAddresses());
-                    updateAddressSuggestions();
+                    for (String address : user.getSavedAddresses()) addUniqueAddress(address);
                 }
                 String address = user.getAddress();
+                addUniqueAddress(address);
+                updateAddressSuggestions();
                 if (address == null || address.trim().isEmpty()
                         || fullAddressInput.getText() != null
                         && !fullAddressInput.getText().toString().trim().isEmpty()) return;
@@ -208,22 +229,45 @@ public class PickupAddressActivity extends AppCompatActivity {
 
             @Override
             public void onError(String message) {
+                savedAddressTitle.setText("Could not load saved addresses. Tap to retry.");
+                savedAddressTitle.setVisibility(View.VISIBLE);
+                savedAddressTitle.setClickable(true);
+                savedAddressTitle.setOnClickListener(v -> loadPrimaryAddress());
                 Toast.makeText(PickupAddressActivity.this,
-                        "Could not load saved address: " + message, Toast.LENGTH_SHORT).show();
+                        "Could not load saved address: " + message, Toast.LENGTH_LONG).show();
             }
         });
     }
 
     private void updateAddressSuggestions() {
         List<String> suggestions = new ArrayList<>(savedAddresses);
-        if (suggestions.isEmpty()) {
-            suggestions.add(getString(R.string.address_home_value));
-            suggestions.add(getString(R.string.address_work_value));
-        }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, suggestions);
         fullAddressInput.setAdapter(adapter);
         fullAddressInput.setThreshold(1);
+        savedAddressTitle.setText(R.string.saved_addresses);
+        savedAddressTitle.setClickable(false);
+        savedAddressTitle.setOnClickListener(null);
+        savedAddressTitle.setVisibility(suggestions.isEmpty() ? View.GONE : View.VISIBLE);
+        homeAddressCard.setVisibility(suggestions.isEmpty() ? View.GONE : View.VISIBLE);
+        workAddressCard.setVisibility(suggestions.size() < 2 ? View.GONE : View.VISIBLE);
+        if (!suggestions.isEmpty()) {
+            homeAddressLabel.setText("Saved address 1");
+            homeAddressValue.setText(suggestions.get(0));
+        }
+        if (suggestions.size() > 1) {
+            workAddressLabel.setText("Saved address 2");
+            workAddressValue.setText(suggestions.get(1));
+        }
+    }
+
+    private void addUniqueAddress(String address) {
+        if (address == null || address.trim().isEmpty()) return;
+        String normalized = address.trim();
+        for (String existing : savedAddresses) {
+            if (normalized.equalsIgnoreCase(existing)) return;
+        }
+        savedAddresses.add(normalized);
     }
 
     private void enableContinue() {

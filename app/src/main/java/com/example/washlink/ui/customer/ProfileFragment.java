@@ -44,9 +44,10 @@ public class ProfileFragment extends CustomerTabFragment {
             try {
                 requireContext().getContentResolver().takePersistableUriPermission(
                         uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                avatar.setImageURI(uri);
-                photoUri = uri.toString();
-                saveProfile();
+                saveProfile(uri.toString(), () -> {
+                    photoUri = uri.toString();
+                    if (avatar != null) avatar.setImageURI(uri);
+                });
             } catch (SecurityException | IllegalArgumentException e) {
                 Toast.makeText(requireContext(), "Unable to access that image.", Toast.LENGTH_SHORT).show();
             }
@@ -72,7 +73,10 @@ public class ProfileFragment extends CustomerTabFragment {
         if (avatar != null) {
             avatar.setOnClickListener(v -> imagePicker.launch(new String[]{"image/*"}));
         }
-        view.findViewById(R.id.card_account_info).setOnClickListener(v -> showProfileDialog());
+        view.findViewById(R.id.card_account_info).setOnClickListener(v -> {
+            if (account == null) loadProfile(view);
+            else showProfileDialog();
+        });
 
         view.findViewById(R.id.row_saved_addresses).setOnClickListener(v -> showAddressDialog());
         view.findViewById(R.id.row_order_history).setOnClickListener(v ->
@@ -111,14 +115,18 @@ public class ProfileFragment extends CustomerTabFragment {
     }
 
     private void loadProfile(View view) {
+        if (view == null) return;
+        TextView name = view.findViewById(R.id.tv_profile_name);
+        TextView email = view.findViewById(R.id.tv_profile_email);
+        TextView phone = view.findViewById(R.id.tv_profile_phone);
+        TextView savedAddress = view.findViewById(R.id.tv_saved_address_value);
+        if (name != null) name.setText("Loading account...");
+        if (email != null) email.setText("");
+        if (phone != null) phone.setText("");
         authRepository.getCurrentUserAccount(new AuthRepository.AuthCallback() {
             @Override public void onSuccess(UserAccount user) {
-                if (!isAdded()) return;
+                if (!isAdded() || getView() != view) return;
                 account = user;
-                TextView name = view.findViewById(R.id.tv_profile_name);
-                TextView email = view.findViewById(R.id.tv_profile_email);
-                TextView phone = view.findViewById(R.id.tv_profile_phone);
-                TextView savedAddress = view.findViewById(R.id.tv_saved_address_value);
 
                 if (name != null) name.setText(value(user.getName(), "Name not provided"));
                 if (email != null) email.setText(value(user.getEmail(), "Email not provided"));
@@ -129,19 +137,31 @@ public class ProfileFragment extends CustomerTabFragment {
 
                 photoUri = value(user.getPhotoUri(), "");
                 if (!photoUri.isEmpty() && avatar != null) {
-                    try { avatar.setImageURI(Uri.parse(photoUri)); }
-                    catch (SecurityException | IllegalArgumentException ignored) { avatar.setImageDrawable(null); }
+                    try {
+                        avatar.setImageURI(Uri.parse(photoUri));
+                    } catch (SecurityException | IllegalArgumentException e) {
+                        Toast.makeText(requireContext(),
+                                "Saved profile picture is unavailable on this device.",
+                                Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
             @Override public void onError(String message) {
-                if (isAdded()) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                if (!isAdded() || getView() != view) return;
+                account = null;
+                if (name != null) name.setText("Could not load profile. Tap to retry.");
+                if (view.findViewById(R.id.card_account_info) != null) {
+                    view.findViewById(R.id.card_account_info).setOnClickListener(v -> loadProfile(view));
+                }
+                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
             }
         });
     }
 
     private void showAddressDialog() {
         if (account == null) {
-            Toast.makeText(requireContext(), "Loading account details...", Toast.LENGTH_SHORT).show();
+            View current = getView();
+            if (current != null) loadProfile(current);
             return;
         }
 
@@ -186,8 +206,9 @@ public class ProfileFragment extends CustomerTabFragment {
                     .setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton("Remove", (confirm, which) -> {
                         List<String> updated = new ArrayList<>(addresses);
-                        updated.remove(address);
-                        String primary = address.equals(account.getAddress())
+                        updated.removeIf(item -> item.equalsIgnoreCase(address));
+                        String primary = account.getAddress() != null
+                                && address.equalsIgnoreCase(account.getAddress())
                                 ? (updated.isEmpty() ? "" : updated.get(0)) : account.getAddress();
                         persistAddresses(updated, primary, () -> {
                             if (dialogRef[0] != null) dialogRef[0].dismiss();
@@ -238,12 +259,12 @@ public class ProfileFragment extends CustomerTabFragment {
         if (account == null) return;
         List<String> cleaned = new ArrayList<>();
         for (String address : addresses) addUniqueAddress(cleaned, address);
-        authRepository.updateCustomerProfile(value(account.getName(), ""),
-                value(account.getPhone(), ""), value(primaryAddress, ""), photoUri, cleaned,
+        authRepository.updateCustomerAddresses(cleaned, primaryAddress,
                 new AuthRepository.SimpleCallback() {
                     @Override public void onSuccess() {
                         if (!isAdded()) return;
                         account.setAddress(primaryAddress == null ? "" : primaryAddress.trim());
+                        addUniqueAddress(cleaned, account.getAddress());
                         account.setSavedAddresses(cleaned);
                         updateSavedAddressLabel(account.getAddress());
                         onSuccess.run();
@@ -258,7 +279,7 @@ public class ProfileFragment extends CustomerTabFragment {
         if (address == null || address.trim().isEmpty()) return;
         String cleaned = address.trim();
         for (String existing : addresses) {
-            if (cleaned.equalsIgnoreCase(existing)) return;
+            if (existing != null && cleaned.equalsIgnoreCase(existing.trim())) return;
         }
         addresses.add(cleaned);
     }
@@ -356,14 +377,16 @@ public class ProfileFragment extends CustomerTabFragment {
                 .show();
     }
 
-    private void saveProfile() {
+    private void saveProfile(String updatedPhotoUri, Runnable onSuccess) {
         if (account == null) return;
         authRepository.updateCustomerProfile(value(account.getName(), ""),
-                value(account.getPhone(), ""), value(account.getAddress(), ""), photoUri,
+                value(account.getPhone(), ""), value(account.getAddress(), ""), updatedPhotoUri,
                 new AuthRepository.SimpleCallback() {
-                    @Override public void onSuccess() { }
+                    @Override public void onSuccess() {
+                        if (isAdded()) onSuccess.run();
+                    }
                     @Override public void onError(String message) {
-                        if (isAdded()) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                        if (isAdded()) Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
                     }
                 });
     }

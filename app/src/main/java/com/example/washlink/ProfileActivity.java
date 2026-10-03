@@ -223,8 +223,24 @@ public class ProfileActivity extends AppCompatActivity {
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.save, (dialog, which) -> {
                     String address = input.getText().toString().trim();
-                    account.setAddress(address);
-                    saveProfile();
+                    authRepository.updateCustomerAddresses(account.getSavedAddresses(), address,
+                            new AuthRepository.SimpleCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    account.setAddress(address);
+                                    savedAddress.setText(address.isEmpty()
+                                            ? getString(R.string.profile_saved_addresses_desc)
+                                            : address);
+                                    Toast.makeText(ProfileActivity.this,
+                                            "Address updated", Toast.LENGTH_SHORT).show();
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    Toast.makeText(ProfileActivity.this,
+                                            message, Toast.LENGTH_SHORT).show();
+                                }
+                            });
                 })
                 .show();
     }

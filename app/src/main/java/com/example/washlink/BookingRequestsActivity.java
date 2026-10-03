@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +31,7 @@ public class BookingRequestsActivity extends AppCompatActivity {
     private TextView stateView;
     private final List<Booking> allBookings = new ArrayList<>();
     private String filter = "pending";
+    private String providerId;
     private boolean loaded;
 
     @Override
@@ -57,7 +57,7 @@ public class BookingRequestsActivity extends AppCompatActivity {
         bindFilter(R.id.tab_history, "history");
         showState("Loading bookings...");
 
-        String providerId = AuthRepository.getInstance().getCurrentUserId();
+        providerId = AuthRepository.getInstance().getCurrentUserId();
         if (providerId == null) {
             showState("Sign in as a provider to view bookings.");
             return;
@@ -88,6 +88,11 @@ public class BookingRequestsActivity extends AppCompatActivity {
     }
 
     private void loadBookingsForProvider(String providerId) {
+        showState("Loading bookings...");
+        if (providerBookingsReg != null) {
+            providerBookingsReg.remove();
+            providerBookingsReg = null;
+        }
         if (BookingServiceFacade.isUsingStub()) {
             showState("Demo booking data is not enabled.");
         } else {
@@ -104,7 +109,16 @@ public class BookingRequestsActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(String message) {
-                    runOnUiThread(() -> showState("Could not load bookings. " + message));
+                    runOnUiThread(() -> {
+                        showState("Could not load bookings. Tap to retry.");
+                        if (stateView != null) {
+                            stateView.setClickable(true);
+                            stateView.setOnClickListener(v -> {
+                                loaded = false;
+                                loadBookingsForProvider(providerId);
+                            });
+                        }
+                    });
                 }
             });
         }
@@ -130,6 +144,8 @@ public class BookingRequestsActivity extends AppCompatActivity {
         if (stateView != null) {
             stateView.setText(message);
             stateView.setVisibility(View.VISIBLE);
+            stateView.setClickable(false);
+            stateView.setOnClickListener(null);
         }
         if (rv != null) rv.setVisibility(View.GONE);
     }

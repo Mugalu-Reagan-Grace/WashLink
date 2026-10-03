@@ -96,10 +96,45 @@ function canCancelBooking(booking) {
       || booking.paymentReference.length === 0);
 }
 
+function isEligibleForProviderPayout(booking) {
+  return booking
+    && booking.status === "DELIVERED"
+    && booking.paymentProvider === "flutterwave"
+    && booking.paymentStatus === "PAID"
+    && Number.isSafeInteger(booking.subtotal)
+    && booking.subtotal > 0;
+}
+
+function isEligibleForProviderRejectionRefund(booking, nextStatus) {
+  return booking
+    && nextStatus === "REJECTED"
+    && booking.status === "BOOKED"
+    && booking.paymentProvider === "flutterwave"
+    && booking.paymentStatus === "PAID"
+    && typeof booking.paymentTransactionId === "string"
+    && /^\d{1,30}$/.test(booking.paymentTransactionId)
+    && Number.isSafeInteger(booking.paymentAmount)
+    && booking.paymentAmount === booking.total
+    && Number.isSafeInteger(booking.total)
+    && booking.total > 0;
+}
+
+function canClaimProviderPayout(attempt, now) {
+  if (!attempt || !["REQUESTED", "UNKNOWN", "PROCESSING"].includes(attempt.state)) {
+    return false;
+  }
+  return attempt.state !== "PROCESSING"
+    || !Number.isFinite(attempt.claimedAt)
+    || now - attempt.claimedAt >= 5 * 60 * 1000;
+}
+
 module.exports = {
   MAX_BOOKING_AMOUNT,
   quoteBooking,
   isVerifiedFlutterwavePayment,
   isValidStatusTransition,
   canCancelBooking,
+  isEligibleForProviderPayout,
+  isEligibleForProviderRejectionRefund,
+  canClaimProviderPayout,
 };

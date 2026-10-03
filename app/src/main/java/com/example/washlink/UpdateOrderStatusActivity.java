@@ -38,6 +38,9 @@ public class UpdateOrderStatusActivity extends AppCompatActivity {
         TextView tvCurrentStatus = findViewById(R.id.tv_current_status_value);
         RadioGroup radioGroup = findViewById(R.id.radio_group_status);
         View btnUpdate = findViewById(R.id.btn_update_status);
+        btnUpdate.setEnabled(false);
+        radioGroup.removeAllViews();
+        tvCurrentStatus.setText("Loading booking...");
 
         bookingId = getIntent().getStringExtra("booking_id");
         if (bookingId == null || bookingId.isEmpty()) {
@@ -83,7 +86,13 @@ public class UpdateOrderStatusActivity extends AppCompatActivity {
 
             @Override
             public void onError(String message) {
-                runOnUiThread(() -> Toast.makeText(UpdateOrderStatusActivity.this, "Error loading booking: " + message, Toast.LENGTH_LONG).show());
+                runOnUiThread(() -> {
+                    btnUpdate.setEnabled(false);
+                    radioGroup.removeAllViews();
+                    tvCurrentStatus.setText("Could not load booking.");
+                    Toast.makeText(UpdateOrderStatusActivity.this,
+                            "Error loading booking: " + message, Toast.LENGTH_LONG).show();
+                });
             }
         };
 
