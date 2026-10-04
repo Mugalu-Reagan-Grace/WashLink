@@ -34,18 +34,29 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void onResult(UserAccount user) {
                 if (user == null) {
+                    FirebaseAuth.getInstance().signOut();
                     openScreen(OnboardingActivity.class);
                     return;
                 }
 
-                Class<?> destination = UserAccount.ROLE_PROVIDER.equals(user.getRole())
-                        ? ProviderDashboardActivity.class
-                        : MainActivity.class;
+                Class<?> destination;
+                if (UserAccount.ROLE_PROVIDER.equals(user.getRole())) {
+                    destination = ProviderDashboardActivity.class;
+                } else if (UserAccount.ROLE_ADMIN.equals(user.getRole())) {
+                    destination = AdminManagementActivity.class;
+                } else if (UserAccount.ROLE_CUSTOMER.equals(user.getRole())) {
+                    destination = MainActivity.class;
+                } else {
+                    FirebaseAuth.getInstance().signOut();
+                    openScreen(OnboardingActivity.class);
+                    return;
+                }
                 openScreen(destination);
             }
 
             @Override
             public void onError(String message) {
+                FirebaseAuth.getInstance().signOut();
                 openScreen(OnboardingActivity.class);
             }
         });

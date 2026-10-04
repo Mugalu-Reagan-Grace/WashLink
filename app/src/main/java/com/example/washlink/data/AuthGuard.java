@@ -20,7 +20,8 @@ public final class AuthGuard {
         AuthRepository.getInstance().getCurrentSession(new AuthRepository.RoleCallback() {
             @Override
             public void onResult(UserAccount user) {
-                if (user == null || !requiredRole.equals(user.getRole())) {
+                if (user == null || user.getIsSuspended()
+                        || !requiredRole.equals(user.getRole())) {
                     FirebaseAuth.getInstance().signOut();
                     redirect(activity, fallback);
                 }

@@ -54,6 +54,8 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_customer_profile);
+        com.example.washlink.data.AuthGuard.requireRole(this,
+                com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 
         profileName = findViewById(R.id.tv_profile_name);
         profileEmail = findViewById(R.id.tv_profile_email);

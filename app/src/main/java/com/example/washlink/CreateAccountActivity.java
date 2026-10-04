@@ -8,6 +8,8 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 import android.view.View;
+import android.text.Editable;
+import android.text.TextWatcher;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
@@ -53,14 +55,17 @@ public class CreateAccountActivity extends AppCompatActivity {
     private String verificationId;
     private PhoneAuthProvider.ForceResendingToken resendToken;
     private PhoneAuthCredential verifiedPhoneCredential;
+    private EditText phoneCodeEt;
     private boolean phoneVerificationInProgress;
+    private String verificationPhoneNumber;
     private MaterialButton signUpButton;
     private MaterialButton verifyPhoneButton;
     private MaterialButton resendPhoneButton;
 
     private static final String STATE_VERIFICATION_ID = "verification_id";
     private static final String STATE_VERIFICATION_IN_PROGRESS = "phone_verification_in_progress";
-    private static final String STATE_PHONE_NUMBER = "verification_phone_number";
+    private static final String STATE_VERIFICATION_PHONE_NUMBER = "verification_phone_number";
+    private static final String STATE_ENTERED_PHONE_NUMBER = "entered_phone_number";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +77,7 @@ public class CreateAccountActivity extends AppCompatActivity {
 
         nameEt = findViewById(R.id.et_name_reg);
         phoneEt = findViewById(R.id.et_phone_reg);
+        phoneCodeEt = findViewById(R.id.et_phone_code);
         emailEt = findViewById(R.id.et_email_reg);
         passwordEt = findViewById(R.id.et_password_reg);
         confirmPasswordEt = findViewById(R.id.et_confirm_password_reg);
@@ -80,31 +86,76 @@ public class CreateAccountActivity extends AppCompatActivity {
         verifyPhoneButton = findViewById(R.id.btn_verify_phone);
         resendPhoneButton = findViewById(R.id.btn_resend_phone);
         View googleButton = findViewById(R.id.btn_google_outlined);
+        View signInPrompt = findViewById(R.id.tv_sign_in_prompt);
 
         signUpButton.setOnClickListener(v -> signUpButtonClicked());
+        signInPrompt.setOnClickListener(v ->
+                startActivity(new Intent(this, SignInActivity.class)));
         verifyPhoneButton.setOnClickListener(v -> {
             if (verificationId == null) {
                 verifyPhone();
             } else {
-                verifyPhoneCode();
-                verifyPhoneButton.setText(R.string.verify_phone_code);
+                Toast.makeText(this, "Enter the code and tap Sign up to verify your number.",
+                        Toast.LENGTH_SHORT).show();
             }
         });
         resendPhoneButton.setOnClickListener(v -> verifyPhone(true));
 
         if (savedInstanceState != null) {
             verificationId = savedInstanceState.getString(STATE_VERIFICATION_ID);
-            String savedPhone = savedInstanceState.getString(STATE_PHONE_NUMBER);
+            verificationPhoneNumber = savedInstanceState.getString(STATE_VERIFICATION_PHONE_NUMBER);
+            String savedPhone = savedInstanceState.getString(STATE_ENTERED_PHONE_NUMBER);
             if (savedPhone != null) {
                 phoneEt.setText(savedPhone);
+            }
+            if (verificationPhoneNumber == null && verificationId != null) {
+                verificationPhoneNumber = normalizePhoneNumber(phoneEt.getText().toString());
             }
             phoneVerificationInProgress = savedInstanceState.getBoolean(
                     STATE_VERIFICATION_IN_PROGRESS, false);
             if (phoneVerificationInProgress) {
-                verifyPhoneButton.setText(R.string.verify_phone_code);
+                verifyPhoneButton.setText(R.string.phone_code_sent);
+                verifyPhoneButton.setEnabled(false);
                 resendPhoneButton.setVisibility(View.VISIBLE);
             }
         }
+        phoneCodeEt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                updateSignUpButtonState();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+        phoneEt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String currentPhone = normalizePhoneNumber(s.toString());
+                if (verificationPhoneNumber != null
+                        && !verificationPhoneNumber.equals(currentPhone)) {
+                    verificationId = null;
+                    verificationPhoneNumber = null;
+                    verifiedPhoneCredential = null;
+                    phoneVerificationInProgress = false;
+                    phoneCodeEt.setText("");
+                    verifyPhoneButton.setText(R.string.verify_phone);
+                    verifyPhoneButton.setEnabled(true);
+                    resendPhoneButton.setVisibility(View.GONE);
+                    updateSignUpButtonState();
+                }
+            }
+        });
+        updateSignUpButtonState();
         googleButton.setOnClickListener(v -> continueWithGoogleButtonClicked());
 
         // Configure Google Sign-In if default_web_client_id is present in strings
@@ -160,15 +211,22 @@ public class CreateAccountActivity extends AppCompatActivity {
             return;
         }
 
-        if (verifiedPhoneCredential == null || !phoneVerificationInProgress) {
+        String code = phoneCodeEt.getText().toString().trim();
+        if (verifiedPhoneCredential == null
+                && (verificationId == null || code.length() != 6
+                || !phone.equals(verificationPhoneNumber))) {
             Toast.makeText(this, "Verify your phone number before signing up.",
                     Toast.LENGTH_SHORT).show();
             return;
         }
 
+        PhoneAuthCredential phoneCredential = verifiedPhoneCredential != null
+                ? verifiedPhoneCredential
+                : PhoneAuthProvider.getCredential(verificationId, code);
+
         signUpButton.setEnabled(false);
         AuthRepository.getInstance().completeCustomerRegistration(fullName, email, phone, password,
-                verifiedPhoneCredential, new AuthRepository.AuthCallback() {
+                phoneCredential, new AuthRepository.AuthCallback() {
                     @Override
                     public void onSuccess(com.example.washlink.models.UserAccount user) {
                         Toast.makeText(CreateAccountActivity.this,
@@ -183,7 +241,7 @@ public class CreateAccountActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(String message) {
-                        signUpButton.setEnabled(true);
+                        updateSignUpButtonState();
                         Log.w(TAG, "Customer registration failed: " + message);
                         Toast.makeText(CreateAccountActivity.this, message,
                                 Toast.LENGTH_SHORT).show();
@@ -202,7 +260,7 @@ public class CreateAccountActivity extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
                     return;
                 }
-
+                verificationPhoneNumber = phoneNumber;
                 PhoneAuthOptions.Builder optionsBuilder = PhoneAuthOptions.newBuilder(mAuth)
                         .setPhoneNumber(phoneNumber)
                         .setTimeout(60L, TimeUnit.SECONDS)
@@ -212,6 +270,7 @@ public class CreateAccountActivity extends AppCompatActivity {
                     optionsBuilder.setForceResendingToken(resendToken);
                 }
                 phoneVerificationInProgress = true;
+                phoneEt.setEnabled(false);
                 PhoneAuthProvider.verifyPhoneNumber(optionsBuilder.build());
     }
 
@@ -221,6 +280,9 @@ public class CreateAccountActivity extends AppCompatActivity {
                             public void onVerificationCompleted(PhoneAuthCredential credential) {
                                 verifiedPhoneCredential = credential;
                                 phoneVerificationInProgress = true;
+                                verificationPhoneNumber = normalizePhoneNumber(
+                                        phoneEt.getText().toString());
+                                phoneEt.setEnabled(true);
                                 signUpButton.setEnabled(true);
                                 verifyPhoneButton.setText(R.string.phone_verified);
                                 verifyPhoneButton.setEnabled(false);
@@ -233,7 +295,12 @@ public class CreateAccountActivity extends AppCompatActivity {
                             public void onVerificationFailed(FirebaseException e) {
                                 phoneVerificationInProgress = false;
                                 verifiedPhoneCredential = null;
+                                verificationId = null;
+                                verificationPhoneNumber = null;
+                                phoneEt.setEnabled(true);
                                 signUpButton.setEnabled(false);
+                                verifyPhoneButton.setText(R.string.verify_phone);
+                                verifyPhoneButton.setEnabled(true);
                                 resendPhoneButton.setVisibility(View.GONE);
                                 if (e instanceof FirebaseAuthInvalidCredentialsException) {
                                     Toast.makeText(CreateAccountActivity.this,
@@ -257,28 +324,25 @@ public class CreateAccountActivity extends AppCompatActivity {
                                         verificationId = id;
                                         resendToken = token;
                                         phoneVerificationInProgress = true;
-                                        verifyPhoneButton.setText(R.string.verify_phone_code);
+                                        verificationPhoneNumber = normalizePhoneNumber(
+                                                phoneEt.getText().toString());
+                                        phoneEt.setEnabled(true);
+                                        verifyPhoneButton.setText(R.string.phone_code_sent);
+                                        verifyPhoneButton.setEnabled(false);
                                         resendPhoneButton.setVisibility(View.VISIBLE);
+                                        updateSignUpButtonState();
                                         Toast.makeText(CreateAccountActivity.this,
                                                 "Verification code sent.", Toast.LENGTH_SHORT).show();
                                     }
                                 };
 
-    private void verifyPhoneCode() {
-                String code = ((EditText) findViewById(R.id.et_phone_code)).getText().toString().trim();
-                if (verificationId == null || code.length() != 6) {
-                            Toast.makeText(this, "Enter the 6-digit verification code.",
-                                    Toast.LENGTH_SHORT).show();
-                            return;
-                }
-                PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
-                verifiedPhoneCredential = credential;
-                phoneVerificationInProgress = true;
-                signUpButton.setEnabled(true);
-                verifyPhoneButton.setText(R.string.phone_verified);
-                verifyPhoneButton.setEnabled(false);
-                resendPhoneButton.setVisibility(View.GONE);
-                Toast.makeText(this, R.string.phone_verified, Toast.LENGTH_SHORT).show();
+    private void updateSignUpButtonState() {
+        String phone = normalizePhoneNumber(phoneEt.getText().toString());
+        boolean codeReady = verifiedPhoneCredential != null
+                || (verificationId != null
+                && phone.equals(verificationPhoneNumber)
+                && phoneCodeEt.getText().toString().trim().length() == 6);
+        signUpButton.setEnabled(codeReady);
     }
 
     private String normalizePhoneNumber(String rawPhone) {
@@ -297,7 +361,8 @@ public class CreateAccountActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
                 outState.putString(STATE_VERIFICATION_ID, verificationId);
                 outState.putBoolean(STATE_VERIFICATION_IN_PROGRESS, phoneVerificationInProgress);
-                outState.putString(STATE_PHONE_NUMBER, phoneEt.getText().toString());
+                outState.putString(STATE_VERIFICATION_PHONE_NUMBER, verificationPhoneNumber);
+                outState.putString(STATE_ENTERED_PHONE_NUMBER, phoneEt.getText().toString());
                 super.onSaveInstanceState(outState);
     }
 
@@ -330,13 +395,19 @@ public class CreateAccountActivity extends AppCompatActivity {
                                             new AuthRepository.AuthCallback() {
                                                 @Override
                                                 public void onSuccess(com.example.washlink.models.UserAccount account) {
+                                                    boolean needsPhone = account.getPhone() == null
+                                                            || account.getPhone().trim().isEmpty();
                                                     Intent intent = new Intent(CreateAccountActivity.this,
-                                                            OnboardingActivity.class);
-                                                    intent.putExtra(OnboardingActivity.EXTRA_SHOW_ONBOARDING, true);
-                                                    intent.putExtra(AddPhoneNumberActivity.EXTRA_USER_NAME,
-                                                            account.getName());
-                                                    intent.putExtra(AddPhoneNumberActivity.EXTRA_USER_UID,
-                                                            account.getUid());
+                                                            needsPhone ? AddPhoneNumberActivity.class
+                                                                    : MainActivity.class);
+                                                    if (needsPhone) {
+                                                        intent.putExtra(AddPhoneNumberActivity.EXTRA_USER_NAME,
+                                                                account.getName());
+                                                        intent.putExtra(AddPhoneNumberActivity.EXTRA_USER_UID,
+                                                                account.getUid());
+                                                    }
+                                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                                                            | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                     startActivity(intent);
                                                     finish();
                                                 }

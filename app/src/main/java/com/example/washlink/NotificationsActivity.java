@@ -9,9 +9,6 @@ import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.washlink.data.BookingService;
 import com.example.washlink.data.BookingServiceFacade;
@@ -35,22 +32,8 @@ public class NotificationsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_notifications);
-
-        android.view.View root = findViewById(R.id.notifications_root);
-        int baseLeft = root.getPaddingLeft();
-        int baseTop = root.getPaddingTop();
-        int baseRight = root.getPaddingRight();
-        int baseBottom = root.getPaddingBottom();
-        ViewCompat.setOnApplyWindowInsetsListener(root,
-                (view, windowInsets) -> {
-                    Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-                    view.setPadding(
-                            baseLeft,
-                            Math.max(baseTop, systemBars.top),
-                            baseRight,
-                            Math.max(baseBottom, systemBars.bottom));
-                    return windowInsets;
-                });
+        com.example.washlink.data.AuthGuard.requireRole(this,
+                com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 
         ImageView back = findViewById(R.id.btn_back);
         if (back != null) back.setOnClickListener(v -> finish());

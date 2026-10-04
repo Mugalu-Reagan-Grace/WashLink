@@ -13,9 +13,14 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const {
   quoteBooking,
+  hasActiveRole,
   isVerifiedFlutterwavePayment,
   isValidStatusTransition,
   canCancelBooking,
+  canReviewBooking,
+  canAssignRider,
+  validReview,
+  updatedRatingAverage,
   isEligibleForProviderPayout,
   isEligibleForProviderRejectionRefund,
   canClaimProviderPayout,
@@ -464,10 +469,13 @@ exports.createBooking = onCall({ region: REGION }, async (request) => {
     db.collection("users").doc(providerId).get(),
     db.collection("providers").doc(providerId).get(),
   ]);
-  if (!customer.exists || customer.get("role") !== "customer"
-      || !providerUser.exists || providerUser.get("role") !== "provider"
+  if (!customer.exists || !hasActiveRole(customer.data(), "customer")
+      || !providerUser.exists || !hasActiveRole(providerUser.data(), "provider")
       || !providerSnapshot.exists) {
     throw new HttpsError("failed-precondition", "The booking customer or provider is not valid.");
+  }
+  if (providerSnapshot.get("isApproved") === false) {
+    throw new HttpsError("failed-precondition", "This provider is awaiting administrator approval.");
   }
   let quote;
   try {
@@ -485,6 +493,7 @@ exports.createBooking = onCall({ region: REGION }, async (request) => {
     id: bookingId,
     customerId: request.auth.uid,
     customerName: authUser.displayName || customer.get("name") || "Customer",
+    customerPhone: customer.get("phone") || "",
     providerId,
     providerName: provider.businessName || "Laundry provider",
     serviceType,
@@ -532,7 +541,7 @@ exports.getUgandaPayoutBanks = onCall(
       throw new HttpsError("unauthenticated", "Sign in to configure payouts.");
     }
     const user = await db.collection("users").doc(request.auth.uid).get();
-    if (!user.exists || user.get("role") !== "provider") {
+    if (!user.exists || !hasActiveRole(user.data(), "provider")) {
       throw new HttpsError("permission-denied", "Only providers can configure payouts.");
     }
     const banks = await flutterwaveRequest("banks/UG");
@@ -556,7 +565,7 @@ exports.getUgandaPayoutBranches = onCall(
       throw new HttpsError("unauthenticated", "Sign in to configure payouts.");
     }
     const user = await db.collection("users").doc(request.auth.uid).get();
-    if (!user.exists || user.get("role") !== "provider") {
+    if (!user.exists || !hasActiveRole(user.data(), "provider")) {
       throw new HttpsError("permission-denied", "Only providers can configure payouts.");
     }
     const bankId = inputText(request.data && request.data.bankId, "Bank", 30);
@@ -580,7 +589,7 @@ exports.saveProviderPayoutProfile = onCall(
     }
     const uid = request.auth.uid;
     const user = await db.collection("users").doc(uid).get();
-    if (!user.exists || user.get("role") !== "provider") {
+    if (!user.exists || !hasActiveRole(user.data(), "provider")) {
       throw new HttpsError("permission-denied", "Only providers can configure payouts.");
     }
     const data = request.data || {};
@@ -668,6 +677,7 @@ exports.updateBookingStatus = onCall({ region: REGION }, async (request) => {
   const timestamp = Date.now();
   const payoutProfileRef = db.collection("users").doc(request.auth.uid)
     .collection("payoutProfile").doc("default");
+  const providerProfileRef = db.collection("providers").doc(request.auth.uid);
   const payoutRef = payoutAttemptRef(request.auth.uid, bookingId);
   const refundRef = db.collection("refundAttempts").doc(bookingId);
   let pushDetails;
@@ -675,18 +685,24 @@ exports.updateBookingStatus = onCall({ region: REGION }, async (request) => {
   let refundRequired = false;
 
   await db.runTransaction(async (transaction) => {
-    const [userSnapshot, bookingSnapshot, payoutProfileSnapshot, payoutSnapshot, refundSnapshot] = await Promise.all([
+    const [userSnapshot, bookingSnapshot, providerProfileSnapshot,
+      payoutProfileSnapshot, payoutSnapshot, refundSnapshot] = await Promise.all([
       transaction.get(userRef),
       transaction.get(bookingRef),
+      transaction.get(providerProfileRef),
       transaction.get(payoutProfileRef),
       transaction.get(payoutRef),
       transaction.get(refundRef),
     ]);
-    if (!userSnapshot.exists || userSnapshot.get("role") !== "provider") {
+    if (!userSnapshot.exists || !hasActiveRole(userSnapshot.data(), "provider")
+        || !providerProfileSnapshot.exists) {
       throw new HttpsError("permission-denied", "Only providers can update booking status.");
     }
     if (!bookingSnapshot.exists) {
       throw new HttpsError("not-found", "Booking not found.");
+    }
+    if (providerProfileSnapshot.get("isApproved") === false) {
+      throw new HttpsError("permission-denied", "This provider is awaiting administrator approval.");
     }
     const booking = bookingSnapshot.data();
     if (booking.providerId !== request.auth.uid) {
@@ -792,6 +808,112 @@ exports.updateBookingStatus = onCall({ region: REGION }, async (request) => {
   };
 });
 
+exports.submitBookingReview = onCall({ region: REGION }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Sign in to submit a review.");
+  }
+  const bookingId = requireBookingId(request.data && request.data.bookingId);
+  const rating = request.data && request.data.rating;
+  const reviewText = request.data && request.data.reviewText;
+  if (!validReview(rating, reviewText)) {
+    throw new HttpsError("invalid-argument", "Choose a rating from 1 to 5 and enter a review of at most 1,000 characters.");
+  }
+  const bookingRef = db.collection("bookings").doc(bookingId);
+  const userRef = db.collection("users").doc(request.auth.uid);
+  await db.runTransaction(async (transaction) => {
+    const bookingSnapshot = await transaction.get(bookingRef);
+    if (!bookingSnapshot.exists) {
+      throw new HttpsError("not-found", "Booking not found.");
+    }
+    const booking = bookingSnapshot.data();
+    if (!canReviewBooking(booking, request.auth.uid)) {
+      throw new HttpsError("failed-precondition", "Only the customer can review a delivered booking.");
+    }
+    const providerRef = db.collection("providers").doc(booking.providerId);
+    const reviewRef = providerRef.collection("reviews").doc(bookingId);
+    const [userSnapshot, providerSnapshot, reviewSnapshot] = await Promise.all([
+      transaction.get(userRef),
+      transaction.get(providerRef),
+      transaction.get(reviewRef),
+    ]);
+    if (!userSnapshot.exists || !hasActiveRole(userSnapshot.data(), "customer")
+        || !providerSnapshot.exists) {
+      throw new HttpsError("permission-denied", "The customer or provider account is unavailable.");
+    }
+    if (reviewSnapshot.exists) {
+      throw new HttpsError("already-exists", "You have already reviewed this booking.");
+    }
+    const storedCount = providerSnapshot.get("reviewCount");
+    const storedRating = providerSnapshot.get("rating");
+    const reviewCount = Number.isInteger(storedCount) && storedCount >= 0 ? storedCount : 0;
+    const currentRating = typeof storedRating === "number" && Number.isFinite(storedRating)
+      ? storedRating : 0;
+    const average = updatedRatingAverage(currentRating, reviewCount, rating);
+    transaction.create(reviewRef, {
+      bookingId,
+      customerId: request.auth.uid,
+      customerName: userSnapshot.get("name") || "WashLink customer",
+      rating,
+      reviewText: reviewText.trim(),
+      createdAt: Date.now(),
+    });
+    transaction.update(bookingRef, { reviewSubmitted: true });
+    transaction.update(providerRef, {
+      rating: average,
+      reviewCount: reviewCount + 1,
+    });
+  });
+  return { success: true };
+});
+
+exports.assignBookingRider = onCall({ region: REGION }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Sign in as a provider to assign a rider.");
+  }
+  const bookingId = requireBookingId(request.data && request.data.bookingId);
+  const riderId = inputText(request.data && request.data.riderId, "Rider", 40);
+  if (!/^[A-Za-z0-9]{10,40}$/.test(riderId)) {
+    throw new HttpsError("invalid-argument", "The selected rider is invalid.");
+  }
+  const uid = request.auth.uid;
+  const userRef = db.collection("users").doc(uid);
+  const providerRef = db.collection("providers").doc(uid);
+  const riderRef = providerRef.collection("riders").doc(riderId);
+  const bookingRef = db.collection("bookings").doc(bookingId);
+  await db.runTransaction(async (transaction) => {
+    const [userSnapshot, providerSnapshot, riderSnapshot, bookingSnapshot] =
+      await Promise.all([
+        transaction.get(userRef),
+        transaction.get(providerRef),
+        transaction.get(riderRef),
+        transaction.get(bookingRef),
+      ]);
+    if (!userSnapshot.exists || !hasActiveRole(userSnapshot.data(), "provider")
+        || !providerSnapshot.exists) {
+      throw new HttpsError("permission-denied", "Only an active provider can assign riders.");
+    }
+    if (providerSnapshot.get("isApproved") === false) {
+      throw new HttpsError("permission-denied", "This provider is awaiting administrator approval.");
+    }
+    if (!bookingSnapshot.exists) {
+      throw new HttpsError("not-found", "Booking not found.");
+    }
+    const booking = bookingSnapshot.data();
+    const rider = riderSnapshot.exists ? riderSnapshot.data() : null;
+    if (!canAssignRider(booking, uid, rider)) {
+      throw new HttpsError("failed-precondition",
+        "Choose an active rider for one of your in-progress bookings.");
+    }
+    transaction.update(bookingRef, {
+      assignedRiderId: riderId,
+      assignedRiderName: rider.name.trim(),
+      assignedRiderPhone: rider.phone.trim(),
+      updatedAt: Date.now(),
+    });
+  });
+  return { success: true };
+});
+
 exports.initiateProviderPayout = onDocumentCreated(
   {
     document: "users/{providerId}/payoutAttempts/{bookingId}",
@@ -867,7 +989,7 @@ exports.cancelBooking = onCall({ region: REGION }, async (request) => {
       transaction.get(userRef),
       transaction.get(bookingRef),
     ]);
-    if (!userSnapshot.exists || userSnapshot.get("role") !== "customer") {
+    if (!userSnapshot.exists || !hasActiveRole(userSnapshot.data(), "customer")) {
       throw new HttpsError("permission-denied", "Only customers can cancel their bookings.");
     }
     if (!bookingSnapshot.exists) {
@@ -955,10 +1077,13 @@ exports.initializeFlutterwaveCheckout = onCall(
         transaction.get(db.collection("users").doc(providerId)),
         transaction.get(db.collection("providers").doc(providerId)),
       ]);
-      if (!customerRole.exists || customerRole.get("role") !== "customer"
-          || !providerRole.exists || providerRole.get("role") !== "provider"
+      if (!customerRole.exists || !hasActiveRole(customerRole.data(), "customer")
+          || !providerRole.exists || !hasActiveRole(providerRole.data(), "provider")
           || !providerSnapshot.exists) {
         throw new HttpsError("failed-precondition", "The booking customer or provider is not valid.");
+      }
+      if (providerSnapshot.get("isApproved") === false) {
+        throw new HttpsError("failed-precondition", "This provider is awaiting administrator approval.");
       }
 
       let quote;
@@ -1025,6 +1150,10 @@ exports.verifyFlutterwavePayment = onCall(
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in to verify a payment.");
+    }
+    const user = await db.collection("users").doc(request.auth.uid).get();
+    if (!user.exists || !hasActiveRole(user.data(), "customer")) {
+      throw new HttpsError("permission-denied", "This customer account is not active.");
     }
     const bookingId = requireBookingId(request.data && request.data.bookingId);
     const booking = await db.collection("bookings").doc(bookingId).get();

@@ -10,19 +10,16 @@
     <!-- Header -->
     <ImageView
         android:id="@+id/btn_back"
+        style="@style/WashLinkBackButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         android:padding="12dp"
-        android:src="@drawable/ic_back_arrow"
         android:clickable="true"
         android:focusable="true"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/nav_home"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:tint="@color/laundr_blue" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/tv_header_title"
@@ -234,6 +231,7 @@
                 app:layout_constraintTop_toBottomOf="@id/label_card_number">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    style="@style/WashLinkInputText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="1234 5678 9012 3456"
@@ -271,6 +269,7 @@
                 app:layout_constraintTop_toBottomOf="@id/label_cardholder">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    style="@style/WashLinkInputText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="John Doe"
@@ -326,6 +325,7 @@
                 app:layout_constraintEnd_toEndOf="@id/label_expiry">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    style="@style/WashLinkInputText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="MM/YY"
@@ -353,6 +353,7 @@
                 app:layout_constraintEnd_toEndOf="@id/label_cvv">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    style="@style/WashLinkInputText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="123"

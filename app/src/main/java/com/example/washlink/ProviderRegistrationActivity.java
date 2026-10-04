@@ -65,15 +65,11 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
                     return;
                 }
                 if (UserAccount.ROLE_PROVIDER.equals(user.getRole())) {
-                    Intent intent = new Intent(ProviderRegistrationActivity.this, ProviderDashboardActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
+                    openRoleScreen(ProviderDashboardActivity.class);
+                } else if (UserAccount.ROLE_ADMIN.equals(user.getRole())) {
+                    openRoleScreen(AdminManagementActivity.class);
                 } else {
-                    Intent intent = new Intent(ProviderRegistrationActivity.this, HomeActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
+                    openRoleScreen(HomeActivity.class);
                 }
             }
 
@@ -82,6 +78,13 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
                 // stay on registration screen if role lookup fails
             }
         });
+    }
+
+    private void openRoleScreen(Class<?> destination) {
+        Intent intent = new Intent(this, destination);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void handleProviderRegistration() {
@@ -107,7 +110,9 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
                 new AuthRepository.AuthCallback() {
                     @Override
                     public void onSuccess(UserAccount user) {
-                        Toast.makeText(ProviderRegistrationActivity.this, "Business account created", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ProviderRegistrationActivity.this,
+                                "Business account created. It will appear to customers after administrator approval.",
+                                Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(ProviderRegistrationActivity.this, ProviderDashboardActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);

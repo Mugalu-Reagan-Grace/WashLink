@@ -17,11 +17,10 @@
 
     <ImageView
         android:id="@+id/btn_back"
+        style="@style/WashLinkBackButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:padding="12dp"
-        android:src="@drawable/ic_back_arrow"
-        app:tint="@color/laundr_blue"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -135,5 +134,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5" />
+
+    <TextView
+        android:id="@+id/tv_recent_reviews"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
+        android:gravity="top"
+        android:text="Recent reviews loading..."
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp"
+        android:scrollbars="vertical"
+        app:layout_constraintTop_toBottomOf="@id/btn_book_provider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

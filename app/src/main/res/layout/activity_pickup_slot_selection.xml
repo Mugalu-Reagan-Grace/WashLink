@@ -5,24 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    android:fitsSystemWindows="true"
     tools:context=".PickupSlotSelectionActivity">
 
     <!-- Header -->
     <ImageView
         android:id="@+id/btn_back"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        style="@style/WashLinkBackButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
         android:clickable="true"
-        android:contentDescription="@string/nav_home"
         android:focusable="true"
-        android:src="@drawable/ic_back_arrow"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="TouchTargetSizeCheck" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tv_header_title"

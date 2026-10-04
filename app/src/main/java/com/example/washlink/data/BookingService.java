@@ -182,6 +182,41 @@ public class BookingService {
                 .addOnFailureListener(error -> cb.onError(error.getLocalizedMessage()));
     }
 
+    public void submitBookingReview(String bookingId, int rating, String reviewText,
+                                    SimpleCallback callback) {
+        if (bookingId == null || bookingId.trim().isEmpty()
+                || rating < 1 || rating > 5 || reviewText == null
+                || reviewText.trim().length() > 1000) {
+            callback.onError("Choose a rating from 1 to 5 and enter a review of at most 1,000 characters.");
+            return;
+        }
+        Map<String, Object> data = new HashMap<>();
+        data.put("bookingId", bookingId);
+        data.put("rating", rating);
+        data.put("reviewText", reviewText.trim());
+        FirebaseFunctions.getInstance("us-central1")
+                .getHttpsCallable("submitBookingReview")
+                .call(data)
+                .addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(error -> callback.onError(error.getLocalizedMessage()));
+    }
+
+    public void assignBookingRider(String bookingId, String riderId, SimpleCallback callback) {
+        if (bookingId == null || bookingId.trim().isEmpty()
+                || riderId == null || riderId.trim().isEmpty()) {
+            callback.onError("Select a booking and rider.");
+            return;
+        }
+        Map<String, Object> data = new HashMap<>();
+        data.put("bookingId", bookingId);
+        data.put("riderId", riderId);
+        FirebaseFunctions.getInstance("us-central1")
+                .getHttpsCallable("assignBookingRider")
+                .call(data)
+                .addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(error -> callback.onError(error.getLocalizedMessage()));
+    }
+
     public void createBooking(Booking booking, SimpleCallback cb) {
         Map<String, Object> data = new HashMap<>();
         data.put("providerId", booking.getProviderId());

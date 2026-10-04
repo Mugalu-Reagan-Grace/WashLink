@@ -48,17 +48,15 @@ public class ProviderLoginActivity extends AppCompatActivity {
                 if (user == null) {
                     return;
                 }
-                if (UserAccount.ROLE_PROVIDER.equals(user.getRole())) {
-                    Intent intent = new Intent(ProviderLoginActivity.this, ProviderDashboardActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    Intent intent = new Intent(ProviderLoginActivity.this, HomeActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-                }
+                Class<?> destination = UserAccount.ROLE_PROVIDER.equals(user.getRole())
+                        ? ProviderDashboardActivity.class
+                        : UserAccount.ROLE_ADMIN.equals(user.getRole())
+                        ? AdminManagementActivity.class
+                        : HomeActivity.class;
+                Intent intent = new Intent(ProviderLoginActivity.this, destination);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
             }
 
             @Override

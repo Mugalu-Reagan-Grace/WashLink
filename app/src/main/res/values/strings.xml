@@ -25,18 +25,24 @@
 
     <!-- Onboarding -->
     <string name="onboarding_title">Laundry Simplified</string>
-    <string name="onboarding_subtitle">Schedule pickups, track washes, and enjoy fresh clothes, hassle free</string>
+    <string name="onboarding_subtitle">Book laundry or grow your laundry business with WashLink.</string>
     <string name="onboarding_slide_two_title">Fresh laundry, delivered</string>
     <string name="onboarding_slide_two_subtitle">WashLink picks up your laundry and brings it back clean, fresh, and ready to wear.</string>
     <string name="onboarding_slide_three_title">Track every step</string>
     <string name="onboarding_slide_three_subtitle">Follow your laundry from pickup to delivery with real-time updates.</string>
     <string name="onboarding_slide_four_title">Find laundry near you</string>
     <string name="onboarding_slide_four_subtitle">Compare prices and customer reviews to choose the right laundry business.</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_skip">Skip</string>
     <string name="get_started">Get Started</string>
     <string name="login">Sign In</string>
+    <string name="onboarding_customer_signup">Create customer account</string>
+    <string name="onboarding_provider_signup">Register a laundry business</string>
+    <string name="onboarding_customer_signin">Already a customer? Sign in</string>
+    <string name="onboarding_provider_signin">Laundry provider sign in</string>
 
     <!-- Sign In -->
-    <string name="join_now_prompt">New to Laundr? Join now</string>
+    <string name="join_now_prompt">New to WashLink? Create a customer account</string>
     <string name="welcome_back">Welcome Back</string>
     <string name="sign_in_subtitle">Sign in to manage your laundry orders quickly</string>
     <string name="email_address">Email Address</string>
@@ -49,9 +55,10 @@
     <string name="sign_in">Sign In</string>
     <string name="or_continue_with">Or continue with</string>
     <string name="continue_with_google">Google</string>
+    <string name="provider_sign_in_link">Laundry provider? Sign in here</string>
 
     <!-- Create Account -->
-    <string name="sign_in_prompt">Welcome back! Sign in</string>
+    <string name="sign_in_prompt">Already have an account? Sign in</string>
     <string name="create_account">Create Account</string>
     <string name="create_account_subtitle">Join us and make laundry simple and fast</string>
     <string name="your_name">Your Name</string>
@@ -63,7 +70,8 @@
     <string name="enter_verification_code">Enter the 6-digit code</string>
     <string name="phone_verified">Phone number verified</string>
     <string name="resend_verification_code">Resend code</string>
-    <string name="phone_sms_consent">You may receive an SMS. Standard message rates may apply.</string>
+    <string name="phone_sms_consent">Enter the SMS code, then tap Sign up to verify your number. Standard message rates may apply.</string>
+    <string name="phone_code_sent">Code sent</string>
     <string name="edit_profile_picture">Edit profile picture</string>
     <string name="profile_address_dialog_message">Enter the address you want to save for pickup and delivery.</string>
     <string name="save">Save</string>
@@ -389,12 +397,36 @@
     <!-- Provider: Dashboard -->
     <string name="provider_dashboard_title">Dashboard</string>
     <string name="provider_greeting">Welcome back,</string>
-    <string name="stat_todays_bookings">Today\'s Bookings</string>
-    <string name="stat_pending_requests">Pending Requests</string>
-    <string name="stat_weekly_earnings">This Week</string>
-    <string name="stat_rating">Rating</string>
     <string name="recent_bookings">Recent Bookings</string>
     <string name="view_all">View All</string>
+    <string name="provider_approval_checking">Checking business status…</string>
+    <string name="provider_business_name_fallback">Your laundry business</string>
+    <string name="provider_no_reviews">No reviews yet</string>
+    <string name="provider_customer_rating">Customer rating</string>
+    <string name="provider_single_review">1 review</string>
+    <string name="provider_review_count">%1$d reviews</string>
+    <string name="provider_rider_count">%1$d riders, %2$d active</string>
+    <string name="provider_profile_completion">%1$d of %2$d business details are set. Edit your profile to keep this information current.</string>
+    <string name="provider_payout_settings">Payout settings</string>
+    <string name="provider_orders_today">Orders today</string>
+    <string name="provider_orders_awaiting_response">Awaiting response</string>
+    <string name="provider_collected_this_week">Collected this week</string>
+    <string name="provider_approval_pending">Business review pending</string>
+    <string name="provider_status_accepting">Accepting new bookings</string>
+    <string name="provider_status_paused">Bookings paused</string>
+    <string name="provider_booking_customer_fallback">Customer booking</string>
+    <string name="provider_booking_service_fallback">Laundry service</string>
+    <string name="provider_no_recent_bookings">No bookings yet. New customer requests will appear here.</string>
+    <string name="provider_bookings_subtitle">Review requests, track work in progress, and revisit completed orders.</string>
+    <string name="provider_booking_view_details">View booking details  ›</string>
+    <string name="provider_booking_pickup">Pickup and delivery</string>
+    <string name="provider_booking_dropoff">Customer drop-off</string>
+    <string name="provider_pending_count">Pending · %1$d</string>
+    <string name="provider_in_progress_count">In progress · %1$d</string>
+    <string name="provider_history_count">History · %1$d</string>
+    <string name="provider_no_customer_name">Customer</string>
+    <string name="provider_no_service_name">Laundry service</string>
+    <string name="provider_no_booking_date">Schedule not provided</string>
 
     <!-- Provider: Nav -->
     <string name="provider_nav_dashboard">Dashboard</string>
@@ -449,15 +481,6 @@
     <string name="mm_yy">MM/YY</string>
     <string name="profile_name">Profile Name</string>
     <string name="provider_price_example">From UGX 20,000 /kg</string>
-
-    <!-- Dashboard sample values -->
-    <string name="default_business_name">CleanWave Laundry</string>
-    <string name="stat_bookings_value">8</string>
-    <string name="stat_pending_value">3</string>
-    <string name="stat_earnings_value">$342</string>
-    <string name="stat_rating_value">4.8</string>
-    <string name="sample_customer_name_1">Olusola James</string>
-    <string name="sample_service_1">Wash &amp; Fold · Pickup &amp; Delivery</string>
 
     <string name="decrease_items">Decrease items</string>
     <string name="increase_items">Increase items</string>

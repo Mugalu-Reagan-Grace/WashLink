@@ -33,6 +33,14 @@ public final class OrderTrackingRenderer {
         setText(root, R.id.tv_tracking_address,
                 (dropOff ? "Drop-off/collection: " : "Pickup/delivery: ")
                         + (isMissing(address) ? "Address unavailable" : address));
+        TextView rider = root.findViewById(R.id.tv_tracking_rider);
+        if (rider != null) {
+            boolean hasRider = !isMissing(booking.getAssignedRiderName());
+            rider.setVisibility(hasRider ? View.VISIBLE : View.GONE);
+            rider.setText(hasRider ? "Rider: " + booking.getAssignedRiderName()
+                    + (isMissing(booking.getAssignedRiderPhone()) ? ""
+                    : " · " + booking.getAssignedRiderPhone()) : "");
+        }
 
         if (status == OrderStatus.CANCELLED || status == OrderStatus.REJECTED
                 || status == OrderStatus.UNKNOWN) {

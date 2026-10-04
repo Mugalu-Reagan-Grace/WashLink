@@ -52,10 +52,16 @@ public class SignInActivity extends AppCompatActivity {
         Button signInButton = findViewById(R.id.btn_sign_in);
         View googleButton = findViewById(R.id.btn_google_outlined);
         TextView forgotPasswordText = findViewById(R.id.tv_forgot_password);
+        View joinPrompt = findViewById(R.id.tv_join_prompt);
+        View providerSignInLink = findViewById(R.id.tv_provider_sign_in_link);
 
         signInButton.setOnClickListener(v -> signInButtonClicked());
         googleButton.setOnClickListener(v -> continueWithGoogleButtonClicked());
         forgotPasswordText.setOnClickListener(v -> forgotPasswordButtonClicked());
+        joinPrompt.setOnClickListener(v ->
+                startActivity(new Intent(this, CreateAccountActivity.class)));
+        providerSignInLink.setOnClickListener(v ->
+                startActivity(new Intent(this, ProviderLoginActivity.class)));
 
         try {
             String webClientId = getString(R.string.default_web_client_id);
@@ -79,12 +85,20 @@ public class SignInActivity extends AppCompatActivity {
             return;
         }
 
-        AuthRepository.getInstance().login(user_email, user_password, UserAccount.ROLE_CUSTOMER,
+        AuthRepository.getInstance().login(user_email, user_password, null,
                 new AuthRepository.AuthCallback() {
                     @Override
                     public void onSuccess(UserAccount account) {
+                        if (!UserAccount.ROLE_CUSTOMER.equals(account.getRole())
+                                && !UserAccount.ROLE_ADMIN.equals(account.getRole())) {
+                            mAuth.signOut();
+                            Toast.makeText(SignInActivity.this,
+                                    "Provider accounts must sign in through Provider Login.",
+                                    Toast.LENGTH_LONG).show();
+                            return;
+                        }
                         Log.d(TAG, "signInWithEmail:success");
-                        updateUI(mAuth.getCurrentUser());
+                        updateUI(account);
                     }
 
                     @Override
@@ -129,7 +143,7 @@ public class SignInActivity extends AppCompatActivity {
                                         new AuthRepository.AuthCallback() {
                                             @Override
                                             public void onSuccess(UserAccount account) {
-                                                updateUI(user);
+                                                updateUI(account);
                                             }
 
                                             @Override
@@ -168,20 +182,30 @@ public class SignInActivity extends AppCompatActivity {
                 });
     }
 
-    private void updateUI(FirebaseUser user) {
-        if (user == null) {
+    private void updateUI(UserAccount account) {
+        if (account == null) {
             return;
         }
 
         boolean firstTimeSignup = getIntent() != null && getIntent().getBooleanExtra("first_time_signup", false);
         Intent intent;
 
-        if (firstTimeSignup) {
+        if (UserAccount.ROLE_CUSTOMER.equals(account.getRole())
+                && (account.getPhone() == null || account.getPhone().trim().isEmpty())) {
+            intent = new Intent(SignInActivity.this, AddPhoneNumberActivity.class);
+            intent.putExtra(AddPhoneNumberActivity.EXTRA_USER_NAME, account.getName());
+            intent.putExtra(AddPhoneNumberActivity.EXTRA_USER_UID, account.getUid());
+        } else if (firstTimeSignup && UserAccount.ROLE_CUSTOMER.equals(account.getRole())) {
             intent = new Intent(SignInActivity.this, SuccessActivity.class);
+        } else if (UserAccount.ROLE_PROVIDER.equals(account.getRole())) {
+            intent = new Intent(SignInActivity.this, ProviderDashboardActivity.class);
+        } else if (UserAccount.ROLE_ADMIN.equals(account.getRole())) {
+            intent = new Intent(SignInActivity.this, AdminManagementActivity.class);
         } else {
             intent = new Intent(SignInActivity.this, MainActivity.class);
         }
 
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
     }

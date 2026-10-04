@@ -44,6 +44,8 @@ public class NearbyLaundryMapActivity extends AppCompatActivity implements OnMap
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_nearby_laundry_map);
+        com.example.washlink.data.AuthGuard.requireRole(this,
+                com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
         radiusBar = findViewById(R.id.map_radius);
         radiusLabel = findViewById(R.id.tv_map_radius);
         locationClient = LocationServices.getFusedLocationProviderClient(this);

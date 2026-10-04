@@ -22,6 +22,8 @@ public class AddCardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_add_card);
+        com.example.washlink.data.AuthGuard.requireRole(this,
+                com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 
         ImageView backButton = findViewById(R.id.btn_back);
         FrameLayout bellLayout = findViewById(R.id.iv_bell);

@@ -38,6 +38,20 @@
         app:layout_constraintBottom_toBottomOf="@id/tv_header_title"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <TextView
+        android:id="@+id/tv_services_subtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="20dp"
+        android:text="Set the services and per-kilogram prices customers can book."
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp"
+        app:layout_constraintTop_toBottomOf="@id/tv_header_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Services list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_services"
@@ -50,7 +64,7 @@
         android:paddingBottom="16dp"
         tools:listitem="@layout/item_provider_service"
         tools:itemCount="4"
-        app:layout_constraintTop_toBottomOf="@id/tv_header_title"
+        app:layout_constraintTop_toBottomOf="@id/tv_services_subtitle"
         app:layout_constraintBottom_toTopOf="@id/bottom_nav_bar" />
 
     <TextView

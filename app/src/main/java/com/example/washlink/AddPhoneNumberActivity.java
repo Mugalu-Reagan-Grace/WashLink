@@ -10,6 +10,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.washlink.data.AuthRepository;
+import com.example.washlink.data.AuthGuard;
+import com.example.washlink.models.UserAccount;
 import com.google.android.material.button.MaterialButton;
 
 public class AddPhoneNumberActivity extends AppCompatActivity {
@@ -26,6 +28,7 @@ public class AddPhoneNumberActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_phone_number);
+        AuthGuard.requireRole(this, UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 
         userName = getIntent().getStringExtra(EXTRA_USER_NAME);
         userUid = getIntent().getStringExtra(EXTRA_USER_UID);

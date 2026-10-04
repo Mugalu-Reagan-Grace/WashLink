@@ -18,6 +18,8 @@ public class PaymentReturnActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        com.example.washlink.data.AuthGuard.requireRole(this,
+                com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
         TextView message = new TextView(this);
         message.setText("Verifying your payment securely…");
         message.setPadding(32, 48, 32, 48);

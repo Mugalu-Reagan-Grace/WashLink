@@ -58,6 +58,8 @@ public class PickupAddressActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_pickup_address);
+        com.example.washlink.data.AuthGuard.requireRole(this,
+                UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 
         backButton = findViewById(R.id.btn_back);
         bellLayout = findViewById(R.id.iv_bell);

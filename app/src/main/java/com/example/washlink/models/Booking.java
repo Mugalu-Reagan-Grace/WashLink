@@ -17,6 +17,7 @@ public class Booking {
     private String id;
     private String customerId;
     private String customerName;
+    private String customerPhone;
     private String providerId;
     private String providerName;
     private String serviceType;       // SERVICE_TYPE_PICKUP or SERVICE_TYPE_DROPOFF
@@ -39,6 +40,10 @@ public class Booking {
     private double serviceFee;
     private long createdAt;
     private long updatedAt;
+    private boolean reviewSubmitted;
+    private String assignedRiderId;
+    private String assignedRiderName;
+    private String assignedRiderPhone;
 
     public Booking() {
     }
@@ -80,6 +85,14 @@ public class Booking {
 
     public void setCustomerName(String customerName) {
         this.customerName = customerName;
+    }
+
+    public String getCustomerPhone() {
+        return customerPhone;
+    }
+
+    public void setCustomerPhone(String customerPhone) {
+        this.customerPhone = customerPhone;
     }
 
     public String getProviderId() {
@@ -256,5 +269,37 @@ public class Booking {
 
     public void setUpdatedAt(long updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public boolean isReviewSubmitted() {
+        return reviewSubmitted;
+    }
+
+    public void setReviewSubmitted(boolean reviewSubmitted) {
+        this.reviewSubmitted = reviewSubmitted;
+    }
+
+    public String getAssignedRiderId() {
+        return assignedRiderId;
+    }
+
+    public void setAssignedRiderId(String assignedRiderId) {
+        this.assignedRiderId = assignedRiderId;
+    }
+
+    public String getAssignedRiderName() {
+        return assignedRiderName;
+    }
+
+    public void setAssignedRiderName(String assignedRiderName) {
+        this.assignedRiderName = assignedRiderName;
+    }
+
+    public String getAssignedRiderPhone() {
+        return assignedRiderPhone;
+    }
+
+    public void setAssignedRiderPhone(String assignedRiderPhone) {
+        this.assignedRiderPhone = assignedRiderPhone;
     }
 }

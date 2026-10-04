@@ -10,17 +10,14 @@
     <!-- Header -->
     <ImageView
         android:id="@+id/btn_back"
+        style="@style/WashLinkBackButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         android:padding="12dp"
-        android:src="@drawable/ic_back_arrow"
-        app:tint="@color/laundr_blue"
         android:clickable="true"
         android:focusable="true"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/nav_home"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -260,6 +257,7 @@
                 app:layout_constraintEnd_toStartOf="@id/btn_apply_promo">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    style="@style/WashLinkInputText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/promo_code_hint"

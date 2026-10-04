@@ -35,6 +35,8 @@ public class ProviderProfileActivity extends AppCompatActivity {
     private String businessName = "";
     private String phone = "";
     private String address = "";
+    private String description = "";
+    private String operatingHours = "";
     private boolean isOpen = true;
 
     @Override
@@ -51,6 +53,8 @@ public class ProviderProfileActivity extends AppCompatActivity {
         findViewById(R.id.tv_edit).setOnClickListener(v -> showEditDialog());
         findViewById(R.id.row_manage_services).setOnClickListener(v ->
                 startActivity(new Intent(this, ManageServicesActivity.class)));
+        findViewById(R.id.row_manage_riders).setOnClickListener(v ->
+                startActivity(new Intent(this, ProviderRidersActivity.class)));
         findViewById(R.id.row_password).setOnClickListener(v ->
                 AuthRepository.getInstance().sendPasswordReset(new AuthRepository.SimpleCallback() {
                     @Override public void onSuccess() {
@@ -87,18 +91,65 @@ public class ProviderProfileActivity extends AppCompatActivity {
                     ownerName = text(document.get("ownerName"));
                     phone = text(document.get("phone"));
                     address = text(document.get("address"));
+                    description = text(document.get("description"));
+                    operatingHours = text(document.get("operatingHours"));
                     Object availability = document.get("isOpen");
                     isOpen = !(availability instanceof Boolean) || (Boolean) availability;
+                    boolean approved = !Boolean.FALSE.equals(document.get("isApproved"));
                     TextView nameView = findViewById(R.id.tv_business_name);
                     TextView addressView = findViewById(R.id.tv_address);
                     TextView phoneView = findViewById(R.id.tv_provider_phone);
                     TextView availabilityView = findViewById(R.id.tv_provider_availability);
+                    TextView ratingView = findViewById(R.id.tv_profile_rating_value);
+                    TextView reviewCountView = findViewById(R.id.tv_profile_review_count);
+                    TextView descriptionView = findViewById(R.id.tv_description_value);
+                    TextView hoursView = findViewById(R.id.tv_hours_value);
+                    TextView completionView = findViewById(R.id.tv_profile_completion);
                     if (nameView != null && !businessName.isEmpty()) nameView.setText(businessName);
                     if (addressView != null) addressView.setText(address.isEmpty()
                             ? "Business address not set" : address);
                     if (phoneView != null) phoneView.setText(phone.isEmpty() ? "Phone not set" : phone);
-                    if (availabilityView != null) availabilityView.setText(isOpen
-                            ? "Accepting new bookings" : "Not accepting bookings");
+                    if (descriptionView != null) descriptionView.setText(description.isEmpty()
+                            ? "Add a business description to help customers understand your services."
+                            : description);
+                    if (hoursView != null) hoursView.setText(operatingHours.isEmpty()
+                            ? "Operating hours have not been configured." : operatingHours);
+                    if (completionView != null) {
+                        Object services = document.get("services");
+                        boolean hasServices = services instanceof List<?> && !((List<?>) services).isEmpty();
+                        int completed = 0;
+                        if (!businessName.isEmpty()) completed++;
+                        if (!address.isEmpty()) completed++;
+                        if (!phone.isEmpty()) completed++;
+                        if (!description.isEmpty()) completed++;
+                        if (!operatingHours.isEmpty()) completed++;
+                        if (hasServices) completed++;
+                        completionView.setText(getString(R.string.provider_profile_completion,
+                                completed, 6));
+                    }
+                    Object rating = document.get("rating");
+                    Object reviewCount = document.get("reviewCount");
+                    if (ratingView != null && rating instanceof Number
+                            && reviewCount instanceof Number
+                            && ((Number) reviewCount).intValue() > 0) {
+                        ratingView.setText(String.format(java.util.Locale.getDefault(), "%.1f",
+                                ((Number) rating).doubleValue()));
+                        if (reviewCountView != null) {
+                            int count = ((Number) reviewCount).intValue();
+                            reviewCountView.setText(count == 1
+                                    ? getString(R.string.provider_single_review)
+                                    : getString(R.string.provider_review_count, count));
+                        }
+                    } else if (reviewCountView != null) {
+                        reviewCountView.setText(R.string.provider_no_reviews);
+                    }
+                    if (availabilityView != null) {
+                        availabilityView.setText(!approved ? "Pending administrator approval"
+                                : isOpen ? "Accepting new bookings" : "Not accepting bookings");
+                        availabilityView.setTextColor(getColor(!approved
+                                ? R.color.pending_text
+                                : isOpen ? R.color.success_green : R.color.text_secondary));
+                    }
                 })
                 .addOnFailureListener(error -> Toast.makeText(this,
                         "Could not load business profile: " + error.getMessage(), Toast.LENGTH_LONG).show());
@@ -133,6 +184,18 @@ public class ProviderProfileActivity extends AppCompatActivity {
         addressInput.setHint("Business address");
         addressInput.setText(address);
         fields.addView(addressInput);
+        EditText descriptionInput = new EditText(this);
+        descriptionInput.setHint("Business description");
+        descriptionInput.setText(description);
+        descriptionInput.setMinLines(2);
+        descriptionInput.setInputType(InputType.TYPE_CLASS_TEXT
+                | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        fields.addView(descriptionInput);
+        EditText hoursInput = new EditText(this);
+        hoursInput.setHint("Operating hours (e.g. Mon-Sat, 8am-6pm)");
+        hoursInput.setText(operatingHours);
+        hoursInput.setSingleLine(true);
+        fields.addView(hoursInput);
         CheckBox availabilityInput = new CheckBox(this);
         availabilityInput.setText("Accept new bookings");
         availabilityInput.setChecked(isOpen);
@@ -147,24 +210,29 @@ public class ProviderProfileActivity extends AppCompatActivity {
                     String newOwnerName = ownerInput.getText().toString().trim();
                     String newPhone = phoneInput.getText().toString().trim();
                     String newAddress = addressInput.getText().toString().trim();
+                    String newDescription = descriptionInput.getText().toString().trim();
+                    String newOperatingHours = hoursInput.getText().toString().trim();
                     if (newBusinessName.isEmpty() || newPhone.isEmpty() || newAddress.isEmpty()) {
                         Toast.makeText(this, "Business name, phone, and address are required.",
                                 Toast.LENGTH_SHORT).show();
                         return;
                     }
                     saveProviderProfile(newBusinessName, newOwnerName, newPhone, newAddress,
-                            availabilityInput.isChecked());
+                            newDescription, newOperatingHours, availabilityInput.isChecked());
                 })
                 .show();
     }
 
     private void saveProviderProfile(String newBusinessName, String newOwnerName,
-                                     String newPhone, String newAddress, boolean newIsOpen) {
+                                     String newPhone, String newAddress, String newDescription,
+                                     String newOperatingHours, boolean newIsOpen) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("businessName", newBusinessName);
         updates.put("ownerName", newOwnerName);
         updates.put("phone", newPhone);
         updates.put("address", newAddress);
+        updates.put("description", newDescription);
+        updates.put("operatingHours", newOperatingHours);
         updates.put("isOpen", newIsOpen);
         FirebaseFirestore.getInstance().collection("providers").document(providerId).update(updates)
                 .addOnSuccessListener(unused -> {
@@ -172,6 +240,8 @@ public class ProviderProfileActivity extends AppCompatActivity {
                     ownerName = newOwnerName;
                     phone = newPhone;
                     address = newAddress;
+                    description = newDescription;
+                    operatingHours = newOperatingHours;
                     isOpen = newIsOpen;
                     loadProviderProfile();
                     Toast.makeText(this, "Business profile updated.", Toast.LENGTH_SHORT).show();

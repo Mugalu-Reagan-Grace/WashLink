@@ -45,6 +45,23 @@ cash collection under this policy. Flutterwave payouts require approved KYC,
 Transfers enabled, server IP allowlisting, and sufficient UGX wallet balance.
 Never save provider bank/mobile-money details in `providers/{uid}`.
 
+## Customer reviews and administrator accounts
+
+Customers can submit one 1-5 star rating per delivered booking. The
+`submitBookingReview` callable verifies booking ownership and delivery, writes
+the review under `providers/{providerId}/reviews/{bookingId}`, and updates the
+provider's aggregate rating in the same Firestore transaction. The app displays
+recent reviews on provider details.
+
+To bootstrap an administrator, first create a dedicated Firebase Authentication
+account. Then, using the Firebase Console as a trusted project owner, create
+`users/{authUid}` with the matching `uid`, `role: "admin"`, and
+`isSuspended: false`. Never grant an app user the admin role from the client.
+Admins can review all accounts, suspend or restore non-admin accounts, and
+approve or unapprove provider listings. Newly registered providers stay hidden
+from discovery until approved; older provider profiles without an approval
+field remain visible until an administrator explicitly unapproves them.
+
 ## One-time project and provider setup
 
 Use Node.js 20 and the Firebase CLI. Cloud Functions deployment requires a

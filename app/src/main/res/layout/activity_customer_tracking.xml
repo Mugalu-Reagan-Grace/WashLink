@@ -10,17 +10,14 @@
     <!-- Header -->
     <ImageView
         android:id="@+id/btn_back"
+        style="@style/WashLinkBackButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         android:padding="12dp"
-        android:src="@drawable/ic_back_arrow"
-        app:tint="@color/laundr_blue"
         android:clickable="true"
         android:focusable="true"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/nav_home"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -149,6 +146,19 @@
                     tools:text="Pickup address: Kampala" />
 
                 <TextView
+                    android:id="@+id/tv_tracking_rider"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/tv_tracking_address"
+                    app:layout_constraintStart_toEndOf="@id/iv_order_icon"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <TextView
                     android:id="@+id/tv_order_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -171,7 +181,7 @@
                     android:layout_height="3dp"
                     android:layout_marginTop="16dp"
                     android:background="@color/progress_track_empty"
-                    app:layout_constraintTop_toBottomOf="@id/tv_tracking_address"
+                    app:layout_constraintTop_toBottomOf="@id/tv_tracking_rider"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
 

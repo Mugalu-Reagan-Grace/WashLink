@@ -28,6 +28,8 @@ public class ProviderDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_provider_details);
+        com.example.washlink.data.AuthGuard.requireRole(this,
+                com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 
         ImageView back = findViewById(R.id.btn_back);
         if (back != null) back.setOnClickListener(v -> finish());
@@ -102,11 +104,47 @@ public class ProviderDetailsActivity extends AppCompatActivity {
         if (serviceSpinner != null && providerId != null && !providerId.trim().isEmpty()) {
             loadProviderServices(providerId, serviceSpinner, bookBtn,
                     !"Closed".equalsIgnoreCase(status), status, statusTv);
+            loadRecentReviews(providerId, findViewById(R.id.tv_recent_reviews));
         } else if (bookBtn != null) {
             bookBtn.setEnabled(false);
         }
 
         BottomNavHelper.bind(this);
+    }
+
+    private void loadRecentReviews(String providerId, TextView reviewsView) {
+        if (reviewsView == null) return;
+        reviewsView.setText("Recent reviews loading...");
+        reviewsView.setOnClickListener(null);
+        FirebaseFirestore.getInstance().collection("providers").document(providerId)
+                .collection("reviews").orderBy("createdAt",
+                        com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(5).get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.isEmpty()) {
+                        reviewsView.setText("No customer reviews yet.");
+                        return;
+                    }
+                    StringBuilder text = new StringBuilder("Recent reviews\n\n");
+                    for (com.google.firebase.firestore.DocumentSnapshot review
+                            : snapshot.getDocuments()) {
+                        Object rating = review.get("rating");
+                        Object reviewer = review.get("customerName");
+                        Object body = review.get("reviewText");
+                        text.append(rating instanceof Number ? rating : "—")
+                                .append("/5 · ")
+                                .append(reviewer instanceof String ? reviewer : "WashLink customer");
+                        if (body instanceof String && !((String) body).trim().isEmpty()) {
+                            text.append('\n').append((String) body);
+                        }
+                        text.append("\n\n");
+                    }
+                    reviewsView.setText(text.toString().trim());
+                })
+                .addOnFailureListener(error -> {
+                    reviewsView.setText("Could not load reviews. Tap to retry.");
+                    reviewsView.setOnClickListener(v -> loadRecentReviews(providerId, reviewsView));
+                });
     }
 
     private void loadProviderServices(String providerId, Spinner spinner, Button bookButton,

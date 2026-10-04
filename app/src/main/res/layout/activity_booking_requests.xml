@@ -21,6 +21,20 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <TextView
+        android:id="@+id/tv_booking_requests_subtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="4dp"
+        android:text="@string/provider_bookings_subtitle"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp"
+        app:layout_constraintTop_toBottomOf="@id/tv_header_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Tabs -->
     <LinearLayout
         android:id="@+id/tab_row"
@@ -30,7 +44,7 @@
         android:layout_marginEnd="20dp"
         android:layout_marginTop="16dp"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/tv_header_title">
+        app:layout_constraintTop_toBottomOf="@id/tv_booking_requests_subtitle">
 
         <TextView
             android:id="@+id/tab_pending"

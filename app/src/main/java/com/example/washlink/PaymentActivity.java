@@ -49,6 +49,8 @@ public class PaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_payment);
+        com.example.washlink.data.AuthGuard.requireRole(this,
+                com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 
         backButton = findViewById(R.id.btn_back);
         bellLayout = findViewById(R.id.iv_bell);

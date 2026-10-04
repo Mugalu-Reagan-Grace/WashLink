@@ -199,11 +199,13 @@ public class ManageServicesActivity extends AppCompatActivity {
                     ? String.format(Locale.getDefault(), "UGX %,.0f / kg", ((Number) amount).doubleValue())
                     : "Price not set";
             holder.price.setText(priceText);
-            holder.itemView.setOnClickListener(v -> showServiceDialog(holder.getBindingAdapterPosition()));
-            holder.itemView.setOnLongClickListener(v -> {
+            holder.edit.setOnClickListener(v -> {
+                int index = holder.getBindingAdapterPosition();
+                if (index != RecyclerView.NO_POSITION) showServiceDialog(index);
+            });
+            holder.remove.setOnClickListener(v -> {
                 int index = holder.getBindingAdapterPosition();
                 if (index != RecyclerView.NO_POSITION) removeService(index);
-                return true;
             });
         }
 
@@ -215,11 +217,15 @@ public class ManageServicesActivity extends AppCompatActivity {
         class Holder extends RecyclerView.ViewHolder {
             final TextView name;
             final TextView price;
+            final TextView edit;
+            final TextView remove;
 
             Holder(View itemView) {
                 super(itemView);
                 name = itemView.findViewById(R.id.tv_service_name);
                 price = itemView.findViewById(R.id.tv_service_price);
+                edit = itemView.findViewById(R.id.btn_service_edit);
+                remove = itemView.findViewById(R.id.btn_service_remove);
             }
         }
     }

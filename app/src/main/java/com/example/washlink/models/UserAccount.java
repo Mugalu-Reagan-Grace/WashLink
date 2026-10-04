@@ -17,6 +17,7 @@ public class UserAccount {
     private String address;
     private String photoUri;
     private List<String> savedAddresses = new ArrayList<>();
+    private boolean isSuspended;
 
     public UserAccount() {
         this.createdAt = java.time.Instant.now().toString();
@@ -102,5 +103,13 @@ public class UserAccount {
     public void setSavedAddresses(List<String> savedAddresses) {
         this.savedAddresses = savedAddresses == null
                 ? new ArrayList<>() : new ArrayList<>(savedAddresses);
+    }
+
+    public boolean getIsSuspended() {
+        return isSuspended;
+    }
+
+    public void setIsSuspended(boolean suspended) {
+        isSuspended = suspended;
     }
 }

@@ -39,6 +39,8 @@ public class DropOffConfirmationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_drop_off_confirmation);
+        com.example.washlink.data.AuthGuard.requireRole(this,
+                com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 
         if (getIntent() != null) {
             selectedService = getIntent().getStringExtra("selected_service");

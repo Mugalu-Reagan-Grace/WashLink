@@ -53,7 +53,6 @@
         android:text="@string/order_1_type"
         android:textColor="@color/text_secondary"
         android:textSize="13sp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_order_date"
         android:layout_marginTop="12dp" />
@@ -66,8 +65,19 @@
         android:textColor="@color/laundr_blue"
         android:textSize="15sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tv_order_type" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_review_booking"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:text="Rate service"
+        android:textAllCaps="false"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/tv_order_type"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

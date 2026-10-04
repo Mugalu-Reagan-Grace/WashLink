@@ -8,7 +8,10 @@ import androidx.fragment.app.Fragment;
 
 import com.example.washlink.NotificationPermissionHelper;
 import com.example.washlink.R;
+import com.example.washlink.SignInActivity;
+import com.example.washlink.data.AuthGuard;
 import com.example.washlink.data.PushTokenManager;
+import com.example.washlink.models.UserAccount;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAB_HOME = "home";
@@ -22,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        AuthGuard.requireRole(this, UserAccount.ROLE_CUSTOMER, SignInActivity.class);
         NotificationPermissionHelper.requestIfNeeded(this);
         PushTokenManager.registerCurrentUser();
         if (savedInstanceState == null) {

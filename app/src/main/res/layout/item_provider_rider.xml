@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_card_bordered"
+    android:padding="14dp">
+
+    <TextView
+        android:id="@+id/tv_rider_initial"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:background="@drawable/bg_offer_card"
+        android:gravity="center"
+        android:textColor="@color/laundr_blue"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_rider_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textColor="@color/text_primary"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/tv_rider_status"
+        app:layout_constraintStart_toEndOf="@id/tv_rider_initial"
+        app:layout_constraintTop_toTopOf="@id/tv_rider_initial" />
+
+    <TextView
+        android:id="@+id/tv_rider_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_status_pill"
+        android:paddingStart="9dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="9dp"
+        android:paddingBottom="4dp"
+        android:textColor="@color/accepted_text"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tv_rider_name" />
+
+    <TextView
+        android:id="@+id/tv_rider_phone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@id/tv_rider_status"
+        app:layout_constraintStart_toStartOf="@id/tv_rider_name"
+        app:layout_constraintTop_toBottomOf="@id/tv_rider_name" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_toggle_rider"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginTop="12dp"
+        android:textAllCaps="false"
+        android:textSize="12sp"
+        app:cornerRadius="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_rider_phone" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

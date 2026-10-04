@@ -1,11 +1,17 @@
 package com.example.washlink.ui.customer;
 
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -155,6 +161,10 @@ public class HistoryFragment extends CustomerTabFragment {
             holder.type.setText(booking.getServiceName() == null ? "Laundry service" : booking.getServiceName());
             holder.status.setText(booking.getStatus() == null ? "BOOKED" : booking.getStatus().replace('_', ' '));
             holder.price.setText(com.example.washlink.data.BookingPricing.format((int) booking.getTotal()));
+            boolean reviewAvailable = "DELIVERED".equals(booking.getStatus())
+                    && !booking.isReviewSubmitted();
+            holder.review.setVisibility(reviewAvailable ? View.VISIBLE : View.GONE);
+            holder.review.setOnClickListener(v -> showReviewDialog(booking));
             holder.itemView.setOnClickListener(v -> {
                 ((MainActivity) requireActivity()).showTab(MainActivity.TAB_TRACKING, booking.getId());
             });
@@ -166,7 +176,51 @@ public class HistoryFragment extends CustomerTabFragment {
             final TextView status = itemView.findViewById(R.id.tv_order_status);
             final TextView type = itemView.findViewById(R.id.tv_order_type);
             final TextView price = itemView.findViewById(R.id.tv_order_price);
+            final View review = itemView.findViewById(R.id.btn_review_booking);
             Holder(View itemView) { super(itemView); }
         }
+    }
+
+    private void showReviewDialog(Booking booking) {
+        if (!isAdded()) return;
+        LinearLayout fields = new LinearLayout(requireContext());
+        fields.setOrientation(LinearLayout.VERTICAL);
+        fields.setPadding(32, 0, 32, 0);
+        RatingBar rating = new RatingBar(requireContext());
+        rating.setNumStars(5);
+        rating.setStepSize(1f);
+        rating.setRating(5f);
+        fields.addView(rating);
+        EditText reviewText = new EditText(requireContext());
+        reviewText.setHint("Share your experience (optional)");
+        reviewText.setMinLines(3);
+        reviewText.setGravity(android.view.Gravity.TOP | android.view.Gravity.START);
+        reviewText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(1000)});
+        fields.addView(reviewText);
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Rate " + (booking.getProviderName() == null
+                        ? "your provider" : booking.getProviderName()))
+                .setView(fields)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton("Submit", (dialog, which) -> {
+                    BookingServiceFacade.getBookingService().submitBookingReview(
+                            booking.getId(), Math.round(rating.getRating()),
+                            reviewText.getText().toString(),
+                            new BookingService.SimpleCallback() {
+                                @Override public void onSuccess() {
+                                    if (!isAdded()) return;
+                                    Toast.makeText(requireContext(), "Thanks for your review.",
+                                            Toast.LENGTH_SHORT).show();
+                                    loadBookings();
+                                }
+                                @Override public void onError(String message) {
+                                    if (!isAdded()) return;
+                                    Toast.makeText(requireContext(),
+                                            "Could not submit review: " + message,
+                                            Toast.LENGTH_LONG).show();
+                                }
+                            });
+                })
+                .show();
     }
 }

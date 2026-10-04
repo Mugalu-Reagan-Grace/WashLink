@@ -39,9 +39,26 @@
         <item name="fontFamily">@font/poppins_semibold</item>
     </style>
 
+    <style name="WashLinkBackButton">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:src">@drawable/ic_back_arrow</item>
+        <item name="android:tint">@color/laundr_blue</item>
+        <item name="android:background">@drawable/bg_back_button</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:contentDescription">@string/back</item>
+    </style>
+
     <style name="Widget.WashLink.EditText" parent="@android:style/Widget.EditText">
         <item name="android:fontFamily">@font/poppins_medium</item>
         <item name="fontFamily">@font/poppins_medium</item>
+    </style>
+
+    <style name="WashLinkInputText">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorHint">@color/hint_gray</item>
     </style>
 
     <style name="Widget.WashLink.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">

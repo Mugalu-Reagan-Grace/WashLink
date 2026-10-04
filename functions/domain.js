@@ -6,6 +6,10 @@ const DELIVERY_FEE = 5000;
 const SERVICE_FEE_RATE = 0.03;
 const MAX_BOOKING_AMOUNT = 5000000;
 
+function hasActiveRole(user, role) {
+  return !!user && user.role === role && user.isSuspended !== true;
+}
+
 function quoteBooking(booking, provider) {
   if (!booking || !provider || !Array.isArray(provider.services)) {
     throw new Error("Provider or service is unavailable.");
@@ -96,6 +100,47 @@ function canCancelBooking(booking) {
       || booking.paymentReference.length === 0);
 }
 
+function canReviewBooking(booking, customerId) {
+  return booking
+    && booking.status === "DELIVERED"
+    && booking.customerId === customerId
+    && booking.reviewSubmitted !== true
+    && typeof booking.providerId === "string"
+    && booking.providerId.length > 0;
+}
+
+function canAssignRider(booking, providerId, rider) {
+  return !!booking
+    && booking.providerId === providerId
+    && ["ACCEPTED", "PICKED_UP", "WASHING", "DRYING", "READY", "OUT_FOR_DELIVERY"]
+      .includes(booking.status)
+    && !!rider
+    && rider.isActive === true
+    && typeof rider.name === "string"
+    && rider.name.trim().length > 0
+    && rider.name.trim().length <= 80
+    && typeof rider.phone === "string"
+    && rider.phone.trim().length >= 7
+    && rider.phone.trim().length <= 30;
+}
+
+function validReview(rating, text) {
+  return Number.isInteger(rating)
+    && rating >= 1
+    && rating <= 5
+    && typeof text === "string"
+    && text.trim().length <= 1000;
+}
+
+function updatedRatingAverage(currentAverage, currentCount, rating) {
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5
+      || !Number.isFinite(currentAverage) || !Number.isInteger(currentCount)
+      || currentCount < 0) {
+    throw new Error("Review aggregate is invalid.");
+  }
+  return Math.round(((currentAverage * currentCount + rating) / (currentCount + 1)) * 100) / 100;
+}
+
 function isEligibleForProviderPayout(booking) {
   return booking
     && booking.status === "DELIVERED"
@@ -130,10 +175,15 @@ function canClaimProviderPayout(attempt, now) {
 
 module.exports = {
   MAX_BOOKING_AMOUNT,
+  hasActiveRole,
   quoteBooking,
   isVerifiedFlutterwavePayment,
   isValidStatusTransition,
   canCancelBooking,
+  canReviewBooking,
+  canAssignRider,
+  validReview,
+  updatedRatingAverage,
   isEligibleForProviderPayout,
   isEligibleForProviderRejectionRefund,
   canClaimProviderPayout,

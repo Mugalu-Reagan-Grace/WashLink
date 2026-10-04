@@ -4,9 +4,14 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
   quoteBooking,
+  hasActiveRole,
   isVerifiedFlutterwavePayment,
   isValidStatusTransition,
   canCancelBooking,
+  canReviewBooking,
+  canAssignRider,
+  validReview,
+  updatedRatingAverage,
   isEligibleForProviderPayout,
   isEligibleForProviderRejectionRefund,
   canClaimProviderPayout,
@@ -28,6 +33,14 @@ const booking = {
 
 test("prices a pickup using the provider's listed service price", () => {
   assert.equal(quoteBooking(booking, provider).total, 46350);
+});
+
+test("accounts can only act within their active stored role", () => {
+  assert.equal(hasActiveRole({ role: "customer" }, "customer"), true);
+  assert.equal(hasActiveRole({ role: "provider" }, "customer"), false);
+  assert.equal(hasActiveRole({ role: "admin" }, "provider"), false);
+  assert.equal(hasActiveRole({ role: "provider", isSuspended: true }, "provider"), false);
+  assert.equal(hasActiveRole(null, "admin"), false);
 });
 
 test("prices a drop-off without pickup or delivery fees", () => {
@@ -88,6 +101,28 @@ test("only allows cancellation of booked orders before payment begins", () => {
     status: "ACCEPTED",
     paymentStatus: "PENDING",
   }), false);
+});
+
+test("only the customer can review a delivered booking and rating content is validated", () => {
+  const delivered = { status: "DELIVERED", customerId: "customer-1", providerId: "provider-1" };
+  assert.equal(canReviewBooking(delivered, "customer-1"), true);
+  assert.equal(canReviewBooking(delivered, "customer-2"), false);
+  assert.equal(canReviewBooking({ ...delivered, status: "WASHING" }, "customer-1"), false);
+  assert.equal(validReview(5, "Excellent service"), true);
+  assert.equal(validReview(0, "Excellent service"), false);
+  assert.equal(validReview(6, "Excellent service"), false);
+  assert.equal(validReview(4, "x".repeat(1001)), false);
+  assert.equal(updatedRatingAverage(4.5, 2, 5), 4.67);
+  assert.throws(() => updatedRatingAverage(4, -1, 3), /aggregate/);
+});
+
+test("riders can only be assigned by their provider to active nonterminal bookings", () => {
+  const booking = { providerId: "provider-1", status: "READY" };
+  const rider = { name: "Sam", phone: "+256700000000", isActive: true };
+  assert.equal(canAssignRider(booking, "provider-1", rider), true);
+  assert.equal(canAssignRider(booking, "provider-2", rider), false);
+  assert.equal(canAssignRider({ ...booking, status: "DELIVERED" }, "provider-1", rider), false);
+  assert.equal(canAssignRider(booking, "provider-1", { ...rider, isActive: false }), false);
 });
 
 test("pays only delivered, verified online bookings and uses subtotal before service fee", () => {

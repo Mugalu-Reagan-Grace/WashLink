@@ -126,8 +126,14 @@ public class BookingRequestsActivity extends AppCompatActivity {
 
     private void updateList() {
         List<Booking> filtered = new ArrayList<>();
+        int pendingCount = 0;
+        int inProgressCount = 0;
+        int historyCount = 0;
         for (Booking booking : allBookings) {
             OrderStatus status = OrderStatus.fromString(booking.getStatus());
+            if (status == OrderStatus.BOOKED) pendingCount++;
+            else if (status.isTerminal()) historyCount++;
+            else inProgressCount++;
             boolean matches = "pending".equals(filter)
                     ? status == OrderStatus.BOOKED
                     : "accepted".equals(filter)
@@ -135,6 +141,12 @@ public class BookingRequestsActivity extends AppCompatActivity {
                     : status.isTerminal();
             if (matches) filtered.add(booking);
         }
+        ((TextView) findViewById(R.id.tab_pending)).setText(
+                getString(R.string.provider_pending_count, pendingCount));
+        ((TextView) findViewById(R.id.tab_accepted)).setText(
+                getString(R.string.provider_in_progress_count, inProgressCount));
+        ((TextView) findViewById(R.id.tab_history)).setText(
+                getString(R.string.provider_history_count, historyCount));
         adapter.setItems(filtered);
         if (filtered.isEmpty()) showState(loaded ? "No bookings in this section yet." : "Loading bookings...");
         else showList();
@@ -170,17 +182,24 @@ public class BookingRequestsActivity extends AppCompatActivity {
 
         @Override
         public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-            View v = getLayoutInflater().inflate(R.layout.item_order_history, parent, false);
+            View v = getLayoutInflater().inflate(R.layout.item_provider_booking, parent, false);
             return new VH(v);
         }
 
         @Override
         public void onBindViewHolder(VH holder, int position) {
             Booking b = items.get(position);
-            holder.tvOrderId.setText(b.getId() != null ? b.getId() : "Order");
-            holder.tvDate.setText(b.getScheduledDateTime() != null ? b.getScheduledDateTime() : "");
-            holder.tvStatus.setText(OrderStatus.fromString(b.getStatus()).getDisplayName());
-            holder.tvType.setText(b.getServiceName() != null ? b.getServiceName() : "");
+            holder.tvCustomer.setText(b.getCustomerName() == null || b.getCustomerName().trim().isEmpty()
+                    ? getString(R.string.provider_no_customer_name) : b.getCustomerName());
+            holder.tvService.setText(b.getServiceName() == null || b.getServiceName().trim().isEmpty()
+                    ? getString(R.string.provider_no_service_name) : b.getServiceName());
+            holder.tvDate.setText(b.getScheduledDateTime() == null || b.getScheduledDateTime().trim().isEmpty()
+                    ? getString(R.string.provider_no_booking_date) : b.getScheduledDateTime());
+            OrderStatus orderStatus = OrderStatus.fromString(b.getStatus());
+            holder.tvStatus.setText(orderStatus.getDisplayName());
+            holder.tvStatus.setTextColor(getColor(statusColor(orderStatus)));
+            holder.tvType.setText(Booking.SERVICE_TYPE_PICKUP.equals(b.getServiceType())
+                    ? R.string.provider_booking_pickup : R.string.provider_booking_dropoff);
             holder.tvPrice.setText(BookingPricing.format((int) b.getTotal()));
 
             holder.itemView.setOnClickListener(v -> {
@@ -194,15 +213,25 @@ public class BookingRequestsActivity extends AppCompatActivity {
         public int getItemCount() { return items != null ? items.size() : 0; }
 
         class VH extends RecyclerView.ViewHolder {
-            TextView tvOrderId, tvDate, tvStatus, tvType, tvPrice;
+            TextView tvCustomer, tvDate, tvStatus, tvService, tvType, tvPrice;
             VH(View itemView) {
                 super(itemView);
-                tvOrderId = itemView.findViewById(R.id.tv_order_id);
-                tvDate = itemView.findViewById(R.id.tv_order_date);
-                tvStatus = itemView.findViewById(R.id.tv_order_status);
-                tvType = itemView.findViewById(R.id.tv_order_type);
-                tvPrice = itemView.findViewById(R.id.tv_order_price);
+                tvCustomer = itemView.findViewById(R.id.tv_booking_customer);
+                tvDate = itemView.findViewById(R.id.tv_booking_date);
+                tvStatus = itemView.findViewById(R.id.tv_booking_status);
+                tvService = itemView.findViewById(R.id.tv_booking_service);
+                tvType = itemView.findViewById(R.id.tv_booking_type);
+                tvPrice = itemView.findViewById(R.id.tv_booking_price);
             }
         }
+    }
+
+    private int statusColor(OrderStatus status) {
+        if (status == OrderStatus.BOOKED) return R.color.pending_text;
+        if (status == OrderStatus.DELIVERED) return R.color.success_green;
+        if (status == OrderStatus.REJECTED || status == OrderStatus.CANCELLED) {
+            return R.color.reject_red;
+        }
+        return R.color.status_processing_text;
     }
 }

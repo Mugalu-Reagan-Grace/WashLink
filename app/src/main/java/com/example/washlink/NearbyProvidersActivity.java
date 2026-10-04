@@ -49,6 +49,8 @@ public class NearbyProvidersActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_nearby_providers);
+        com.example.washlink.data.AuthGuard.requireRole(this,
+                com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
         selectedService = getIntent().getStringExtra("selected_service");
         if (selectedService == null || selectedService.trim().isEmpty()) selectedService = "Pickup & Delivery";
 
@@ -146,6 +148,7 @@ public class NearbyProvidersActivity extends AppCompatActivity {
                     providerLoadFailed = false;
                     allProviders.clear();
                     for (DocumentSnapshot document : snapshot.getDocuments()) {
+                        if (Boolean.FALSE.equals(document.get("isApproved"))) continue;
                         String name = stringValue(document.get("businessName"));
                         if (name.isEmpty()) continue;
                         double minPrice = Double.MAX_VALUE;

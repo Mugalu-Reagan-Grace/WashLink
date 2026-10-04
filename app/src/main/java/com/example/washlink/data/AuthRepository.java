@@ -85,10 +85,16 @@ public class AuthRepository {
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
                         UserAccount user = doc.toObject(UserAccount.class);
-                        callback.onResult(user);
+                        if (user == null || user.getRole() == null || user.getIsSuspended()) {
+                            auth.signOut();
+                            callback.onResult(null);
+                        } else {
+                            callback.onResult(user);
+                        }
                     } else {
                         // Auth account exists but Firestore doc doesn't - treat as logged out
                         // rather than crashing on a null role downstream.
+                        auth.signOut();
                         callback.onResult(null);
                     }
                 })
@@ -116,7 +122,10 @@ public class AuthRepository {
                     firebaseUser.sendEmailVerification();
                     db.collection("users").document(user.getUid()).set(user)
                             .addOnSuccessListener(unused -> callback.onSuccess(user))
-                            .addOnFailureListener(e -> callback.onError(e.getMessage()));
+                            .addOnFailureListener(e -> {
+                                auth.signOut();
+                                callback.onError(e.getMessage());
+                            });
                 })
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
@@ -159,17 +168,33 @@ public class AuthRepository {
                     userDoc.put("phone", user.getPhone());
                     userDoc.put("role", user.getRole());
                     userDoc.put("createdAt", user.getCreatedAt());
+                    userDoc.put("isSuspended", false);
 
                     // Write both documents. If the provider doc write fails after the user
                     // doc succeeds, the account still exists but without a business profile -
                     // acceptable for now, but worth reconciling with a Cloud Function later
                     // rather than leaving it as a silent partial failure.
+                    Map<String, Object> providerDoc = new HashMap<>();
+                    providerDoc.put("uid", provider.getUid());
+                    providerDoc.put("businessName", provider.getBusinessName());
+                    providerDoc.put("ownerName", provider.getOwnerName());
+                    providerDoc.put("email", provider.getEmail());
+                    providerDoc.put("phone", provider.getPhone());
+                    providerDoc.put("address", provider.getAddress());
+                    providerDoc.put("latitude", provider.getLatitude());
+                    providerDoc.put("longitude", provider.getLongitude());
+                    providerDoc.put("createdAt", provider.getCreatedAt());
+                    providerDoc.put("isApproved", false);
+
                     db.collection("users").document(uid).set(userDoc)
                             .addOnSuccessListener(unused ->
-                                    db.collection("providers").document(uid).set(provider)
+                                    db.collection("providers").document(uid).set(providerDoc)
                                             .addOnSuccessListener(unused2 -> callback.onSuccess(user))
                                             .addOnFailureListener(e -> callback.onError(e.getMessage())))
-                            .addOnFailureListener(e -> callback.onError(e.getMessage()));
+                            .addOnFailureListener(e -> {
+                                auth.signOut();
+                                callback.onError(e.getMessage());
+                            });
                 })
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
@@ -206,6 +231,11 @@ public class AuthRepository {
                                     callback.onError("Account role is not configured.");
                                     return;
                                 }
+                                if (user.getIsSuspended()) {
+                                    auth.signOut();
+                                    callback.onError("This account has been suspended. Contact WashLink support.");
+                                    return;
+                                }
                                 if (requiredRole != null
                                         && !requiredRole.equals(user.getRole())) {
                                     // e.g. a customer trying to sign in on the Provider Login screen
@@ -216,7 +246,10 @@ public class AuthRepository {
                                 }
                                 callback.onSuccess(user);
                             })
-                            .addOnFailureListener(e -> callback.onError(e.getMessage()));
+                            .addOnFailureListener(e -> {
+                                auth.signOut();
+                                callback.onError(e.getMessage());
+                            });
                 })
                 .addOnFailureListener(e -> callback.onError(e.getMessage()));
     }
@@ -234,6 +267,11 @@ public class AuthRepository {
                         if (user == null || !UserAccount.ROLE_CUSTOMER.equals(user.getRole())) {
                             auth.signOut();
                             callback.onError("This account is not registered as a customer.");
+                            return;
+                        }
+                        if (user.getIsSuspended()) {
+                            auth.signOut();
+                            callback.onError("This account has been suspended. Contact WashLink support.");
                             return;
                         }
                         callback.onSuccess(user);
