@@ -13,10 +13,13 @@ import {
   getDoc,
   getDocs,
   limit,
+  onSnapshot,
   orderBy,
   query,
+  serverTimestamp,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { auth, db, firebaseConfigured, functions } from "./firebase";
@@ -39,8 +42,74 @@ const money = (value) => new Intl.NumberFormat("en-UG", {
 }).format(Number(value || 0));
 
 const shortDate = (value) => value
-  ? new Date(Number(value)).toLocaleDateString()
+  ? new Date(timestampMillis(value)).toLocaleDateString()
   : "—";
+
+const KNOWN_SERVICES = [
+  "Wash & Fold",
+  "Dry Cleaning",
+  "Ironing & Pressing",
+  "Bedding & Blankets",
+  "Shoe Cleaning",
+  "Stain Removal",
+  "Carpet Cleaning",
+  "Curtain Cleaning",
+  "Express Laundry",
+];
+
+function timestampMillis(value) {
+  if (value && typeof value.toMillis === "function") return value.toMillis();
+  if (value instanceof Date) return value.getTime();
+  const numeric = Number(value || 0);
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
+function matchesSearch(value, search) {
+  return String(value || "").toLocaleLowerCase().includes(search.trim().toLocaleLowerCase());
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[character]);
+}
+
+function ExportActions({ rows, columns, fileName }) {
+  function exportFile(format) {
+    if (rows.length === 0) return;
+    const heading = columns.map((column) => `<th>${escapeHtml(column.label)}</th>`).join("");
+    const body = rows.map((row) => `<tr>${columns.map((column) =>
+      `<td>${escapeHtml(column.value(row))}</td>`).join("")}</tr>`).join("");
+    const markup = `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(fileName)}</title>
+      <style>body{font:14px Arial,sans-serif;color:#172b42;padding:24px}h1{font-size:20px}table{border-collapse:collapse;width:100%}
+      th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}th{background:#eaf1f8}
+      @media print{body{padding:0}button{display:none}}</style></head><body><h1>${escapeHtml(fileName)}</h1>
+      <table><thead><tr>${heading}</tr></thead><tbody>${body}</tbody></table></body></html>`;
+    if (format === "pdf") {
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) return;
+      printWindow.opener = null;
+      printWindow.document.open();
+      printWindow.document.write(`${markup}<script>window.addEventListener("load",()=>window.print());</script>`);
+      printWindow.document.close();
+      return;
+    }
+    const mime = format === "doc" ? "application/msword;charset=utf-8" : "application/vnd.ms-excel;charset=utf-8";
+    const extension = format === "doc" ? "doc" : "xls";
+    const blob = new Blob([`\ufeff${markup}`], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${fileName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.${extension}`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+  return <div className="export-actions" aria-label={`Export ${fileName}`}>
+    <button className="secondary small" disabled={!rows.length} onClick={() => exportFile("doc")}>Word</button>
+    <button className="secondary small" disabled={!rows.length} onClick={() => exportFile("excel")}>Excel</button>
+    <button className="secondary small" disabled={!rows.length} onClick={() => exportFile("pdf")}>PDF</button>
+  </div>;
+}
 
 function Brand({ light = false }) {
   return <div className={light ? "brand light" : "brand"}>
@@ -57,6 +126,7 @@ function App() {
   const [page, setPage] = useState("overview");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!auth) return undefined;
@@ -88,6 +158,15 @@ function App() {
     });
   }, []);
 
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    function closeOnEscape(event) {
+      if (event.key === "Escape") setMenuOpen(false);
+    }
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [menuOpen]);
+
   if (!firebaseConfigured) return <Setup />;
   if (authLoading) return <div className="center-page"><div className="spinner" /></div>;
   if (!session || !role) {
@@ -96,17 +175,19 @@ function App() {
 
   const links = role === "admin"
     ? [["overview", "Overview"], ["bookings", "Bookings"], ["providers", "Providers"], ["users", "Users"]]
-    : [["overview", "Overview"], ["orders", "Orders"], ["reports", "Reports"], ["riders", "Riders"]];
+    : [["overview", "Overview"], ["orders", "Orders"], ["services", "Services"], ["reports", "Reports"], ["riders", "Riders"], ["profile", "Business profile"], ["payouts", "Payout settings"], ["messages", "Messages"]];
 
   return (
     <div className="workspace">
-      <aside className="sidebar">
+      {menuOpen && <button className="sidebar-scrim" aria-label="Close navigation menu"
+        onClick={() => setMenuOpen(false)} />}
+      <aside className={menuOpen ? "sidebar sidebar-open" : "sidebar"}>
         <Brand light />
         <div className="role-chip">{role === "admin" ? "Administrator" : "Laundry provider"}</div>
         <nav>
           {links.map(([key, label]) => (
             <button key={key} className={page === key ? "nav-link active" : "nav-link"}
-              onClick={() => { setPage(key); setNotice(""); }}>
+              onClick={() => { setPage(key); setNotice(""); setMenuOpen(false); }}>
               <span className="nav-dot" />{label}
             </button>
           ))}
@@ -118,9 +199,14 @@ function App() {
       </aside>
       <main className="main-panel">
         <header className="topbar">
+          <button className="menu-toggle" aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
+            <span /><span /><span />
+          </button>
           <div className="mobile-brand">WashLink <span>Operations</span></div>
           <div className="topbar-spacer" />
           <span className="live-dot">Signed in</span>
+          {role === "provider" && <ProviderNotifications uid={session.uid} setNotice={setNotice} />}
           <button className="avatar" title={session.email}>{(session.email || "W")[0].toUpperCase()}</button>
         </header>
         <div className="content">
@@ -133,11 +219,60 @@ function App() {
           {page === "orders" && role === "provider" && <ProviderOrders uid={session.uid} setNotice={setNotice} setBusy={setBusy} />}
           {page === "reports" && role === "provider" && <ProviderReports uid={session.uid} />}
           {page === "riders" && role === "provider" && <ProviderRiders uid={session.uid} setNotice={setNotice} />}
+          {page === "services" && role === "provider" && <ProviderServices uid={session.uid} setNotice={setNotice} setBusy={setBusy} />}
+          {page === "profile" && role === "provider" && <ProviderProfile uid={session.uid} setNotice={setNotice} setBusy={setBusy} />}
+          {page === "payouts" && role === "provider" && <ProviderPayouts uid={session.uid} setNotice={setNotice} setBusy={setBusy} />}
+          {page === "messages" && role === "provider" && <ProviderMessages uid={session.uid} setNotice={setNotice} setBusy={setBusy} />}
         </div>
       </main>
       {busy && <div className="busy-overlay"><div className="spinner" /><span>Saving changes…</span></div>}
     </div>
   );
+}
+
+function ProviderNotifications({ uid, setNotice }) {
+  const [open, setOpen] = useState(false);
+  const [state, setState] = useState({ data: [], loading: true, error: "" });
+
+  useEffect(() => onSnapshot(query(
+    collection(db, "users", uid, "notifications"), limit(50),
+  ), (snapshot) => setState({
+    data: snapshot.docs.map((entry) => ({ id: entry.id, ...entry.data() }))
+      .sort((a, b) => timestampMillis(b.createdAt) - timestampMillis(a.createdAt)),
+    loading: false,
+    error: "",
+  }), (error) => setState({
+    data: [], loading: false, error: error.message || "Could not load notifications.",
+  })), [uid]);
+
+  const unread = state.data.filter((notification) => notification.read !== true).length;
+  async function markRead(notification) {
+    try {
+      await updateDoc(doc(db, "users", uid, "notifications", notification.id), { read: true });
+    } catch (error) {
+      setNotice(error.message || "Could not update notification.");
+    }
+  }
+
+  return <div className="notification-menu">
+    <button className="notification-toggle" aria-label={`Notifications${unread ? `, ${unread} unread` : ""}`}
+      aria-expanded={open} onClick={() => setOpen((value) => !value)}>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>
+      {unread > 0 && <span className="notification-count">{unread > 99 ? "99+" : unread}</span>}
+    </button>
+    {open && <section className="notification-popover" aria-label="Notifications">
+      <div className="notification-heading"><strong>Notifications</strong><span>{unread} unread</span></div>
+      {state.loading ? <Loading /> : state.error ? <ErrorState message={state.error} /> :
+        state.data.length === 0 ? <Empty text="No notifications yet." /> :
+          <div className="notification-list">{state.data.map((notification) => <button
+            key={notification.id} className={notification.read === true ? "notification-item read" : "notification-item"}
+            onClick={() => notification.read === true ? undefined : markRead(notification)}>
+            <strong>{notification.title || "Update"}</strong>
+            <span>{notification.body || "You have a new update."}</span>
+            <small>{shortDate(notification.createdAt)}</small>
+          </button>)}</div>}
+    </section>}
+  </div>;
 }
 
 function Setup() {
@@ -231,7 +366,7 @@ function AdminOverview({ setPage }) {
   const providers = useCollection(async () => (await getDocs(query(collection(db, "providers"), limit(500))))
     .docs.map((entry) => ({ id: entry.id, ...entry.data() })), []);
   const bookings = useCollection(async () => (await getDocs(query(collection(db, "bookings"), orderBy("createdAt", "desc"), limit(300))))
-    .docs.map((entry) => ({ id: entry.id, ...entry.data() })).sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0)), []);
+    .docs.map((entry) => ({ id: entry.id, ...entry.data() })).sort((a, b) => timestampMillis(b.createdAt) - timestampMillis(a.createdAt)), []);
   const inProgress = bookings.data.filter((b) => !["DELIVERED", "CANCELLED", "REJECTED"].includes(b.status));
   const waitingProviders = providers.data.filter((p) => p.isApproved === false);
   const collected = bookings.data.reduce((sum, b) => sum + verifiedRevenue(b), 0);
@@ -254,16 +389,40 @@ function AdminOverview({ setPage }) {
 }
 
 function AdminBookings() {
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("ALL");
   const data = useCollection(async () => (await getDocs(query(collection(db, "bookings"), orderBy("createdAt", "desc"), limit(500))))
-    .docs.map((entry) => ({ id: entry.id, ...entry.data() })).sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0)), []);
-  return <><PageHeading eyebrow="MARKETPLACE" title="Bookings" description="Recent bookings across WashLink. Booking changes remain customer/provider controlled." action={<button className="secondary" onClick={data.reload}>Refresh</button>} />
-    <section className="panel">{data.loading ? <Loading /> : data.error ? <ErrorState message={data.error} /> : <BookingTable bookings={data.data} admin />}</section>
+    .docs.map((entry) => ({ id: entry.id, ...entry.data() })).sort((a, b) => timestampMillis(b.createdAt) - timestampMillis(a.createdAt)), []);
+  const filtered = data.data.filter((booking) => (status === "ALL" || booking.status === status)
+    && [booking.id, booking.customerName, booking.providerName, booking.serviceName, booking.status,
+      booking.customerPhone].some((value) => matchesSearch(value, search)));
+  return <><PageHeading eyebrow="MARKETPLACE" title="Bookings" description="Recent bookings across WashLink. Booking changes remain customer/provider controlled." action={<div className="heading-actions"><ExportActions rows={filtered} fileName="Bookings" columns={[
+    { label: "Booking", value: (row) => row.id }, { label: "Customer", value: (row) => row.customerName || "" },
+    { label: "Provider", value: (row) => row.providerName || "" }, { label: "Service", value: (row) => row.serviceName || "" },
+    { label: "Created", value: (row) => shortDate(row.createdAt) }, { label: "Status", value: (row) => row.status || "" },
+    { label: "Total (UGX)", value: (row) => Number(row.total || 0) },
+  ]} /><button className="secondary" onClick={data.reload}>Refresh</button></div>} />
+    <div className="table-controls"><label className="search-control"><span>Search bookings</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Customer, provider, service, phone…" /></label>
+      <label className="search-control status-select"><span>Filter by status</span><select value={status} onChange={(event) => setStatus(event.target.value)}>
+        <option value="ALL">All statuses</option>{Object.keys(STATUS_FLOW).flatMap((key) => [key, ...STATUS_FLOW[key]])
+          .filter((value, index, all) => all.indexOf(value) === index).concat("CANCELLED")
+          .map((value) => <option key={value} value={value}>{value.replaceAll("_", " ")}</option>)}
+      </select></label></div>
+    <section className="panel">{data.loading ? <Loading /> : data.error ? <ErrorState message={data.error} /> : <BookingTable bookings={filtered} admin />}</section>
   </>;
 }
 
 function AdminProviders({ setBusy, setNotice }) {
+  const [search, setSearch] = useState("");
+  const [approvalFilter, setApprovalFilter] = useState("ALL");
   const providers = useCollection(async () => (await getDocs(query(collection(db, "providers"), limit(500))))
     .docs.map((entry) => ({ id: entry.id, ...entry.data() })), []);
+  const filteredProviders = providers.data.filter((provider) => [
+    provider.businessName, provider.ownerName, provider.phone, provider.address,
+    provider.isApproved === false ? "pending" : "approved",
+  ].some((value) => matchesSearch(value, search))
+    && (approvalFilter === "ALL" || (approvalFilter === "PENDING"
+      ? provider.isApproved === false : provider.isApproved !== false)));
   async function approve(provider, value) {
     setBusy(true);
     try {
@@ -273,10 +432,18 @@ function AdminProviders({ setBusy, setNotice }) {
     } catch (error) { setNotice(error.message || "Could not update provider approval."); }
     finally { setBusy(false); }
   }
-  return <><PageHeading eyebrow="ADMINISTRATION" title="Providers" description="Review business profiles and manage marketplace approval." action={<button className="secondary" onClick={providers.reload}>Refresh</button>} />
+  return <><PageHeading eyebrow="ADMINISTRATION" title="Providers" description="Review business profiles and manage marketplace approval." action={<div className="heading-actions"><ExportActions rows={filteredProviders} fileName="Providers" columns={[
+    { label: "Business", value: (row) => row.businessName || "" }, { label: "Owner", value: (row) => row.ownerName || "" },
+    { label: "Phone", value: (row) => row.phone || "" }, { label: "Address", value: (row) => row.address || "" },
+    { label: "Approval", value: (row) => row.isApproved === false ? "Pending" : "Approved" },
+  ]} /><button className="secondary" onClick={providers.reload}>Refresh</button></div>} />
+    <div className="table-controls"><label className="search-control"><span>Search providers</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Business, owner, phone, address…" /></label>
+      <label className="search-control status-select"><span>Approval status</span><select value={approvalFilter} onChange={(event) => setApprovalFilter(event.target.value)}>
+        <option value="ALL">All providers</option><option value="PENDING">Pending</option><option value="APPROVED">Approved</option>
+      </select></label></div>
     <section className="panel">{providers.loading ? <Loading /> : providers.error ? <ErrorState message={providers.error} /> :
-      providers.data.length === 0 ? <Empty text="No provider profiles found." /> : <div className="records">
-        {providers.data.map((provider) => <div className="record-row" key={provider.id}>
+      providers.data.length === 0 ? <Empty text="No provider profiles found." /> : filteredProviders.length === 0 ? <Empty text="No providers match your search." /> : <div className="records">
+        {filteredProviders.map((provider) => <div className="record-row" key={provider.id}>
           <div className="record-main"><strong>{provider.businessName || "Laundry provider"}</strong><span>{provider.ownerName || "Owner unavailable"} · {provider.phone || "No phone"}</span><span>{provider.address || "Address not set"}</span></div>
           <span className={provider.isApproved === false ? "badge pending" : "badge delivered"}>{provider.isApproved === false ? "Pending approval" : "Approved"}</span>
           <button className={provider.isApproved === false ? "primary small" : "secondary small"} onClick={() => approve(provider, provider.isApproved === false)}>{provider.isApproved === false ? "Approve" : "Unapprove"}</button>
@@ -286,8 +453,17 @@ function AdminProviders({ setBusy, setNotice }) {
 }
 
 function AdminUsers({ setBusy, setNotice }) {
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("ALL");
+  const [accountFilter, setAccountFilter] = useState("ALL");
   const users = useCollection(async () => (await getDocs(query(collection(db, "users"), limit(500))))
     .docs.map((entry) => ({ id: entry.id, ...entry.data() })), []);
+  const filteredUsers = users.data.filter((user) => [
+    user.name, user.email, user.phone, user.role, user.isSuspended ? "suspended" : "active",
+  ].some((value) => matchesSearch(value, search))
+    && (roleFilter === "ALL" || user.role === roleFilter)
+    && (accountFilter === "ALL" || (accountFilter === "SUSPENDED"
+      ? user.isSuspended === true : user.isSuspended !== true)));
   async function suspend(user, suspended) {
     setBusy(true);
     try {
@@ -297,9 +473,20 @@ function AdminUsers({ setBusy, setNotice }) {
     } catch (error) { setNotice(error.message || "Could not update account."); }
     finally { setBusy(false); }
   }
-  return <><PageHeading eyebrow="ADMINISTRATION" title="User accounts" description="View platform accounts and suspend or restore non-admin access." action={<button className="secondary" onClick={users.reload}>Refresh</button>} />
-    <section className="panel">{users.loading ? <Loading /> : users.error ? <ErrorState message={users.error} /> : <div className="records">
-      {users.data.map((user) => <div className="record-row" key={user.id}><div className="record-main"><strong>{user.name || "Unnamed account"}</strong><span>{user.email || "No email"} · {user.role || "Unknown role"}</span></div>
+  return <><PageHeading eyebrow="ADMINISTRATION" title="User accounts" description="View platform accounts and suspend or restore non-admin access." action={<div className="heading-actions"><ExportActions rows={filteredUsers} fileName="Users" columns={[
+    { label: "Name", value: (row) => row.name || "" }, { label: "Email", value: (row) => row.email || "" },
+    { label: "Phone", value: (row) => row.phone || "" }, { label: "Role", value: (row) => row.role || "" },
+    { label: "Status", value: (row) => row.isSuspended ? "Suspended" : "Active" },
+  ]} /><button className="secondary" onClick={users.reload}>Refresh</button></div>} />
+    <div className="table-controls"><label className="search-control"><span>Search users</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Name, email, phone…" /></label>
+      <label className="search-control status-select"><span>Role</span><select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value)}>
+        <option value="ALL">All roles</option><option value="customer">Customer</option><option value="provider">Provider</option><option value="admin">Admin</option>
+      </select></label>
+      <label className="search-control status-select"><span>Account status</span><select value={accountFilter} onChange={(event) => setAccountFilter(event.target.value)}>
+        <option value="ALL">All accounts</option><option value="ACTIVE">Active</option><option value="SUSPENDED">Suspended</option>
+      </select></label></div>
+    <section className="panel">{users.loading ? <Loading /> : users.error ? <ErrorState message={users.error} /> : filteredUsers.length === 0 ? <Empty text="No user accounts match your search." /> : <div className="records">
+      {filteredUsers.map((user) => <div className="record-row" key={user.id}><div className="record-main"><strong>{user.name || "Unnamed account"}</strong><span>{user.email || "No email"} · {user.role || "Unknown role"}</span></div>
         <span className={user.isSuspended ? "badge rejected" : "badge delivered"}>{user.isSuspended ? "Suspended" : "Active"}</span>
         {user.role !== "admin" && <button className="secondary small" onClick={() => suspend(user, !user.isSuspended)}>{user.isSuspended ? "Restore" : "Suspend"}</button>}
       </div>)}
@@ -309,7 +496,7 @@ function AdminUsers({ setBusy, setNotice }) {
 
 function ProviderOverview({ uid }) {
   const bookings = useCollection(async () => (await getDocs(query(collection(db, "bookings"), where("providerId", "==", uid), limit(500))))
-    .docs.map((entry) => ({ id: entry.id, ...entry.data() })).sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0)), [uid]);
+    .docs.map((entry) => ({ id: entry.id, ...entry.data() })).sort((a, b) => timestampMillis(b.createdAt) - timestampMillis(a.createdAt)), [uid]);
   const provider = useCollection(async () => {
     const snapshot = await getDoc(doc(db, "providers", uid));
     return snapshot.exists() ? [snapshot.data()] : [];
@@ -335,9 +522,12 @@ function ProviderOverview({ uid }) {
 
 function ProviderOrders({ uid, setNotice, setBusy }) {
   const [filter, setFilter] = useState("ALL");
+  const [search, setSearch] = useState("");
   const bookings = useCollection(async () => (await getDocs(query(collection(db, "bookings"), where("providerId", "==", uid), limit(500))))
-    .docs.map((entry) => ({ id: entry.id, ...entry.data() })).sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0)), [uid]);
-  const filtered = filter === "ALL" ? bookings.data : bookings.data.filter((booking) => booking.status === filter);
+    .docs.map((entry) => ({ id: entry.id, ...entry.data() })).sort((a, b) => timestampMillis(b.createdAt) - timestampMillis(a.createdAt)), [uid]);
+  const filtered = bookings.data.filter((booking) => (filter === "ALL" || booking.status === filter)
+    && [booking.id, booking.customerName, booking.customerPhone, booking.serviceName, booking.status,
+      booking.address, booking.assignedRiderName].some((value) => matchesSearch(value, search)));
   async function updateStatus(booking, status) {
     setBusy(true);
     setNotice("");
@@ -364,7 +554,13 @@ function ProviderOrders({ uid, setNotice, setBusy }) {
   const ridersForAssignment = useCollection(async () => (await getDocs(query(collection(db, "providers", uid, "riders"), where("isActive", "==", true))))
     .docs.map((entry) => ({ id: entry.id, ...entry.data() })), [uid]).data;
   return <>
-    <PageHeading eyebrow="ORDER MANAGEMENT" title="Orders" description="Review customer details and move each order through its valid next status." action={<button className="secondary" onClick={bookings.reload}>Refresh</button>} />
+    <PageHeading eyebrow="ORDER MANAGEMENT" title="Orders" description="Review customer details and move each order through its valid next status." action={<div className="heading-actions"><ExportActions rows={filtered} fileName="Orders" columns={[
+      { label: "Booking", value: (row) => row.id }, { label: "Customer", value: (row) => row.customerName || "" },
+      { label: "Phone", value: (row) => row.customerPhone || "" }, { label: "Service", value: (row) => row.serviceName || "" },
+      { label: "Created", value: (row) => shortDate(row.createdAt) }, { label: "Status", value: (row) => row.status || "" },
+      { label: "Total (UGX)", value: (row) => Number(row.total || 0) },
+    ]} /><button className="secondary" onClick={bookings.reload}>Refresh</button></div>} />
+    <label className="search-control"><span>Search orders</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Customer, service, phone, address…" /></label>
     <div className="filter-row">{["ALL", "BOOKED", "ACCEPTED", "PICKED_UP", "WASHING", "DRYING", "READY", "OUT_FOR_DELIVERY", "DELIVERED"].map((status) =>
       <button key={status} className={filter === status ? "filter active" : "filter"} onClick={() => setFilter(status)}>{status.replaceAll("_", " ")}</button>)}</div>
     <section className="panel">{bookings.loading ? <Loading /> : bookings.error ? <ErrorState message={bookings.error} /> :
@@ -372,6 +568,376 @@ function ProviderOrders({ uid, setNotice, setBusy }) {
         {filtered.map((booking) => <OrderCard key={booking.id} booking={booking} riders={ridersForAssignment}
           onStatus={updateStatus} onAssign={assignRider} />)}
       </div>}</section>
+  </>;
+}
+
+function ProviderServices({ uid, setNotice, setBusy }) {
+  const provider = useCollection(async () => {
+    const snapshot = await getDoc(doc(db, "providers", uid));
+    return snapshot.exists() ? (snapshot.data().services || []) : [];
+  }, [uid]);
+  const [editing, setEditing] = useState(-1);
+  const [serviceChoice, setServiceChoice] = useState(KNOWN_SERVICES[0]);
+  const [customName, setCustomName] = useState("");
+  const [search, setSearch] = useState("");
+  const [availability, setAvailability] = useState("ALL");
+  const services = provider.data;
+  const filteredServices = services.filter((service) => (availability === "ALL"
+    || (availability === "AVAILABLE" ? service.isAvailable !== false : service.isAvailable === false))
+    && matchesSearch(service.name, search));
+
+  function startEdit(index) {
+    setEditing(index);
+    const service = index < 0 ? null : services[index];
+    const name = service?.name || "";
+    setServiceChoice(KNOWN_SERVICES.includes(name) ? name : "__custom");
+    setCustomName(service && !KNOWN_SERVICES.includes(name) ? name : "");
+    const form = document.getElementById("provider-service-form");
+    if (!form) return;
+    form.elements.namedItem("pricePerKg").value = service?.pricePerKg ?? "";
+  }
+
+  async function save(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const name = String(serviceChoice === "__custom" ? customName : serviceChoice).trim();
+    const pricePerKg = Number(formData.get("pricePerKg"));
+    if (name.length < 2 || name.length > 80 || !Number.isFinite(pricePerKg) || pricePerKg <= 0) {
+      setNotice("Enter a service name (2–80 characters) and a price above zero.");
+      return;
+    }
+    if (services.some((service, index) => index !== editing
+      && String(service.name || "").toLowerCase() === name.toLowerCase())) {
+      setNotice("A service with that name already exists.");
+      return;
+    }
+    const updated = [...services];
+    const prior = editing < 0 ? null : services[editing];
+    const service = { name, pricePerKg, isAvailable: prior?.isAvailable !== false };
+    if (editing < 0) updated.push(service);
+    else updated[editing] = service;
+    setBusy(true);
+    try {
+      await updateDoc(doc(db, "providers", uid), { services: updated });
+      setNotice(editing < 0 ? "Service added." : "Service updated.");
+      setEditing(-1);
+      form.reset();
+      setServiceChoice(KNOWN_SERVICES[0]);
+      setCustomName("");
+      await provider.reload();
+    } catch (error) { setNotice(error.message || "Could not save service."); }
+    finally { setBusy(false); }
+  }
+
+  async function toggle(service, index) {
+    const updated = services.map((entry, current) => current === index
+      ? { ...entry, isAvailable: entry.isAvailable === false } : entry);
+    setBusy(true);
+    try {
+      await updateDoc(doc(db, "providers", uid), { services: updated });
+      setNotice(service.isAvailable === false ? "Service is available to customers." : "Service paused.");
+      await provider.reload();
+    } catch (error) { setNotice(error.message || "Could not update service availability."); }
+    finally { setBusy(false); }
+  }
+
+  async function remove(index) {
+    const updated = services.filter((_, current) => current !== index);
+    setBusy(true);
+    try {
+      await updateDoc(doc(db, "providers", uid), { services: updated });
+      if (editing === index) setEditing(-1);
+      setNotice("Service removed.");
+      await provider.reload();
+    } catch (error) { setNotice(error.message || "Could not remove service."); }
+    finally { setBusy(false); }
+  }
+
+  return <>
+    <PageHeading eyebrow="SERVICE CATALOG" title="Services & pricing" description="Set the services customers can book and control availability without deleting your prices." action={<button className="secondary" onClick={() => startEdit(-1)}>Add service</button>} />
+    <section className="panel service-form-panel"><div className="panel-heading"><div><h2>{editing < 0 ? "Add a service" : "Edit service"}</h2><p>Prices are stored in UGX per kilogram and shared with the Android app.</p></div></div>
+      <form id="provider-service-form" className="service-form" onSubmit={save}>
+        <label>Service name<select name="serviceChoice" value={serviceChoice} onChange={(event) => setServiceChoice(event.target.value)}>
+          {KNOWN_SERVICES.map((name) => <option key={name} value={name}>{name}</option>)}
+          <option value="__custom">Custom service</option>
+        </select></label>
+        {serviceChoice === "__custom" && <label>Custom service name<input name="customName" required minLength="2" maxLength="80" value={customName}
+          onChange={(event) => setCustomName(event.target.value)} placeholder="Enter your service" /></label>}
+        <label>Price per kg (UGX)<input name="pricePerKg" required type="number" min="1" step="1" placeholder="5000" /></label>
+        <button className="primary">{editing < 0 ? "Add service" : "Save changes"}</button>
+        {editing >= 0 && <button className="secondary" type="button" onClick={() => {
+          setEditing(-1); setServiceChoice(KNOWN_SERVICES[0]); setCustomName("");
+          document.getElementById("provider-service-form")?.reset();
+        }}>Cancel</button>}
+      </form>
+    </section>
+    <section className="panel"><div className="panel-heading"><div><h2>Your services</h2><p>{services.filter((service) => service.isAvailable !== false).length} available · {services.length} total</p></div>
+      <div className="heading-actions"><ExportActions rows={filteredServices} fileName="Services" columns={[
+        { label: "Service", value: (row) => row.name || "" }, { label: "Price per kg (UGX)", value: (row) => Number(row.pricePerKg || 0) },
+        { label: "Availability", value: (row) => row.isAvailable === false ? "Unavailable" : "Available" },
+      ]} /><button className="secondary" onClick={provider.reload}>Refresh</button></div></div>
+      <div className="table-controls"><label className="search-control"><span>Search services</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Service name…" /></label>
+        <label className="search-control status-select"><span>Availability</span><select value={availability} onChange={(event) => setAvailability(event.target.value)}>
+          <option value="ALL">All services</option><option value="AVAILABLE">Available</option><option value="UNAVAILABLE">Unavailable</option>
+        </select></label></div>
+      {provider.loading ? <Loading /> : provider.error ? <ErrorState message={provider.error} /> : services.length === 0 ? <Empty text="No services yet. Add the services and prices customers can book." /> :
+        filteredServices.length === 0 ? <Empty text="No services match your search." /> : <div className="records">{filteredServices.map((service) => {
+          const index = services.indexOf(service);
+          return <div className="record-row service-row" key={`${service.name}-${index}`}>
+          <div className="record-main"><strong>{service.name || "Laundry service"}</strong><span>{money(service.pricePerKg)} / kg</span></div>
+          <span className={service.isAvailable === false ? "badge rejected" : "badge delivered"}>{service.isAvailable === false ? "Unavailable" : "Available"}</span>
+          <button className="secondary small" onClick={() => startEdit(index)}>Edit</button>
+          <button className="secondary small" onClick={() => toggle(service, index)}>{service.isAvailable === false ? "Enable" : "Pause"}</button>
+          <button className="danger small" onClick={() => remove(index)}>Remove</button>
+        </div>;
+        })}</div>}
+    </section>
+  </>;
+}
+
+function ProviderProfile({ uid, setNotice, setBusy }) {
+  const provider = useCollection(async () => {
+    const snapshot = await getDoc(doc(db, "providers", uid));
+    return snapshot.exists() ? [snapshot.data()] : [];
+  }, [uid]);
+  const profile = provider.data[0] || {};
+  async function save(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const values = new FormData(form);
+    const businessName = String(values.get("businessName") || "").trim();
+    const phone = String(values.get("phone") || "").trim();
+    const address = String(values.get("address") || "").trim();
+    if (!businessName || !phone || !address) {
+      setNotice("Business name, phone, and address are required.");
+      return;
+    }
+    const updates = {
+      businessName,
+      ownerName: String(values.get("ownerName") || "").trim(),
+      phone,
+      address,
+      description: String(values.get("description") || "").trim(),
+      operatingHours: String(values.get("operatingHours") || "").trim(),
+      isOpen: values.get("isOpen") === "on",
+    };
+    setBusy(true);
+    try {
+      await updateDoc(doc(db, "providers", uid), updates);
+      setNotice("Business profile updated.");
+      await provider.reload();
+    } catch (error) { setNotice(error.message || "Could not save business profile."); }
+    finally { setBusy(false); }
+  }
+  const services = profile.services || [];
+  const availableCount = services.filter((service) => service.isAvailable !== false).length;
+  return <>
+    <PageHeading eyebrow="BUSINESS SETTINGS" title="Business profile" description="Keep your public business details and booking availability current across the app and web." />
+    <section className="panel profile-panel">
+      {provider.loading ? <Loading /> : provider.error ? <ErrorState message={provider.error} /> : <>
+        {profile.isApproved === false && <div className="notice warn">Your provider profile is awaiting administrator approval.</div>}
+        <div className="profile-summary"><div><span className="detail-label">Profile completeness</span><strong>{[profile.businessName, profile.phone, profile.address, profile.description, profile.operatingHours, services.length > 0].filter(Boolean).length} / 6 details</strong></div><div><span className="detail-label">Service catalog</span><strong>{availableCount} available · {services.length} total</strong></div><div><span className="detail-label">Customer bookings</span><strong>{profile.isOpen === false ? "Paused" : "Accepting bookings"}</strong></div></div>
+        <form className="profile-form" onSubmit={save}>
+          <label>Business name<input name="businessName" required defaultValue={profile.businessName || ""} /></label>
+          <label>Owner name<input name="ownerName" defaultValue={profile.ownerName || ""} /></label>
+          <label>Business phone<input name="phone" type="tel" required defaultValue={profile.phone || ""} /></label>
+          <label>Business address<input name="address" required defaultValue={profile.address || ""} /></label>
+          <label className="wide">Description<textarea name="description" rows="3" defaultValue={profile.description || ""} /></label>
+          <label>Operating hours<input name="operatingHours" placeholder="Mon–Sat, 8am–6pm" defaultValue={profile.operatingHours || ""} /></label>
+          <label className="availability-check"><input name="isOpen" type="checkbox" defaultChecked={profile.isOpen !== false} /> Accept new bookings</label>
+          <button className="primary">Save profile</button>
+        </form>
+      </>}
+    </section>
+  </>;
+}
+
+function ProviderMessages({ uid, setNotice, setBusy }) {
+  const [chats, setChats] = useState({ data: [], loading: true, error: "" });
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [selectedId, setSelectedId] = useState("");
+  const [search, setSearch] = useState("");
+  const [messages, setMessages] = useState({ data: [], loading: false, error: "" });
+  useEffect(() => onSnapshot(query(
+    collection(db, "chats"), where("participantIds", "array-contains", uid), limit(200),
+  ), (snapshot) => setChats({
+    data: snapshot.docs.map((entry) => ({ id: entry.id, ...entry.data() }))
+      .sort((a, b) => timestampMillis(b.lastMessageAt) - timestampMillis(a.lastMessageAt)),
+    loading: false,
+    error: "",
+  }), (error) => setChats({ data: [], loading: false, error: error.code === "permission-denied"
+    ? "Firestore denied access to conversations. Confirm the web app targets the same Firebase project as Android and that the latest participant-only chat rules are deployed."
+    : error.message || "Could not load conversations." })),
+  [uid, refreshKey]);
+  const selected = chats.data.find((chat) => chat.id === selectedId);
+  useEffect(() => {
+    if (!selectedId) {
+      setMessages({ data: [], loading: false, error: "" });
+      return undefined;
+    }
+    setMessages({ data: [], loading: true, error: "" });
+    return onSnapshot(query(collection(db, "chats", selectedId, "messages"),
+      orderBy("createdAt", "asc"), limit(500)),
+    (snapshot) => setMessages({
+      data: snapshot.docs.map((entry) => ({ id: entry.id, ...entry.data() })),
+      loading: false,
+      error: "",
+    }), (error) => setMessages({ data: [], loading: false, error: error.code === "permission-denied"
+      ? "Firestore denied access to this chat's messages. Confirm participantIds includes your provider UID and the latest participant-only chat rules are deployed."
+      : error.message || "Could not load messages." }));
+  }, [selectedId]);
+  const visibleChats = chats.data.filter((chat) => [
+    chat.customerName, chat.customerPhone, chat.lastMessage,
+  ].some((value) => matchesSearch(value, search)));
+
+  async function send(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const text = String(new FormData(form).get("message") || "").trim();
+    if (!selected || !text || text.length > 2000) {
+      setNotice("Select a conversation and enter a message (1–2,000 characters).");
+      return;
+    }
+    const batch = writeBatch(db);
+    const chatRef = doc(db, "chats", selected.id);
+    batch.set(doc(collection(db, "chats", selected.id, "messages")), {
+      senderId: uid,
+      senderRole: "provider",
+      text,
+      createdAt: serverTimestamp(),
+    });
+    batch.update(chatRef, {
+      lastMessage: text,
+      lastMessageAt: serverTimestamp(),
+      lastSenderId: uid,
+    });
+    setBusy(true);
+    try {
+      await batch.commit();
+      form.reset();
+    } catch (error) { setNotice(error.message || "Could not send message."); }
+    finally { setBusy(false); }
+  }
+  return <>
+    <PageHeading eyebrow="CUSTOMER SUPPORT" title="Messages" description="Read and reply to customer conversations from the app or the provider workspace." action={<button className="secondary" onClick={() => setRefreshKey((value) => value + 1)}>Refresh</button>} />
+    <section className="panel messages-panel">
+      <label className="search-control"><span>Search conversations</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Customer, phone, message…" /></label>
+      {chats.loading ? <Loading /> : chats.error ? <ErrorState message={chats.error} /> : chats.data.length === 0
+        ? <Empty text="No customer conversations yet. Chats started in the WashLink app will appear here." />
+        : visibleChats.length === 0 ? <Empty text="No conversations match your search." />
+        : <div className="messages-layout">
+          <div className="conversation-list">{visibleChats.map((chat) => <button key={chat.id}
+            className={selectedId === chat.id ? "conversation-item selected" : "conversation-item"}
+            onClick={() => setSelectedId(chat.id)}>
+            <strong>{chat.customerName || "Customer"}</strong>
+            <span>{chat.lastMessage || "Conversation started"}</span>
+          </button>)}</div>
+          <div className="message-thread">
+            {!selected ? <Empty text="Choose a conversation to view messages." /> : <>
+              <div className="thread-heading"><strong>{selected.customerName || "Customer"}</strong><span>{selected.customerPhone || ""}</span></div>
+              <div className="thread-messages">{messages.loading ? <Loading /> : messages.error ? <ErrorState message={messages.error} /> : messages.data.map((message) =>
+                <div key={message.id} className={message.senderId === uid ? "message-bubble mine" : "message-bubble"}>{message.text}</div>)}</div>
+              <form className="message-form" onSubmit={send}><input name="message" required maxLength="2000" placeholder="Write a reply…" /><button className="primary">Send</button></form>
+            </>}
+          </div>
+        </div>}
+    </section>
+  </>;
+}
+
+function ProviderPayouts({ uid, setNotice, setBusy }) {
+  const saved = useCollection(async () => {
+    const snapshot = await getDoc(doc(db, "users", uid, "payoutProfile", "default"));
+    return snapshot.exists() ? [snapshot.data()] : [];
+  }, [uid]);
+  const current = saved.data[0] || {};
+  const [destinationType, setDestinationType] = useState("");
+  const [banks, setBanks] = useState([]);
+  const [branches, setBranches] = useState([]);
+  const [bankCode, setBankCode] = useState("");
+  const [branchCode, setBranchCode] = useState("");
+  const [optionsError, setOptionsError] = useState("");
+
+  useEffect(() => {
+    if (!functions) return;
+    httpsCallable(functions, "getUgandaPayoutBanks")()
+      .then((result) => setBanks(Array.isArray(result.data) ? result.data : []))
+      .catch((error) => setOptionsError(error.message || "Could not load Uganda banks."));
+  }, []);
+  useEffect(() => {
+    const bank = banks.find((entry) => entry.code === bankCode);
+    if (!bank?.hasBranches) {
+      setBranches([]);
+      setBranchCode("");
+      return;
+    }
+    httpsCallable(functions, "getUgandaPayoutBranches")({ bankId: bank.id })
+      .then((result) => {
+        const values = Array.isArray(result.data) ? result.data : [];
+        setBranches(values);
+        setBranchCode((previous) => values.some((entry) => entry.code === previous)
+          ? previous : "");
+      })
+      .catch((error) => setOptionsError(error.message || "Could not load bank branches."));
+  }, [bankCode, banks]);
+
+  useEffect(() => {
+    if (!current.destinationType) return;
+    setDestinationType(current.destinationType);
+    setBankCode(current.destinationType === "bank" ? current.accountBank || "" : "");
+    setBranchCode(current.destinationBranchCode || "");
+  }, [current.destinationType, current.accountBank, current.destinationBranchCode]);
+
+  async function save(event) {
+    event.preventDefault();
+    const values = new FormData(event.currentTarget);
+    const data = {
+      destinationType,
+      beneficiaryName: String(values.get("beneficiaryName") || "").trim(),
+      accountNumber: String(values.get("accountNumber") || "").trim(),
+    };
+    if (destinationType === "bank") {
+      data.accountBank = bankCode;
+      data.destinationBranchCode = branchCode || null;
+    }
+    setBusy(true);
+    try {
+      await httpsCallable(functions, "saveProviderPayoutProfile")(data);
+      setNotice("Payout destination saved securely.");
+      await saved.reload();
+    } catch (error) { setNotice(error.message || "Could not save payout settings."); }
+    finally { setBusy(false); }
+  }
+
+  const selectedBank = banks.find((bank) => bank.code === bankCode);
+  return <>
+    <PageHeading eyebrow="PAYMENT DESTINATION" title="Payout settings" description="Save a Uganda bank or mobile-money destination for eligible verified online order payouts." />
+    <section className="panel profile-panel">
+      {saved.loading ? <Loading /> : saved.error ? <ErrorState message={saved.error} /> : <>
+        <div className="notice">Only your signed-in account can read these payout details. Cash-on-delivery orders are collected directly by your business.</div>
+        {current.accountNumber && <p className="payout-summary">Current destination: <strong>{current.beneficiaryName}</strong> · {current.destinationType} ending {current.accountNumber.slice(-4)}</p>}
+        {optionsError && <div className="form-error">{optionsError}</div>}
+        <form className="profile-form payout-form" onSubmit={save}>
+          <label className="wide">Destination type<select required value={destinationType} onChange={(event) => setDestinationType(event.target.value)}>
+            <option value="">Choose destination</option><option value="bank">Uganda bank account</option><option value="airtel">Airtel Money</option><option value="mtn">MTN Mobile Money</option>
+          </select></label>
+          {destinationType === "bank" && <>
+            <label>Bank<select required value={bankCode} onChange={(event) => { setBankCode(event.target.value); setBranchCode(""); }}>
+              <option value="">Choose bank</option>{banks.map((bank) => <option key={bank.code} value={bank.code}>{bank.name}</option>)}
+            </select></label>
+            {selectedBank?.hasBranches && <label>Branch<select required value={branchCode} onChange={(event) => setBranchCode(event.target.value)}>
+              <option value="">Choose branch</option>{branches.map((branch) => <option key={branch.code} value={branch.code}>{branch.name}</option>)}
+            </select></label>}
+          </>}
+          <label>Beneficiary full name<input name="beneficiaryName" required maxLength="100" defaultValue={current.beneficiaryName || ""} /></label>
+          <label>{destinationType === "bank" ? "Bank account number" : "Uganda phone number (2567XXXXXXXX)"}
+            <input name="accountNumber" required minLength="5" maxLength="32" defaultValue={current.accountNumber || ""} />
+          </label>
+          <button className="primary" disabled={destinationType === "bank" && (!bankCode || (selectedBank?.hasBranches && !branchCode))}>Save payout destination</button>
+        </form>
+      </>}
+    </section>
   </>;
 }
 
@@ -405,11 +971,16 @@ function ProviderReports({ uid }) {
   const bookings = useCollection(async () => (await getDocs(query(collection(db, "bookings"), where("providerId", "==", uid), limit(500))))
     .docs.map((entry) => ({ id: entry.id, ...entry.data() })), [uid]);
   const cutoff = range === 0 ? 0 : Date.now() - range * 24 * 60 * 60 * 1000;
-  const filtered = bookings.data.filter((b) => Number(b.createdAt || 0) >= cutoff);
+  const filtered = bookings.data.filter((b) => timestampMillis(b.createdAt) >= cutoff);
   const complete = filtered.filter((b) => b.status === "DELIVERED");
   const revenue = filtered.reduce((sum, b) => sum + verifiedRevenue(b), 0);
   return <>
-    <PageHeading eyebrow="BUSINESS PERFORMANCE" title="Reports" description="Booking and collected-revenue summary for selected periods." action={<div className="range-switch">{[[7, "7 days"], [30, "30 days"], [0, "All time"]].map(([days, text]) => <button key={days} className={range === days ? "selected" : ""} onClick={() => setRange(days)}>{text}</button>)}</div>} />
+    <PageHeading eyebrow="BUSINESS PERFORMANCE" title="Reports" description="Booking and collected-revenue summary for selected periods." action={<div className="heading-actions"><ExportActions rows={filtered} fileName="Bookings report" columns={[
+      { label: "Booking", value: (row) => row.id }, { label: "Customer", value: (row) => row.customerName || "" },
+      { label: "Service", value: (row) => row.serviceName || "" }, { label: "Created", value: (row) => shortDate(row.createdAt) },
+      { label: "Status", value: (row) => row.status || "" }, { label: "Payment status", value: (row) => row.paymentStatus || "" },
+      { label: "Total (UGX)", value: (row) => Number(row.total || 0) },
+    ]} /><div className="range-switch">{[[7, "7 days"], [30, "30 days"], [0, "All time"]].map(([days, text]) => <button key={days} className={range === days ? "selected" : ""} onClick={() => setRange(days)}>{text}</button>)}</div></div>} />
     {bookings.loading ? <Loading /> : bookings.error ? <ErrorState message={bookings.error} /> : <>
       <div className="stats-grid"><StatCard label="Bookings" value={filtered.length} note={range ? `Created in the last ${range} days` : "All time"} /><StatCard label="Delivered" value={complete.length} note="Orders marked delivered" accent="accent-blue" /><StatCard label="Awaiting action" value={filtered.filter((b) => b.status === "BOOKED").length} note="New requests" accent="accent-amber" /><StatCard label="Collected revenue" value={money(revenue)} note="Cash totals + paid online subtotal" accent="accent-green" /></div>
       <section className="panel"><div className="panel-heading"><div><h2>Revenue by payment method</h2><p>Only delivered cash and paid Flutterwave orders count.</p></div></div>
@@ -424,8 +995,13 @@ function ProviderReports({ uid }) {
 }
 
 function ProviderRiders({ uid, setNotice }) {
+  const [search, setSearch] = useState("");
+  const [activeFilter, setActiveFilter] = useState("ALL");
   const riders = useCollection(async () => (await getDocs(collection(db, "providers", uid, "riders")))
     .docs.map((entry) => ({ id: entry.id, ...entry.data() })), [uid]);
+  const filteredRiders = riders.data.filter((rider) => [rider.name, rider.phone,
+    rider.isActive ? "active" : "inactive"].some((value) => matchesSearch(value, search))
+    && (activeFilter === "ALL" || (activeFilter === "ACTIVE" ? rider.isActive : !rider.isActive)));
   async function add(event) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -454,9 +1030,18 @@ function ProviderRiders({ uid, setNotice }) {
     <section className="panel rider-form-panel"><div className="panel-heading"><div><h2>Add a rider</h2><p>Rider information is only visible to your business and assigned customers.</p></div></div>
       <form className="rider-form" onSubmit={add}><label>Full name<input name="name" required minLength="2" maxLength="80" placeholder="Rider name" /></label><label>Phone number<input name="phone" required minLength="7" maxLength="30" type="tel" placeholder="+256…" /></label><button className="primary">Add rider</button></form>
     </section>
-    <section className="panel"><div className="panel-heading"><div><h2>Your riders</h2><p>{riders.data.filter((r) => r.isActive).length} active</p></div><button className="secondary" onClick={riders.reload}>Refresh</button></div>
+    <section className="panel"><div className="panel-heading"><div><h2>Your riders</h2><p>{riders.data.filter((r) => r.isActive).length} active</p></div>
+      <div className="heading-actions"><ExportActions rows={filteredRiders} fileName="Riders" columns={[
+        { label: "Name", value: (row) => row.name || "" }, { label: "Phone", value: (row) => row.phone || "" },
+        { label: "Status", value: (row) => row.isActive ? "Active" : "Inactive" },
+      ]} /><button className="secondary" onClick={riders.reload}>Refresh</button></div></div>
+      <div className="table-controls"><label className="search-control"><span>Search riders</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Name, phone…" /></label>
+        <label className="search-control status-select"><span>Rider status</span><select value={activeFilter} onChange={(event) => setActiveFilter(event.target.value)}>
+          <option value="ALL">All riders</option><option value="ACTIVE">Active</option><option value="INACTIVE">Inactive</option>
+        </select></label></div>
       {riders.loading ? <Loading /> : riders.error ? <ErrorState message={riders.error} /> : riders.data.length === 0 ? <Empty text="No riders yet. Add your first rider above." /> :
-        <div className="records">{riders.data.map((rider) => <div className="record-row" key={rider.id}><div className="record-main"><strong>{rider.name}</strong><span>{rider.phone}</span></div><span className={rider.isActive ? "badge delivered" : "badge rejected"}>{rider.isActive ? "Active" : "Inactive"}</span><button className="secondary small" onClick={() => toggle(rider)}>{rider.isActive ? "Deactivate" : "Activate"}</button></div>)}</div>}
+        filteredRiders.length === 0 ? <Empty text="No riders match your search." /> :
+          <div className="records">{filteredRiders.map((rider) => <div className="record-row" key={rider.id}><div className="record-main"><strong>{rider.name}</strong><span>{rider.phone}</span></div><span className={rider.isActive ? "badge delivered" : "badge rejected"}>{rider.isActive ? "Active" : "Inactive"}</span><button className="secondary small" onClick={() => toggle(rider)}>{rider.isActive ? "Deactivate" : "Activate"}</button></div>)}</div>}
     </section>
   </>;
 }

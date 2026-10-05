@@ -40,6 +40,16 @@
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/btn_provider_menu"
+            android:layout_width="40dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_menu_lines"
+            android:contentDescription="@string/provider_nav_more"
+            android:clickable="true"
+            android:focusable="true" />
     </LinearLayout>
 
     <TextView
@@ -79,4 +89,9 @@
             android:layout_marginTop="12dp"
             android:orientation="vertical" />
     </ScrollView>
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        layout="@layout/provider_nav_bar" />
 </LinearLayout>

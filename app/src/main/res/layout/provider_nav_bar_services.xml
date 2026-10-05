@@ -36,4 +36,21 @@
         android:contentDescription="@string/nav_profile"
                 app:tint="@color/nav_inactive" />
 
+    <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+    <TextView
+                android:id="@+id/tv_provider_nav_more"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:contentDescription="@string/provider_nav_more"
+                android:focusable="true"
+                android:gravity="center"
+                android:minWidth="48dp"
+                android:text="@string/provider_nav_more"
+                android:textColor="@color/nav_inactive"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
 </LinearLayout>

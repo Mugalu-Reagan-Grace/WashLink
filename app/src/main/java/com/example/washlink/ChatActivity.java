@@ -77,6 +77,12 @@ public class ChatActivity extends AppCompatActivity {
                     return;
                 }
                 role = account.getRole();
+                if (UserAccount.ROLE_PROVIDER.equals(role)) {
+                    ProviderNavBarHelper.bind(ChatActivity.this, ProviderNavBarHelper.TAB_CHAT);
+                } else {
+                    findViewById(R.id.provider_chat_thread_nav).setVisibility(View.GONE);
+                    findViewById(R.id.btn_provider_menu).setVisibility(View.GONE);
+                }
                 if (UserAccount.ROLE_CUSTOMER.equals(role)) {
                     customerId = uid;
                     customerName = account.getName();

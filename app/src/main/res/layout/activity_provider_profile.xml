@@ -19,8 +19,22 @@
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btn_provider_menu"
         app:layout_constraintEnd_toStartOf="@id/tv_edit" />
+
+    <ImageView
+        android:id="@+id/btn_provider_menu"
+        android:layout_width="36dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="12dp"
+        android:padding="6dp"
+        android:src="@drawable/ic_menu_lines"
+        android:contentDescription="@string/provider_nav_more"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toTopOf="@id/tv_header_title"
+        app:layout_constraintBottom_toBottomOf="@id/tv_header_title"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/tv_edit"
@@ -300,12 +314,48 @@
                     android:contentDescription="@null" />
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/row_provider_reports"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                app:layout_constraintTop_toBottomOf="@id/row_manage_riders">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_provider_stat_revenue"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:text="Business reports"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_chevron_right"
+                    android:contentDescription="@null" />
+            </LinearLayout>
+
             <View
                 android:id="@+id/divider1"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/divider_gray"
-                app:layout_constraintTop_toBottomOf="@id/row_manage_riders" />
+                app:layout_constraintTop_toBottomOf="@id/row_provider_reports" />
 
             <LinearLayout
                 android:id="@+id/row_payment_settings"
@@ -412,7 +462,11 @@
     <!-- Bottom nav (Profile tab active) -->
     <include
         android:id="@+id/bottom_nav_bar"
-        layout="@layout/provider_nav_bar_profile"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        layout="@layout/provider_nav_bar"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

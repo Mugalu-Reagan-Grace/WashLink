@@ -5,52 +5,56 @@
     android:layout_height="56dp"
     android:orientation="horizontal"
     android:background="@color/white"
-    android:padding="8dp"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
     android:gravity="center">
 
     <ImageView
         android:id="@+id/iv_nav_dashboard"
-        android:layout_width="40dp"
+        android:layout_width="36dp"
         android:layout_height="40dp"
         android:src="@drawable/ic_nav_home"
         android:contentDescription="@string/nav_home"
-                app:tint="@color/nav_inactive" />
-
-    <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
-
-    <ImageView
-        android:id="@+id/iv_nav_services"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/ic_nav_services"
-        android:contentDescription="@string/nav_services"
-                app:tint="@color/nav_inactive" />
+        app:tint="@color/nav_inactive" />
 
     <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
 
     <ImageView
         android:id="@+id/iv_nav_bookings"
-        android:layout_width="40dp"
+        android:layout_width="36dp"
         android:layout_height="40dp"
         android:src="@drawable/ic_nav_history"
         android:contentDescription="@string/nav_history"
-        app:tint="@color/laundr_blue" />
+        app:tint="@color/nav_inactive" />
 
     <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
 
-    <TextView
-        android:id="@+id/tv_provider_nav_more"
-        android:layout_width="wrap_content"
+    <ImageView
+        android:id="@+id/iv_nav_services"
+        android:layout_width="36dp"
         android:layout_height="40dp"
-        android:background="?attr/selectableItemBackground"
-        android:clickable="true"
-        android:contentDescription="@string/provider_nav_more"
-        android:focusable="true"
-        android:gravity="center"
-        android:minWidth="48dp"
-        android:text="@string/provider_nav_more"
-        android:textColor="@color/nav_inactive"
-        android:textSize="12sp"
-        android:textStyle="bold" />
+        android:src="@drawable/ic_nav_services"
+        android:contentDescription="@string/nav_services"
+        app:tint="@color/nav_inactive" />
 
+    <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+    <ImageView
+        android:id="@+id/iv_nav_chat"
+        android:layout_width="36dp"
+        android:layout_height="40dp"
+        android:padding="7dp"
+        android:src="@drawable/ic_chat_bubble"
+        android:contentDescription="@string/provider_chat"
+        app:tint="@color/nav_inactive" />
+
+    <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+    <ImageView
+        android:id="@+id/iv_nav_profile"
+        android:layout_width="36dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_nav_profile"
+        android:contentDescription="@string/nav_profile"
+        app:tint="@color/nav_inactive" />
 </LinearLayout>

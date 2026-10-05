@@ -162,6 +162,7 @@ public class NearbyProvidersActivity extends AppCompatActivity {
                             for (Object item : (List<?>) serviceData) {
                                 if (item instanceof Map<?, ?>) {
                                     Map<?, ?> service = (Map<?, ?>) item;
+                                    if (Boolean.FALSE.equals(service.get("isAvailable"))) continue;
                                     Object nameValue = service.get("name");
                                     Object priceValue = service.get("pricePerKg");
                                     if (nameValue instanceof String

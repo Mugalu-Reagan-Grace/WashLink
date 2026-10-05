@@ -32,6 +32,7 @@ public class ProviderReportsActivity extends AppCompatActivity {
         AuthGuard.requireRole(this, UserAccount.ROLE_PROVIDER, ProviderLoginActivity.class);
         setContentView(R.layout.activity_provider_reports);
         findViewById(R.id.btn_report_back).setOnClickListener(v -> finish());
+        ProviderNavBarHelper.bind(this, -1);
         state = findViewById(R.id.tv_report_state);
         bindFilter(R.id.filter_7_days, 7);
         bindFilter(R.id.filter_30_days, 30);

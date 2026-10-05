@@ -518,6 +518,8 @@ exports.createBooking = onCall({ region: REGION }, async (request) => {
   };
   const notificationRef = db.collection("users").doc(request.auth.uid)
     .collection("notifications").doc();
+  const providerNotificationRef = db.collection("users").doc(providerId)
+    .collection("notifications").doc();
   const notification = {
     bookingId,
     customerId: request.auth.uid,
@@ -525,9 +527,18 @@ exports.createBooking = onCall({ region: REGION }, async (request) => {
     body: `Order #${bookingId} with ${booking.providerName} is now Booked.`,
     createdAt: timestamp,
   };
+  const providerNotification = {
+    bookingId,
+    providerId,
+    customerId: request.auth.uid,
+    title: "New booking request",
+    body: `${booking.customerName} booked ${booking.serviceName}.`,
+    createdAt: timestamp,
+  };
   const batch = db.batch();
   batch.set(bookingRef, booking);
   batch.set(notificationRef, notification);
+  batch.set(providerNotificationRef, providerNotification);
   await batch.commit();
   await sendPushNotification(providerId, "New booking request",
     `A customer booked ${booking.serviceName}.`, bookingId, "provider");
@@ -1018,6 +1029,15 @@ exports.cancelBooking = onCall({ region: REGION }, async (request) => {
       customerId: request.auth.uid,
       title: "Booking Cancelled",
       body: `Order #${bookingId} has been cancelled.`,
+      createdAt: timestamp,
+    });
+    transaction.set(db.collection("users").doc(providerId)
+      .collection("notifications").doc(notificationId), {
+      bookingId,
+      providerId,
+      customerId: request.auth.uid,
+      title: "Booking Cancelled",
+      body: `Order #${bookingId} was cancelled by the customer.`,
       createdAt: timestamp,
     });
   });

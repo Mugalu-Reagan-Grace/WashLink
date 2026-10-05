@@ -26,7 +26,8 @@ function quoteBooking(booking, provider) {
   const service = provider.services.find((item) =>
     item && typeof item.name === "string" && item.name === booking.serviceName
   );
-  if (!service || typeof service.pricePerKg !== "number"
+  if (!service || service.isAvailable === false
+      || typeof service.pricePerKg !== "number"
       || !Number.isFinite(service.pricePerKg) || service.pricePerKg <= 0) {
     throw new Error("Selected service is not currently offered by this provider.");
   }

@@ -55,6 +55,8 @@ public class ProviderProfileActivity extends AppCompatActivity {
                 startActivity(new Intent(this, ManageServicesActivity.class)));
         findViewById(R.id.row_manage_riders).setOnClickListener(v ->
                 startActivity(new Intent(this, ProviderRidersActivity.class)));
+        findViewById(R.id.row_provider_reports).setOnClickListener(v ->
+                startActivity(new Intent(this, ProviderReportsActivity.class)));
         findViewById(R.id.row_password).setOnClickListener(v ->
                 AuthRepository.getInstance().sendPasswordReset(new AuthRepository.SimpleCallback() {
                     @Override public void onSuccess() {
@@ -66,6 +68,9 @@ public class ProviderProfileActivity extends AppCompatActivity {
                     }
                 }));
         findViewById(R.id.row_payment_settings).setOnClickListener(v -> loadPayoutSettings());
+        if (getIntent().getBooleanExtra("open_payout_settings", false)) {
+            findViewById(R.id.row_payment_settings).post(this::loadPayoutSettings);
+        }
 
         if (providerId != null) loadProviderProfile();
 
@@ -116,7 +121,17 @@ public class ProviderProfileActivity extends AppCompatActivity {
                             ? "Operating hours have not been configured." : operatingHours);
                     if (completionView != null) {
                         Object services = document.get("services");
-                        boolean hasServices = services instanceof List<?> && !((List<?>) services).isEmpty();
+                        int availableServices = 0;
+                        if (services instanceof List<?>) {
+                            for (Object service : (List<?>) services) {
+                                if (service instanceof java.util.Map<?, ?>
+                                        && !Boolean.FALSE.equals(
+                                        ((java.util.Map<?, ?>) service).get("isAvailable"))) {
+                                    availableServices++;
+                                }
+                            }
+                        }
+                        boolean hasServices = availableServices > 0;
                         int completed = 0;
                         if (!businessName.isEmpty()) completed++;
                         if (!address.isEmpty()) completed++;
@@ -126,6 +141,8 @@ public class ProviderProfileActivity extends AppCompatActivity {
                         if (hasServices) completed++;
                         completionView.setText(getString(R.string.provider_profile_completion,
                                 completed, 6));
+                        completionView.setText(completionView.getText() + " · "
+                                + availableServices + " services available");
                     }
                     Object rating = document.get("rating");
                     Object reviewCount = document.get("reviewCount");

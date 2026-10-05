@@ -236,7 +236,8 @@ public class ProviderDetailsActivity extends AppCompatActivity {
                             Map<?, ?> data = (Map<?, ?>) item;
                             Object name = data.get("name");
                             Object price = data.get("pricePerKg");
-                            if (name instanceof String && !((String) name).trim().isEmpty()
+                            if (!Boolean.FALSE.equals(data.get("isAvailable"))
+                                    && name instanceof String && !((String) name).trim().isEmpty()
                                     && price instanceof Number && ((Number) price).doubleValue() > 0) {
                                 serviceOptions.add(new ProviderServiceOption(
                                         (String) name, ((Number) price).doubleValue()));

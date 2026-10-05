@@ -37,6 +37,7 @@ public class ProviderRidersActivity extends AppCompatActivity {
         setContentView(R.layout.activity_provider_riders);
         firestore = FirebaseFirestore.getInstance();
         providerId = AuthRepository.getInstance().getCurrentUserId();
+        ProviderNavBarHelper.bind(this, -1);
         rows = findViewById(R.id.rider_items);
         state = findViewById(R.id.tv_rider_state);
         riderCount = findViewById(R.id.tv_rider_count);

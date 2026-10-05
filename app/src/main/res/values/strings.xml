@@ -428,6 +428,9 @@
     <string name="provider_whatsapp">WhatsApp</string>
     <string name="provider_call_unavailable">No phone app is available to place a call.</string>
     <string name="provider_whatsapp_unavailable">Could not open WhatsApp or a browser.</string>
+    <string name="provider_service_available">Available · tap to pause</string>
+    <string name="provider_service_unavailable">Unavailable · tap to enable</string>
+    <string name="provider_nav_more">More</string>
     <string name="chat_inbox_title">Messages</string>
     <string name="chat_inbox_loading">Loading your conversations…</string>
     <string name="chat_inbox_empty">No messages yet. Open a laundry business to start a conversation.</string>

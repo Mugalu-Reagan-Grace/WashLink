@@ -124,7 +124,8 @@ public class ManageServicesActivity extends AppCompatActivity {
                         Toast.makeText(this, "Enter a valid price.", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    if (serviceName.isEmpty() || servicePrice <= 0) {
+                    if (serviceName.isEmpty() || !Double.isFinite(servicePrice)
+                            || servicePrice <= 0) {
                         Toast.makeText(this, "Enter a service name and a price above zero.", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -132,6 +133,18 @@ public class ManageServicesActivity extends AppCompatActivity {
                     Map<String, Object> service = new HashMap<>();
                     service.put("name", serviceName);
                     service.put("pricePerKg", servicePrice);
+                    service.put("isAvailable", existing == null
+                            || !Boolean.FALSE.equals(existing.get("isAvailable")));
+                    for (int i = 0; i < services.size(); i++) {
+                        if (i == position) continue;
+                        Object otherName = services.get(i).get("name");
+                        if (otherName instanceof String
+                                && ((String) otherName).equalsIgnoreCase(serviceName)) {
+                            Toast.makeText(this, "A service with that name already exists.",
+                                    Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                    }
                     if (position < 0) services.add(service);
                     else services.set(position, service);
                     persistServices();
@@ -149,6 +162,15 @@ public class ManageServicesActivity extends AppCompatActivity {
                     persistServices();
                 })
                 .show();
+    }
+
+    private void toggleAvailability(int position) {
+        if (position < 0 || position >= services.size()) return;
+        Map<String, Object> service = new HashMap<>(services.get(position));
+        boolean available = !Boolean.FALSE.equals(service.get("isAvailable"));
+        service.put("isAvailable", !available);
+        services.set(position, service);
+        persistServices();
     }
 
     private void persistServices() {
@@ -199,6 +221,15 @@ public class ManageServicesActivity extends AppCompatActivity {
                     ? String.format(Locale.getDefault(), "UGX %,.0f / kg", ((Number) amount).doubleValue())
                     : "Price not set";
             holder.price.setText(priceText);
+            boolean available = !Boolean.FALSE.equals(service.get("isAvailable"));
+            holder.availability.setText(available ? R.string.provider_service_available
+                    : R.string.provider_service_unavailable);
+            holder.availability.setTextColor(getColor(available
+                    ? R.color.success_green : R.color.text_secondary));
+            holder.availability.setOnClickListener(v -> {
+                int index = holder.getBindingAdapterPosition();
+                if (index != RecyclerView.NO_POSITION) toggleAvailability(index);
+            });
             holder.edit.setOnClickListener(v -> {
                 int index = holder.getBindingAdapterPosition();
                 if (index != RecyclerView.NO_POSITION) showServiceDialog(index);
@@ -219,6 +250,7 @@ public class ManageServicesActivity extends AppCompatActivity {
             final TextView price;
             final TextView edit;
             final TextView remove;
+            final TextView availability;
 
             Holder(View itemView) {
                 super(itemView);
@@ -226,6 +258,7 @@ public class ManageServicesActivity extends AppCompatActivity {
                 price = itemView.findViewById(R.id.tv_service_price);
                 edit = itemView.findViewById(R.id.btn_service_edit);
                 remove = itemView.findViewById(R.id.btn_service_remove);
+                availability = itemView.findViewById(R.id.btn_service_availability);
             }
         }
     }

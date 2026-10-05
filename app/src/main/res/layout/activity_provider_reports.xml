@@ -20,15 +20,29 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginEnd="8dp"
         android:text="Reports"
         android:textColor="@color/text_primary"
         android:textSize="21sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/btn_report_back"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_provider_menu"
         app:layout_constraintStart_toEndOf="@id/btn_report_back"
         app:layout_constraintTop_toTopOf="@id/btn_report_back" />
+
+    <ImageView
+        android:id="@+id/btn_provider_menu"
+        android:layout_width="40dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="12dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_menu_lines"
+        android:contentDescription="@string/provider_nav_more"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toTopOf="@id/btn_report_back"
+        app:layout_constraintBottom_toBottomOf="@id/btn_report_back"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:id="@+id/tv_report_subtitle"
@@ -112,7 +126,7 @@
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:paddingBottom="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav_bar"
         app:layout_constraintTop_toBottomOf="@id/report_filters">
 
         <LinearLayout
@@ -291,4 +305,13 @@
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <include
+        android:id="@+id/bottom_nav_bar"
+        layout="@layout/provider_nav_bar"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

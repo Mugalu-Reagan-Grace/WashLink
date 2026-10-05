@@ -62,6 +62,20 @@ test("rejects stale/forged booking totals and unlisted services", () => {
   assert.throws(() => quoteBooking({ ...booking, serviceName: "Unlisted" }, provider), /not currently offered/);
 });
 
+test("does not quote a service a provider marked unavailable", () => {
+  assert.throws(() => quoteBooking({
+    providerId: "provider-1",
+    serviceName: "Wash & Fold",
+    serviceType: "dropoff",
+    itemCount: 5,
+  }, { services: [{ name: "Wash & Fold", pricePerKg: 5000, isAvailable: false }] }),
+  /not currently offered/);
+});
+
+test("treats legacy services without availability metadata as available", () => {
+  assert.equal(quoteBooking(booking, provider).total, booking.total);
+});
+
 test("only accepts a successful, matching UGX Flutterwave transaction", () => {
   const transaction = {
     status: "successful",

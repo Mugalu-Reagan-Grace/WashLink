@@ -47,6 +47,13 @@ public class ChatInboxActivity extends AppCompatActivity {
                     return;
                 }
                 role = account.getRole();
+                if (UserAccount.ROLE_PROVIDER.equals(role)) {
+                    ProviderNavBarHelper.bind(ChatInboxActivity.this,
+                            ProviderNavBarHelper.TAB_CHAT);
+                } else {
+                    findViewById(R.id.provider_chat_nav).setVisibility(View.GONE);
+                    findViewById(R.id.btn_provider_menu).setVisibility(View.GONE);
+                }
                 listenForChats();
             }
 
