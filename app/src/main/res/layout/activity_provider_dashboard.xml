@@ -7,84 +7,103 @@
     android:background="@color/white"
     tools:context=".ProviderDashboardActivity">
 
-    <!-- Header -->
-    <View
-        android:id="@+id/iv_logo"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+    <LinearLayout
+        android:id="@+id/provider_dashboard_header"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/bg_thumbnail_placeholder"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/tv_greeting"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:text="@string/provider_greeting"
-        android:textColor="@color/text_secondary"
-        android:textSize="12sp"
-        app:layout_constraintTop_toTopOf="@id/iv_logo"
-        app:layout_constraintStart_toEndOf="@id/iv_logo"
-        app:layout_constraintEnd_toStartOf="@id/iv_bell" />
-
-    <TextView
-        android:id="@+id/tv_business_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="2dp"
-        android:text="@string/provider_business_name_fallback"
-        android:textColor="@color/text_primary"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/tv_greeting"
-        app:layout_constraintStart_toEndOf="@id/iv_logo"
-        app:layout_constraintEnd_toStartOf="@id/iv_bell" />
-
-    <TextView
-        android:id="@+id/tv_provider_approval"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="2dp"
-        android:text="@string/provider_approval_checking"
-        android:textColor="@color/text_secondary"
-        android:textSize="11sp"
-        app:layout_constraintTop_toBottomOf="@id/tv_business_name"
-        app:layout_constraintStart_toEndOf="@id/iv_logo"
-        app:layout_constraintEnd_toStartOf="@id/iv_bell" />
-
-    <FrameLayout
-        android:id="@+id/iv_bell"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="20dp"
-        app:layout_constraintTop_toTopOf="@id/iv_logo"
-        app:layout_constraintBottom_toBottomOf="@id/iv_logo"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_bell"
-            android:contentDescription="@null" />
-
         <View
-            android:layout_width="7dp"
-            android:layout_height="7dp"
-            android:layout_gravity="top|end"
-            android:background="@drawable/dot_notification" />
-    </FrameLayout>
+            android:id="@+id/iv_logo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_thumbnail_placeholder" />
 
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/header_barrier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="iv_logo,tv_provider_approval,iv_bell" />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_greeting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/provider_greeting"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tv_business_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/provider_business_name_fallback"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_provider_approval"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/provider_approval_checking"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/iv_chat_inbox"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="6dp"
+            android:background="@drawable/bg_offer_card"
+            android:clickable="true"
+            android:contentDescription="@string/provider_chat"
+            android:focusable="true"
+            android:padding="6dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_chat_bubble"
+                app:tint="@color/laundr_blue" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/iv_bell"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_bell"
+                android:contentDescription="@null" />
+
+            <View
+                android:layout_width="7dp"
+                android:layout_height="7dp"
+                android:layout_gravity="top|end"
+                android:background="@drawable/dot_notification" />
+        </FrameLayout>
+    </LinearLayout>
 
     <!-- Scrollable content -->
     <androidx.core.widget.NestedScrollView
@@ -92,7 +111,7 @@
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:paddingBottom="16dp"
-        app:layout_constraintTop_toBottomOf="@id/header_barrier"
+        app:layout_constraintTop_toBottomOf="@id/provider_dashboard_header"
         app:layout_constraintBottom_toTopOf="@id/bottom_nav_bar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -118,11 +137,11 @@
                     android:id="@+id/iv_stat_bookings"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@drawable/ic_calendar"
+                    android:src="@drawable/ic_provider_stat_bookings"
                     android:contentDescription="@null"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:tint="@color/text_primary" />
+                    app:tint="@color/laundr_blue" />
 
                 <TextView
                     android:id="@+id/tv_stat_bookings_value"
@@ -163,11 +182,11 @@
                     android:id="@+id/iv_stat_pending"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@drawable/ic_clock"
+                    android:src="@drawable/ic_provider_stat_pending"
                     android:contentDescription="@null"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:tint="@color/text_primary" />
+                    app:tint="@color/laundr_blue" />
 
                 <TextView
                     android:id="@+id/tv_stat_pending_value"
@@ -208,11 +227,11 @@
                     android:id="@+id/iv_stat_earnings"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@drawable/ic_money"
+                    android:src="@drawable/ic_provider_stat_revenue"
                     android:contentDescription="@null"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:tint="@color/text_primary" />
+                    app:tint="@color/laundr_blue" />
 
                 <TextView
                     android:id="@+id/tv_stat_earnings_value"
@@ -254,11 +273,11 @@
                     android:id="@+id/iv_stat_rating"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@drawable/ic_star_filled"
+                    android:src="@drawable/ic_provider_stat_rating"
                     android:contentDescription="@null"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:tint="@color/text_primary" />
+                    app:tint="@color/laundr_blue" />
 
                 <TextView
                     android:id="@+id/tv_stat_rating_value"
@@ -287,12 +306,14 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_provider_reports"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="Open reports"
                 android:textAllCaps="false"
-                app:layout_constraintTop_toBottomOf="@id/stat_rating" />
+                app:layout_constraintTop_toBottomOf="@id/stat_rating"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <!-- Recent Bookings -->
             <TextView

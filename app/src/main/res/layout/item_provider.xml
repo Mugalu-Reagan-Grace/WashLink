@@ -14,9 +14,11 @@
         android:id="@+id/iv_provider_thumb"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:background="@drawable/bg_thumbnail_placeholder"
-        android:scaleType="centerCrop"
+        android:background="@drawable/bg_offer_card"
+        android:padding="18dp"
+        android:src="@drawable/ic_provider_business"
         android:contentDescription="@null"
+        app:tint="@color/laundr_blue"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -30,6 +32,8 @@
         android:textColor="@color/text_primary"
         android:textSize="15sp"
         android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintTop_toTopOf="@id/iv_provider_thumb"
         app:layout_constraintStart_toEndOf="@id/iv_provider_thumb"
         app:layout_constraintEnd_toStartOf="@id/tv_status" />
@@ -47,6 +51,7 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
+            android:id="@+id/iv_provider_rating_star"
             android:layout_width="13dp"
             android:layout_height="13dp"
             android:src="@drawable/ic_star_filled"
@@ -67,7 +72,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
-            android:text="(214 reviews)"
+            android:text="@string/provider_no_reviews"
             android:textColor="@color/text_secondary"
             android:textSize="12sp" />
     </LinearLayout>
@@ -116,45 +121,24 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/iv_provider_thumb" />
 
-    <!-- Service type tags -->
-    <LinearLayout
+    <TextView
         android:id="@+id/row_tags"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:orientation="horizontal"
+        android:background="@drawable/bg_chip_unselected"
+        android:drawableStart="@drawable/ic_nav_services"
+        android:drawablePadding="6dp"
+        android:gravity="center_vertical"
+        android:paddingStart="10dp"
+        android:paddingTop="5dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="5dp"
+        android:text="@string/provider_service_count_unknown"
+        android:textColor="@color/chip_unselected_text"
+        android:textSize="11sp"
         app:layout_constraintTop_toBottomOf="@id/iv_provider_thumb"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:id="@+id/tag_drop_off"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/bg_chip_unselected"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
-            android:text="@string/drop_off"
-            android:textColor="@color/chip_unselected_text"
-            android:textSize="10sp" />
-
-        <TextView
-            android:id="@+id/tag_pickup"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_chip_unselected"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
-            android:text="@string/pickup_delivery"
-            android:textColor="@color/chip_unselected_text"
-            android:textSize="10sp" />
-
-    </LinearLayout>
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Price -->
     <TextView
@@ -162,7 +146,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="@string/provider_price_example"
+        android:text="@string/provider_contact_for_quote"
         android:textColor="@color/laundr_blue"
         android:textSize="14sp"
         android:textStyle="bold"

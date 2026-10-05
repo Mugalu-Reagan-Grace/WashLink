@@ -46,6 +46,8 @@ public class ProviderDashboardActivity extends AppCompatActivity {
                 startActivity(new Intent(this, BookingRequestsActivity.class)));
         findViewById(R.id.btn_provider_reports).setOnClickListener(v ->
                 startActivity(new Intent(this, ProviderReportsActivity.class)));
+        findViewById(R.id.iv_chat_inbox).setOnClickListener(v ->
+                startActivity(new Intent(this, ChatInboxActivity.class)));
         recentBookings = findViewById(R.id.ll_dashboard_bookings);
         TextView rating = findViewById(R.id.tv_stat_rating_value);
         if (rating != null) rating.setText("—");

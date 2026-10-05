@@ -3,6 +3,7 @@ package com.example.washlink;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -23,6 +24,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -71,11 +73,20 @@ public class NearbyLaundryMapActivity extends AppCompatActivity implements OnMap
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
         map.getUiSettings().setZoomControlsEnabled(true);
+        map.setOnMarkerClickListener(marker -> {
+            Object tag = marker.getTag();
+            if (tag instanceof Provider) {
+                openProvider((Provider) tag);
+                return true;
+            }
+            return false;
+        });
         requestLocation();
         loadProviders();
     }
 
     private void requestLocation() {
+        if (map == null) return;
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -107,8 +118,24 @@ public class NearbyLaundryMapActivity extends AppCompatActivity implements OnMap
                 .addOnSuccessListener(snapshot -> {
                     providers.clear();
                     snapshot.getDocuments().forEach(document -> {
+                        if (Boolean.FALSE.equals(document.getBoolean("isApproved"))) return;
                         Provider provider = document.toObject(Provider.class);
-                        if (provider != null) providers.add(provider);
+                        if (provider != null) {
+                            provider.setUid(document.getId());
+                            Object rating = document.get("rating");
+                            if (rating instanceof Number) {
+                                provider.setRating(((Number) rating).doubleValue());
+                            }
+                            Object reviews = document.get("reviewCount");
+                            if (reviews instanceof Number) {
+                                provider.setReviewCount(((Number) reviews).intValue());
+                            }
+                            Object isOpen = document.get("isOpen");
+                            if (isOpen instanceof Boolean) {
+                                provider.setIsOpen((Boolean) isOpen);
+                            }
+                            providers.add(provider);
+                        }
                     });
                     redrawMarkers();
                 })
@@ -132,12 +159,45 @@ public class NearbyLaundryMapActivity extends AppCompatActivity implements OnMap
             if (distance[0] <= radiusKm * 1000d) {
                 String name = provider.getBusinessName() == null
                         ? "Laundry business" : provider.getBusinessName();
-                map.addMarker(new MarkerOptions()
+                Marker marker = map.addMarker(new MarkerOptions()
                         .position(new LatLng(provider.getLatitude(), provider.getLongitude()))
                         .title(name)
                         .snippet(String.format(Locale.US, "%.1f km away", distance[0] / 1000)));
+                if (marker != null) marker.setTag(provider);
             }
         }
+    }
+
+    private void openProvider(Provider provider) {
+        Intent intent = new Intent(this, ProviderDetailsActivity.class);
+        intent.putExtra("provider_id", provider.getUid());
+        intent.putExtra("provider_name", provider.getBusinessName());
+        intent.putExtra("provider_phone", provider.getPhone());
+        intent.putExtra("provider_address", provider.getAddress());
+        if (provider.getRating() != null && provider.getReviewCount() != null
+                && provider.getReviewCount() > 0) {
+            intent.putExtra("provider_rating", String.format(Locale.US, "%.1f",
+                    provider.getRating()));
+            intent.putExtra("provider_reviews", provider.getReviewCount() == 1
+                    ? getString(R.string.provider_single_review)
+                    : getString(R.string.provider_review_count, provider.getReviewCount()));
+        } else {
+            intent.putExtra("provider_rating", getString(R.string.provider_not_rated));
+            intent.putExtra("provider_reviews", getString(R.string.provider_no_reviews));
+        }
+        intent.putExtra("provider_status", provider.getIsOpen() == null
+                ? getString(R.string.provider_availability_unlisted)
+                : getString(provider.getIsOpen() ? R.string.open_now : R.string.closed));
+        if (userLocation != null) {
+            float[] distance = new float[1];
+            Location.distanceBetween(userLocation.latitude, userLocation.longitude,
+                    provider.getLatitude(), provider.getLongitude(), distance);
+            intent.putExtra("provider_distance",
+                    String.format(Locale.getDefault(), "%.1f km away", distance[0] / 1000));
+        }
+        intent.putExtra("provider_image_res", R.drawable.ic_provider_business);
+        intent.putExtra("selected_service", getIntent().getStringExtra("selected_service"));
+        startActivity(intent);
     }
 
     private void updateRadiusLabel() {
@@ -159,7 +219,7 @@ public class NearbyLaundryMapActivity extends AppCompatActivity implements OnMap
         }
         if (requestCode == LOCATION_REQUEST && granted) {
             requestLocation();
-        } else {
+        } else if (requestCode == LOCATION_REQUEST) {
             Toast.makeText(this, R.string.map_location_permission, Toast.LENGTH_LONG).show();
         }
     }

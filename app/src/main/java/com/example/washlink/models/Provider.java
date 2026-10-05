@@ -10,6 +10,9 @@ public class Provider {
     private double latitude;
     private double longitude;
     private String createdAt;
+    private Boolean isOpen;
+    private Double rating;
+    private Integer reviewCount;
 
     public Provider() {
         this.createdAt = java.time.Instant.now().toString();
@@ -95,5 +98,29 @@ public class Provider {
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Boolean getIsOpen() {
+        return isOpen;
+    }
+
+    public void setIsOpen(Boolean isOpen) {
+        this.isOpen = isOpen;
+    }
+
+    public Double getRating() {
+        return rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
+    }
+
+    public Integer getReviewCount() {
+        return reviewCount;
+    }
+
+    public void setReviewCount(Integer reviewCount) {
+        this.reviewCount = reviewCount;
     }
 }

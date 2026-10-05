@@ -9,6 +9,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.View;
+import android.widget.AdapterView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,38 +44,72 @@ public class ProviderDetailsActivity extends AppCompatActivity {
         TextView statusTv = findViewById(R.id.tv_provider_status);
         TextView priceTv = findViewById(R.id.tv_provider_price);
         Button callBtn = findViewById(R.id.btn_call_provider_details);
+        View chatBtn = findViewById(R.id.btn_chat_provider);
+        View whatsappBtn = findViewById(R.id.btn_whatsapp_provider);
         Button bookBtn = findViewById(R.id.btn_book_provider);
         Spinner serviceSpinner = findViewById(R.id.spinner_provider_services);
 
         Intent in = getIntent();
-        String name = in != null ? in.getStringExtra("provider_name") : "Provider";
-        String rating = in != null ? in.getStringExtra("provider_rating") : "N/A";
-        String reviews = in != null ? in.getStringExtra("provider_reviews") : "";
-        String distance = in != null ? in.getStringExtra("provider_distance") : "";
-        String status = in != null ? in.getStringExtra("provider_status") : "";
-        String price = in != null ? in.getStringExtra("provider_price") : "";
-        String phone = in != null ? in.getStringExtra("provider_phone") : "+256700000000";
+        String name = in != null ? in.getStringExtra("provider_name") : null;
+        String rating = in != null ? in.getStringExtra("provider_rating") : null;
+        String reviews = in != null ? in.getStringExtra("provider_reviews") : null;
+        String distance = in != null ? in.getStringExtra("provider_distance") : null;
+        String status = in != null ? in.getStringExtra("provider_status") : null;
+        String price = in != null ? in.getStringExtra("provider_price") : null;
+        String phone = in != null ? in.getStringExtra("provider_phone") : null;
         String providerId = in != null ? in.getStringExtra("provider_id") : null;
         String address = in != null ? in.getStringExtra("provider_address") : null;
         String selectedService = in != null ? in.getStringExtra("selected_service") : null;
-        int imageRes = in != null ? in.getIntExtra("provider_image_res", R.drawable.bg_thumbnail_placeholder) : R.drawable.bg_thumbnail_placeholder;
+        int imageRes = in != null ? in.getIntExtra("provider_image_res",
+                R.drawable.ic_provider_business) : R.drawable.ic_provider_business;
 
         if (avatar != null) avatar.setImageResource(imageRes);
-        if (nameTv != null) nameTv.setText(name);
-        if (ratingTv != null) ratingTv.setText(rating);
-        if (reviewsTv != null) reviewsTv.setText(reviews);
-        if (distanceTv != null) distanceTv.setText(distance);
-        if (statusTv != null) statusTv.setText(status);
-        if (priceTv != null) priceTv.setText(price);
+        if (nameTv != null) nameTv.setText(nonEmpty(name, getString(
+                R.string.provider_business_name_fallback)));
+        if (ratingTv != null) ratingTv.setText(nonEmpty(rating,
+                getString(R.string.provider_not_rated)));
+        if (reviewsTv != null) reviewsTv.setText(nonEmpty(reviews,
+                getString(R.string.provider_no_reviews)));
+        if (distanceTv != null) distanceTv.setText(nonEmpty(distance,
+                getString(R.string.provider_distance_unavailable)));
+        if (statusTv != null) statusTv.setText(nonEmpty(status,
+                getString(R.string.provider_availability_unlisted)));
+        if (priceTv != null) priceTv.setText(nonEmpty(price,
+                getString(R.string.provider_contact_for_quote)));
 
         if (callBtn != null) {
             final String phoneFinal = phone;
-            callBtn.setEnabled(phoneFinal != null && !phoneFinal.trim().isEmpty());
+            boolean hasPhone = phoneFinal != null && !phoneFinal.trim().isEmpty();
+            callBtn.setEnabled(hasPhone);
+            callBtn.setText(hasPhone ? R.string.provider_call : R.string.provider_phone_unavailable);
+            callBtn.setAlpha(hasPhone ? 1f : 0.55f);
             callBtn.setOnClickListener(v -> {
                 if (phoneFinal == null || phoneFinal.trim().isEmpty()) return;
-                Intent dial = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneFinal));
-                if (dial.resolveActivity(getPackageManager()) != null) startActivity(dial);
+                Intent dial = new Intent(Intent.ACTION_DIAL,
+                        Uri.fromParts("tel", phoneFinal.trim(), null));
+                if (dial.resolveActivity(getPackageManager()) != null) {
+                    startActivity(dial);
+                } else {
+                    Toast.makeText(this, R.string.provider_call_unavailable,
+                            Toast.LENGTH_SHORT).show();
+                }
             });
+        }
+        if (chatBtn != null) {
+            chatBtn.setEnabled(providerId != null && !providerId.trim().isEmpty());
+            chatBtn.setOnClickListener(v -> {
+                if (providerId == null || providerId.trim().isEmpty()) return;
+                Intent chat = new Intent(this, ChatActivity.class);
+                chat.putExtra(ChatActivity.EXTRA_PROVIDER_ID, providerId);
+                chat.putExtra(ChatActivity.EXTRA_PROVIDER_NAME, name);
+                startActivity(chat);
+            });
+        }
+        if (whatsappBtn != null) {
+            boolean hasPhone = phone != null && !phone.trim().isEmpty();
+            whatsappBtn.setEnabled(hasPhone);
+            whatsappBtn.setAlpha(hasPhone ? 1f : 0.55f);
+            whatsappBtn.setOnClickListener(v -> openWhatsApp(phone));
         }
 
         if (bookBtn != null) {
@@ -104,6 +140,19 @@ public class ProviderDetailsActivity extends AppCompatActivity {
         if (serviceSpinner != null && providerId != null && !providerId.trim().isEmpty()) {
             loadProviderServices(providerId, serviceSpinner, bookBtn,
                     !"Closed".equalsIgnoreCase(status), status, statusTv);
+            serviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (position >= 0 && position < serviceOptions.size() && priceTv != null) {
+                        priceTv.setText(getString(R.string.provider_price_from,
+                                BookingPricing.format((int) Math.round(
+                                        serviceOptions.get(position).pricePerKg))));
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) { }
+            });
             loadRecentReviews(providerId, findViewById(R.id.tv_recent_reviews));
         } else if (bookBtn != null) {
             bookBtn.setEnabled(false);
@@ -112,9 +161,34 @@ public class ProviderDetailsActivity extends AppCompatActivity {
         BottomNavHelper.bind(this);
     }
 
+    private void openWhatsApp(String phone) {
+        if (phone == null || phone.trim().isEmpty()) {
+            Toast.makeText(this, R.string.provider_phone_unavailable, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String number = phone.replaceAll("[^0-9]", "");
+        if (number.startsWith("0")) {
+            number = "256" + number.substring(1);
+        } else if (!number.startsWith("256") && number.length() == 9) {
+            number = "256" + number;
+        }
+        if (number.isEmpty()) {
+            Toast.makeText(this, R.string.provider_phone_unavailable, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent whatsapp = new Intent(Intent.ACTION_VIEW,
+                Uri.parse("https://wa.me/" + number));
+        if (whatsapp.resolveActivity(getPackageManager()) != null) {
+            startActivity(whatsapp);
+        } else {
+            Toast.makeText(this, R.string.provider_whatsapp_unavailable,
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void loadRecentReviews(String providerId, TextView reviewsView) {
         if (reviewsView == null) return;
-        reviewsView.setText("Recent reviews loading...");
+        reviewsView.setText(R.string.provider_reviews_loading);
         reviewsView.setOnClickListener(null);
         FirebaseFirestore.getInstance().collection("providers").document(providerId)
                 .collection("reviews").orderBy("createdAt",
@@ -122,10 +196,11 @@ public class ProviderDetailsActivity extends AppCompatActivity {
                 .limit(5).get()
                 .addOnSuccessListener(snapshot -> {
                     if (snapshot.isEmpty()) {
-                        reviewsView.setText("No customer reviews yet.");
+                        reviewsView.setText(R.string.provider_no_reviews);
                         return;
                     }
-                    StringBuilder text = new StringBuilder("Recent reviews\n\n");
+                    StringBuilder text = new StringBuilder(
+                            getString(R.string.provider_recent_reviews)).append("\n\n");
                     for (com.google.firebase.firestore.DocumentSnapshot review
                             : snapshot.getDocuments()) {
                         Object rating = review.get("rating");
@@ -142,7 +217,7 @@ public class ProviderDetailsActivity extends AppCompatActivity {
                     reviewsView.setText(text.toString().trim());
                 })
                 .addOnFailureListener(error -> {
-                    reviewsView.setText("Could not load reviews. Tap to retry.");
+                    reviewsView.setText(R.string.provider_reviews_load_error);
                     reviewsView.setOnClickListener(v -> loadRecentReviews(providerId, reviewsView));
                 });
     }
@@ -170,14 +245,18 @@ public class ProviderDetailsActivity extends AppCompatActivity {
                     }
                     List<String> labels = new ArrayList<>();
                     for (ProviderServiceOption option : serviceOptions) labels.add(option.toString());
-                    if (labels.isEmpty()) labels.add("No services listed");
+                    if (labels.isEmpty()) labels.add(getString(R.string.provider_no_services));
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                             android.R.layout.simple_spinner_item, labels);
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     spinner.setAdapter(adapter);
                     boolean hasServices = !serviceOptions.isEmpty();
                     spinner.setEnabled(hasServices);
-                    if (bookButton != null) bookButton.setEnabled(hasServices && providerOpen);
+                    if (bookButton != null) {
+                        bookButton.setEnabled(hasServices && providerOpen);
+                        bookButton.setText(hasServices ? R.string.provider_book_action
+                                : R.string.provider_no_services);
+                    }
                     if (statusView != null) {
                         statusView.setText(providerStatus);
                         statusView.setClickable(false);
@@ -186,12 +265,12 @@ public class ProviderDetailsActivity extends AppCompatActivity {
                     }
                     if (!hasServices) {
                         TextView price = findViewById(R.id.tv_provider_price);
-                        if (price != null) price.setText("No services listed");
+                        if (price != null) price.setText(R.string.provider_no_services);
                     }
                 })
                 .addOnFailureListener(error -> {
                     if (statusView != null) {
-                        statusView.setText("Could not load services. Tap to retry.");
+                        statusView.setText(R.string.provider_services_load_error);
                         statusView.setClickable(true);
                         statusView.setFocusable(true);
                         statusView.setOnClickListener(v -> loadProviderServices(
@@ -199,6 +278,10 @@ public class ProviderDetailsActivity extends AppCompatActivity {
                                 providerStatus, statusView));
                     }
                 });
+    }
+
+    private String nonEmpty(String value, String fallback) {
+        return value == null || value.trim().isEmpty() ? fallback : value;
     }
 
     private static final class ProviderServiceOption {

@@ -87,6 +87,10 @@
         <activity android:name=".NearbyProvidersActivity" />
         <activity android:name=".NearbyLaundryMapActivity" />
         <activity android:name=".ProviderDetailsActivity" />
+        <activity android:name=".ChatInboxActivity" />
+        <activity
+            android:name=".ChatActivity"
+            android:windowSoftInputMode="adjustResize" />
         <activity android:name=".OrderTrackingActivity" />
         <activity android:name=".NotificationsActivity" />
         <activity android:name=".ProviderLoginActivity" />

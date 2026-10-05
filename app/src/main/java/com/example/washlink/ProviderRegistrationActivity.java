@@ -69,7 +69,7 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
                 } else if (UserAccount.ROLE_ADMIN.equals(user.getRole())) {
                     openRoleScreen(AdminManagementActivity.class);
                 } else {
-                    openRoleScreen(HomeActivity.class);
+                    openRoleScreen(com.example.washlink.ui.customer.MainActivity.class);
                 }
             }
 

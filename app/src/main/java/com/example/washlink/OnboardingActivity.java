@@ -1,6 +1,7 @@
 package com.example.washlink;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
@@ -22,10 +23,10 @@ public class OnboardingActivity extends AppCompatActivity {
     public static final String EXTRA_SHOW_ONBOARDING = "extra_show_onboarding";
 
     private Button btn_get_started;
-    private Button btn_onboarding_next;
     private TextView btn_sign_in;
     private View btn_onboarding_skip;
     private ImageView heroImage;
+    private View firstSlideDecoration;
     private TextView title;
     private TextView subtitle;
     private View indicatorOne;
@@ -53,12 +54,12 @@ public class OnboardingActivity extends AppCompatActivity {
         }
 
         btn_get_started = findViewById(R.id.btn_get_started);
-        btn_onboarding_next = findViewById(R.id.btn_onboarding_next);
         btn_sign_in = findViewById(R.id.btn_sign_in);
         btn_onboarding_skip = findViewById(R.id.btn_onboarding_skip);
         View providerSignup = findViewById(R.id.btn_provider_signup);
         View providerSignIn = findViewById(R.id.btn_provider_sign_in);
         heroImage = findViewById(R.id.iv_hero);
+        firstSlideDecoration = findViewById(R.id.first_slide_decoration);
         title = findViewById(R.id.tv_title);
         subtitle = findViewById(R.id.tv_subtitle);
         indicatorOne = findViewById(R.id.indicator_one);
@@ -73,8 +74,13 @@ public class OnboardingActivity extends AppCompatActivity {
         configureLocationAnimation();
 
         btn_get_started.setOnClickListener(v -> getStartedButtonClicked());
-        btn_onboarding_next.setOnClickListener(v -> showPage(currentPage + 1));
-        btn_onboarding_skip.setOnClickListener(v -> showPage(3));
+        SharedPreferences preferences = getSharedPreferences(
+                "washlink_preferences", MODE_PRIVATE);
+        currentPage = preferences.getBoolean("onboarding_completed", false) ? 3 : 0;
+        btn_onboarding_skip.setOnClickListener(v -> {
+            preferences.edit().putBoolean("onboarding_completed", true).apply();
+            showPage(3);
+        });
         btn_sign_in.setOnClickListener(v -> signInButtonClicked());
         providerSignup.setOnClickListener(v ->
                 startActivity(new Intent(this, ProviderRegistrationActivity.class)));
@@ -98,19 +104,20 @@ public class OnboardingActivity extends AppCompatActivity {
         trackingAnimation.setOnTouchListener(swipeListener);
         deliveryAnimation.setOnTouchListener(swipeListener);
         locationAnimation.setOnTouchListener(swipeListener);
-        indicatorOne.setOnClickListener(v -> showPage(0));
-        indicatorTwo.setOnClickListener(v -> showPage(1));
-        indicatorThree.setOnClickListener(v -> showPage(2));
-        indicatorFour.setOnClickListener(v -> showPage(3));
         showPage(currentPage);
     }
 
     private void showPage(int page) {
         currentPage = Math.max(0, Math.min(page, 3));
+        if (currentPage == 3) {
+            getSharedPreferences("washlink_preferences", MODE_PRIVATE)
+                    .edit().putBoolean("onboarding_completed", true).apply();
+        }
         boolean secondPage = currentPage == 1;
         boolean thirdPage = currentPage == 2;
         boolean fourthPage = currentPage == 3;
         heroImage.setVisibility(secondPage || thirdPage || fourthPage ? View.GONE : View.VISIBLE);
+        firstSlideDecoration.setVisibility(currentPage == 0 ? View.VISIBLE : View.GONE);
         deliveryAnimation.setVisibility(secondPage ? View.VISIBLE : View.GONE);
         trackingAnimation.setVisibility(thirdPage ? View.VISIBLE : View.GONE);
         locationAnimation.setVisibility(fourthPage ? View.VISIBLE : View.GONE);
@@ -160,7 +167,6 @@ public class OnboardingActivity extends AppCompatActivity {
                 ? R.drawable.dot_active_indicator : R.drawable.dot_inactive_indicator);
 
         int accountActionVisibility = fourthPage ? View.VISIBLE : View.GONE;
-        btn_onboarding_next.setVisibility(fourthPage ? View.GONE : View.VISIBLE);
         btn_onboarding_skip.setVisibility(fourthPage ? View.GONE : View.VISIBLE);
         btn_get_started.setVisibility(accountActionVisibility);
         findViewById(R.id.btn_provider_signup).setVisibility(accountActionVisibility);

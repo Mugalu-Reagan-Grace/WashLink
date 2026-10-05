@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -54,8 +55,11 @@ public class NearbyProvidersActivity extends AppCompatActivity {
         selectedService = getIntent().getStringExtra("selected_service");
         if (selectedService == null || selectedService.trim().isEmpty()) selectedService = "Pickup & Delivery";
 
-        findViewById(R.id.btn_open_map).setOnClickListener(v ->
-                startActivity(new Intent(this, NearbyLaundryMapActivity.class)));
+        findViewById(R.id.btn_open_map).setOnClickListener(v -> {
+            Intent mapIntent = new Intent(this, NearbyLaundryMapActivity.class);
+            mapIntent.putExtra("selected_service", selectedService);
+            startActivity(mapIntent);
+        });
 
         View backButton = findViewById(R.id.btn_back);
         if (backButton != null) {
@@ -152,13 +156,21 @@ public class NearbyProvidersActivity extends AppCompatActivity {
                         String name = stringValue(document.get("businessName"));
                         if (name.isEmpty()) continue;
                         double minPrice = Double.MAX_VALUE;
+                        int serviceCount = 0;
                         Object serviceData = document.get("services");
                         if (serviceData instanceof List<?>) {
                             for (Object item : (List<?>) serviceData) {
                                 if (item instanceof Map<?, ?>) {
-                                    Object price = ((Map<?, ?>) item).get("pricePerKg");
-                                    if (price instanceof Number) {
-                                        minPrice = Math.min(minPrice, ((Number) price).doubleValue());
+                                    Map<?, ?> service = (Map<?, ?>) item;
+                                    Object nameValue = service.get("name");
+                                    Object priceValue = service.get("pricePerKg");
+                                    if (nameValue instanceof String
+                                            && !((String) nameValue).trim().isEmpty()) {
+                                        serviceCount++;
+                                    }
+                                    if (priceValue instanceof Number) {
+                                        minPrice = Math.min(minPrice,
+                                                ((Number) priceValue).doubleValue());
                                     }
                                 }
                             }
@@ -185,10 +197,15 @@ public class NearbyProvidersActivity extends AppCompatActivity {
                         String distanceText = distanceKm == Double.MAX_VALUE ? "Distance unavailable"
                                 : String.format(Locale.getDefault(), "%.1f km away", distanceKm);
                         String ratingText = rating < 0 ? "New" : String.format(Locale.US, "%.1f", rating);
+                        String reviewText = reviewCount == 0
+                                ? getString(R.string.provider_no_reviews)
+                                : reviewCount == 1 ? getString(R.string.provider_single_review)
+                                : getString(R.string.provider_review_count, reviewCount);
                         Provider provider = new Provider(document.getId(), name, ratingText,
-                                reviewCount + " reviews", distanceText, status, priceText,
+                                reviewText, distanceText, status, priceText,
                                 stringValue(document.get("phone")), stringValue(document.get("address")),
-                                rating, reviewCount, distanceKm, minPrice, R.drawable.bg_thumbnail_placeholder);
+                                rating, reviewCount, distanceKm, minPrice, serviceCount,
+                                R.drawable.ic_provider_business);
                         provider.setCoordinates(latitude, longitude);
                         provider.updateDistance(userLocation);
                         allProviders.add(provider);
@@ -308,13 +325,15 @@ public class NearbyProvidersActivity extends AppCompatActivity {
         final int reviewCount;
         double distanceKm;
         final double priceValue;
+        final int serviceCount;
         final int imageRes;
         double latitude;
         double longitude;
 
         Provider(String id, String name, String rating, String reviews, String distance,
                  String status, String price, String phone, String address, double ratingValue,
-                 int reviewCount, double distanceKm, double priceValue, int imageRes) {
+                 int reviewCount, double distanceKm, double priceValue, int serviceCount,
+                 int imageRes) {
             this.id = id;
             this.name = name;
             this.rating = rating;
@@ -328,6 +347,7 @@ public class NearbyProvidersActivity extends AppCompatActivity {
             this.reviewCount = reviewCount;
             this.distanceKm = distanceKm;
             this.priceValue = priceValue;
+            this.serviceCount = serviceCount;
             this.imageRes = imageRes;
         }
 
@@ -373,9 +393,17 @@ public class NearbyProvidersActivity extends AppCompatActivity {
             Provider provider = providers.get(position);
             holder.name.setText(provider.name);
             holder.rating.setText(provider.rating);
-            holder.reviews.setText("(" + provider.reviews + ")");
+            holder.reviews.setText(provider.reviews);
+            holder.ratingStar.setVisibility(provider.reviewCount > 0 ? View.VISIBLE : View.GONE);
             holder.distance.setText(provider.distance);
             holder.price.setText(provider.price);
+            if (provider.serviceCount == 0) {
+                holder.serviceCount.setText(R.string.provider_service_count_unknown);
+            } else {
+                holder.serviceCount.setText(holder.itemView.getResources().getQuantityString(
+                        R.plurals.provider_service_count, provider.serviceCount,
+                        provider.serviceCount));
+            }
             holder.itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onProviderClicked(provider);
@@ -409,6 +437,8 @@ public class NearbyProvidersActivity extends AppCompatActivity {
             final TextView distance;
             final TextView status;
             final TextView price;
+            final TextView serviceCount;
+            final ImageView ratingStar;
 
             ProviderViewHolder(View itemView) {
                 super(itemView);
@@ -418,6 +448,8 @@ public class NearbyProvidersActivity extends AppCompatActivity {
                 distance = itemView.findViewById(R.id.tv_distance);
                 status = itemView.findViewById(R.id.tv_status);
                 price = itemView.findViewById(R.id.tv_price);
+                serviceCount = itemView.findViewById(R.id.row_tags);
+                ratingStar = itemView.findViewById(R.id.iv_provider_rating_star);
             }
         }
     }

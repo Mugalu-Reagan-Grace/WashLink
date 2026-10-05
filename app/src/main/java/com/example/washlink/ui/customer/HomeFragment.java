@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.washlink.NearbyProvidersActivity;
+import com.example.washlink.ChatInboxActivity;
 import com.example.washlink.R;
 import com.example.washlink.data.BookingService;
 import com.example.washlink.data.BookingServiceFacade;
@@ -52,6 +53,8 @@ public class HomeFragment extends CustomerTabFragment {
         view.findViewById(R.id.btn_book_service).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), NearbyProvidersActivity.class)));
         view.findViewById(R.id.iv_bell).setOnClickListener(v -> openNotifications());
+        view.findViewById(R.id.iv_chat_inbox).setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), ChatInboxActivity.class)));
         view.findViewById(R.id.row_order_history).setOnClickListener(v ->
                 ((MainActivity) requireActivity()).showTab(MainActivity.TAB_HISTORY));
         view.findViewById(R.id.row_profile_settings).setOnClickListener(v ->
