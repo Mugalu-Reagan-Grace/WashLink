@@ -84,6 +84,7 @@ public class BookingRequestsActivity extends AppCompatActivity {
                     ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
             tab.setTextColor(androidx.core.content.ContextCompat.getColor(this,
                     selected ? R.color.white : R.color.chip_unselected_text));
+            tab.setSelected(selected);
         }
     }
 

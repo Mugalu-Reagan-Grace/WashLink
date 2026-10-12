@@ -32,6 +32,12 @@ public class UpdateOrderStatusActivity extends AppCompatActivity {
     private String bookingId;
     private Booking currentBooking;
     private MaterialButton assignRiderButton;
+    private View updateStatusButton;
+    private RadioGroup statusOptions;
+    private TextView approvalNotice;
+    private boolean approvalChecked;
+    private boolean providerApproved;
+    private com.google.firebase.firestore.ListenerRegistration approvalListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +52,20 @@ public class UpdateOrderStatusActivity extends AppCompatActivity {
         TextView customerDetails = findViewById(R.id.tv_customer_name);
         TextView tvCurrentStatus = findViewById(R.id.tv_current_status_value);
         assignRiderButton = findViewById(R.id.btn_assign_rider);
+        approvalNotice = findViewById(R.id.tv_provider_approval_notice);
         MaterialButton callCustomerButton = findViewById(R.id.btn_call_customer);
         assignRiderButton.setEnabled(false);
         callCustomerButton.setEnabled(false);
-        RadioGroup radioGroup = findViewById(R.id.radio_group_status);
-        View btnUpdate = findViewById(R.id.btn_update_status);
-        btnUpdate.setEnabled(false);
+        statusOptions = findViewById(R.id.radio_group_status);
+        updateStatusButton = findViewById(R.id.btn_update_status);
+        updateStatusButton.setEnabled(false);
+        if (approvalNotice != null) {
+            approvalNotice.setText(R.string.provider_approval_checking);
+            approvalNotice.setVisibility(View.VISIBLE);
+        }
+        loadProviderApproval();
+        RadioGroup radioGroup = statusOptions;
+        View btnUpdate = updateStatusButton;
         radioGroup.removeAllViews();
         tvCurrentStatus.setText("Loading booking...");
 
@@ -79,7 +93,21 @@ public class UpdateOrderStatusActivity extends AppCompatActivity {
                             .append("\nSchedule: ").append(value(booking.getScheduledDateTime(), "Not scheduled"))
                             .append("\nAddress: ").append(value(booking.getAddress(), "Not provided"))
                             .append("\nItems: ").append(booking.getItemCount())
-                            .append(" · Total: ").append(com.example.washlink.data.BookingPricing
+                            .append("\nFulfilment: ").append(getString(
+                                    Booking.SERVICE_TYPE_PICKUP.equals(booking.getServiceType())
+                                            ? R.string.provider_booking_pickup
+                                            : Booking.SERVICE_TYPE_DROPOFF.equals(booking.getServiceType())
+                                            ? R.string.provider_booking_dropoff
+                                            : R.string.provider_booking_mode_unavailable))
+                            .append("\n").append(getString(R.string.provider_booking_subtotal_label))
+                            .append(": ").append(
+                                    com.example.washlink.data.BookingPricing.format(
+                                            (int) booking.getSubtotal()))
+                            .append("\n").append(getString(R.string.service_fee)).append(": ").append(
+                                    com.example.washlink.data.BookingPricing.format(
+                                            (int) booking.getServiceFeeForDisplay()))
+                            .append("\n").append(getString(R.string.total)).append(": ")
+                            .append(com.example.washlink.data.BookingPricing
                                     .format((int) booking.getTotal()))
                             .append("\nPayment: ").append(value(booking.getPaymentStatus(), "Pending"))
                             .append(" · ").append(value(booking.getPaymentMethod(), "Not selected"));
@@ -94,7 +122,8 @@ public class UpdateOrderStatusActivity extends AppCompatActivity {
                     customerDetails.setText(details);
                     callCustomerButton.setEnabled(booking.getCustomerPhone() != null
                             && !booking.getCustomerPhone().trim().isEmpty());
-                    assignRiderButton.setEnabled(!BookingServiceFacade.isUsingStub()
+                    assignRiderButton.setEnabled(approvalChecked && providerApproved
+                            && !BookingServiceFacade.isUsingStub()
                             && isRiderAssignableStatus(booking.getStatus()));
                     OrderStatus current = OrderStatus.fromString(booking.getStatus());
                     tvCurrentStatus.setText(current.getDisplayName());
@@ -108,7 +137,6 @@ public class UpdateOrderStatusActivity extends AppCompatActivity {
                         btnUpdate.setEnabled(false);
                         Toast.makeText(UpdateOrderStatusActivity.this, "No further statuses available.", Toast.LENGTH_SHORT).show();
                     } else {
-                        btnUpdate.setEnabled(true);
                         for (int i = 0; i < availableStatuses.size(); i++) {
                             OrderStatus s = availableStatuses.get(i);
                             RadioButton rb = new RadioButton(UpdateOrderStatusActivity.this);
@@ -119,6 +147,7 @@ public class UpdateOrderStatusActivity extends AppCompatActivity {
                             radioGroup.addView(rb);
                             if (i == 0) rb.setChecked(true);
                         }
+                        btnUpdate.setEnabled(approvalChecked && providerApproved);
                     }
                 });
             }
@@ -203,6 +232,66 @@ public class UpdateOrderStatusActivity extends AppCompatActivity {
         });
     }
 
+    private void loadProviderApproval() {
+        String providerId = com.example.washlink.data.AuthRepository.getInstance().getCurrentUserId();
+        if (BookingServiceFacade.isUsingStub()) {
+            approvalChecked = true;
+            providerApproved = true;
+            updateApprovalControls();
+            return;
+        }
+        if (providerId == null) {
+            approvalChecked = true;
+            providerApproved = false;
+            approvalNotice.setText(R.string.provider_approval_unavailable);
+            approvalNotice.setVisibility(View.VISIBLE);
+            updateApprovalControls();
+            return;
+        }
+        approvalListener = FirebaseFirestore.getInstance().collection("providers")
+                .document(providerId).addSnapshotListener((document, error) -> {
+                    if (error != null) {
+                        approvalChecked = true;
+                        providerApproved = false;
+                        if (approvalNotice != null) {
+                            approvalNotice.setText(R.string.provider_approval_unavailable);
+                            approvalNotice.setVisibility(View.VISIBLE);
+                        }
+                        updateApprovalControls();
+                        return;
+                    }
+                    approvalChecked = true;
+                    providerApproved = document != null && document.exists()
+                            && Boolean.TRUE.equals(document.get("isApproved"));
+                    updateApprovalControls();
+                });
+    }
+
+    private void updateApprovalControls() {
+        boolean canManageOrders = approvalChecked && providerApproved;
+        if (approvalNotice != null) {
+            if (canManageOrders) {
+                approvalNotice.setVisibility(View.GONE);
+            } else if (approvalNotice.getVisibility() != View.VISIBLE
+                    || !getString(R.string.provider_approval_unavailable)
+                    .contentEquals(approvalNotice.getText())) {
+                approvalNotice.setText(approvalChecked
+                        ? R.string.provider_approval_pending
+                        : R.string.provider_approval_checking);
+                approvalNotice.setVisibility(View.VISIBLE);
+            }
+        }
+        if (currentBooking != null && assignRiderButton != null) {
+            assignRiderButton.setEnabled(canManageOrders
+                    && !BookingServiceFacade.isUsingStub()
+                    && isRiderAssignableStatus(currentBooking.getStatus()));
+        }
+        if (updateStatusButton != null && statusOptions != null) {
+            updateStatusButton.setEnabled(canManageOrders
+                    && statusOptions.getChildCount() > 0);
+        }
+    }
+
     private void showRiderPicker() {
         if (currentBooking == null || BookingServiceFacade.isUsingStub()) {
             Toast.makeText(UpdateOrderStatusActivity.this, "Rider assignment is unavailable.",
@@ -268,6 +357,7 @@ public class UpdateOrderStatusActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (approvalListener != null) approvalListener.remove();
         if (bookingListener != null) {
             if (BookingServiceFacade.isUsingStub()) BookingServiceStub.getInstance().removeListener(bookingListener);
             else BookingService.getInstance().removeListener(bookingListener);

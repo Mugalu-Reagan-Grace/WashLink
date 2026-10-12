@@ -72,8 +72,8 @@ public final class BottomNavHelper {
         ImageView icon = findFirstImageView(group);
         TextView label = findFirstTextView(group);
 
-        int activeColor = ContextCompat.getColor(activity, R.color.laundr_blue);
-        int inactiveColor = ContextCompat.getColor(activity, R.color.nav_inactive);
+        int activeColor = ContextCompat.getColor(activity, R.color.white);
+        int inactiveColor = ContextCompat.getColor(activity, R.color.splash_tagline_text);
 
         if (icon != null) {
             icon.setColorFilter(active ? activeColor : inactiveColor, PorterDuff.Mode.SRC_IN);
@@ -92,7 +92,7 @@ public final class BottomNavHelper {
             label.setTypeface(null, active ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
         }
 
-        navItem.setBackgroundResource(active ? R.drawable.bg_card_selected_outline : 0);
+        navItem.setBackgroundColor(active ? 0x24FFFFFF : android.graphics.Color.TRANSPARENT);
     }
 
     private static ImageView findFirstImageView(ViewGroup parent) {

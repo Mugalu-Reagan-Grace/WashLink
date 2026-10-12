@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_card_bordered"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:padding="14dp">
+
+    <ImageView
+        android:id="@+id/iv_favorite_provider"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:background="@drawable/bg_offer_card"
+        android:contentDescription="@null"
+        android:padding="14dp"
+        android:src="@drawable/ic_provider_business"
+        app:tint="@color/laundr_blue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_favorite_provider_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:text="@string/favorite_empty_name"
+        android:textColor="@color/text_primary"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/btn_remove_favorite"
+        app:layout_constraintStart_toEndOf="@id/iv_favorite_provider"
+        app:layout_constraintTop_toTopOf="@id/iv_favorite_provider" />
+
+    <TextView
+        android:id="@+id/tv_favorite_provider_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
+        android:text="@string/provider_not_rated"
+        android:textColor="@color/text_primary"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@id/iv_favorite_provider"
+        app:layout_constraintTop_toBottomOf="@id/tv_favorite_provider_name" />
+
+    <TextView
+        android:id="@+id/tv_favorite_provider_reviews"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/provider_no_reviews"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@id/tv_favorite_provider_rating"
+        app:layout_constraintEnd_toStartOf="@id/btn_remove_favorite"
+        app:layout_constraintStart_toEndOf="@id/tv_favorite_provider_rating"
+        app:layout_constraintTop_toTopOf="@id/tv_favorite_provider_rating" />
+
+    <TextView
+        android:id="@+id/tv_favorite_provider_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/provider_availability_unlisted"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iv_favorite_provider" />
+
+    <TextView
+        android:id="@+id/tv_favorite_provider_price"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="10dp"
+        android:ellipsize="end"
+        android:gravity="end"
+        android:maxLines="1"
+        android:text="@string/provider_contact_for_quote"
+        android:textColor="@color/laundr_blue"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tv_favorite_provider_status"
+        app:layout_constraintTop_toBottomOf="@id/iv_favorite_provider" />
+
+    <TextView
+        android:id="@+id/btn_remove_favorite"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:gravity="center"
+        android:minWidth="48dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:text="@string/favorite_remove"
+        android:textColor="@color/reject_red"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

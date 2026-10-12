@@ -4,6 +4,7 @@ import com.google.firebase.functions.FirebaseFunctions;
 import com.example.washlink.models.Booking;
 
 import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -20,7 +21,12 @@ public final class FlutterwavePaymentClient {
         data.put("providerId", booking.getProviderId());
         data.put("serviceType", booking.getServiceType());
         data.put("serviceName", booking.getServiceName());
+        data.put("serviceNames", booking.getServiceNames() == null
+                || booking.getServiceNames().isEmpty()
+                ? Collections.singletonList(booking.getServiceName())
+                : booking.getServiceNames());
         data.put("itemCount", booking.getItemCount());
+        if (booking.getWeightKg() > 0) data.put("weightKg", booking.getWeightKg());
         data.put("subtotal", booking.getSubtotal());
         data.put("pickupFee", booking.getPickupFee());
         data.put("deliveryFee", booking.getDeliveryFee());

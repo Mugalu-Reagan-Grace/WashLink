@@ -1,5 +1,7 @@
 package com.example.washlink.data;
 
+import android.net.Uri;
+
 import androidx.annotation.NonNull;
 
 import com.example.washlink.models.Provider;
@@ -185,6 +187,8 @@ public class AuthRepository {
                     providerDoc.put("longitude", provider.getLongitude());
                     providerDoc.put("createdAt", provider.getCreatedAt());
                     providerDoc.put("isApproved", false);
+                    providerDoc.put("supportsPickupDelivery", true);
+                    providerDoc.put("supportsDropoff", true);
 
                     db.collection("users").document(uid).set(userDoc)
                             .addOnSuccessListener(unused ->
@@ -341,10 +345,13 @@ public class AuthRepository {
         }
         db.collection("users").document(firebaseUser.getUid()).update(updates)
                 .addOnSuccessListener(unused -> {
-                    firebaseUser.updateProfile(new UserProfileChangeRequest.Builder()
-                            .setDisplayName(name)
-                            .build())
-                            .addOnSuccessListener(profileUpdate -> callback.onSuccess())
+                    UserProfileChangeRequest.Builder updateRequest =
+                            new UserProfileChangeRequest.Builder().setDisplayName(name);
+                    if (photoUri != null && photoUri.startsWith("https://")) {
+                        updateRequest.setPhotoUri(Uri.parse(photoUri));
+                    }
+                    firebaseUser.updateProfile(updateRequest.build())
+                            .addOnSuccessListener(unusedProfile -> callback.onSuccess())
                             .addOnFailureListener(e -> callback.onError(
                                     "Your account details were saved, but the sign-in profile "
                                             + "could not be synchronized: " + e.getMessage()));

@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.washlink.NearbyProvidersActivity;
+import com.example.washlink.NotificationsActivity;
 import com.example.washlink.R;
 
 public class ServicesFragment extends CustomerTabFragment {
@@ -21,6 +22,10 @@ public class ServicesFragment extends CustomerTabFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         bindNavigation(view, MainActivity.TAB_SERVICES);
+        view.findViewById(R.id.btn_back).setOnClickListener(v ->
+                ((MainActivity) requireActivity()).showTab(MainActivity.TAB_HOME));
+        view.findViewById(R.id.iv_bell).setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), NotificationsActivity.class)));
         view.findViewById(R.id.card_drop_off).setOnClickListener(v ->
                 openProviderList("Drop Off"));
         view.findViewById(R.id.card_pickup_delivery).setOnClickListener(v ->

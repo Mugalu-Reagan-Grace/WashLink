@@ -34,11 +34,13 @@ public class OrderSummaryDropOffActivity extends AppCompatActivity {
         backButton = findViewById(R.id.btn_back);
         bellLayout = findViewById(R.id.iv_bell);
         proceedPaymentButton = findViewById(R.id.btn_proceed_payment);
+        TextView changeServiceButton = findViewById(R.id.tv_change_service);
+        TextView editLogisticsButton = findViewById(R.id.tv_edit_logistics);
         serviceTypeValueText = findViewById(R.id.tv_service_type_value);
         dateTimeValueText = findViewById(R.id.tv_datetime_value);
         itemsValueText = findViewById(R.id.tv_items_value_inline);
         weightValueText = findViewById(R.id.tv_weight_value_inline);
-        int itemCount = getIntent() != null ? getIntent().getIntExtra("item_count", 15) : 15;
+        int itemCount = getIntent() != null ? getIntent().getIntExtra("item_count", 1) : 1;
         int weightKg = getIntent() != null ? getIntent().getIntExtra("weight_kg", BookingPricing.estimateWeightKg(itemCount)) : BookingPricing.estimateWeightKg(itemCount);
         double pricePerKg = getIntent().getDoubleExtra("price_per_kg", BookingPricing.PRICE_PER_KG);
         BookingPricing.Quote quote = BookingPricing.quote(weightKg, false, pricePerKg);
@@ -75,6 +77,8 @@ public class OrderSummaryDropOffActivity extends AppCompatActivity {
         weightValueText.setText(weightKg + " kg");
 
         backButton.setOnClickListener(v -> finish());
+        changeServiceButton.setOnClickListener(v -> returnToProviderServices());
+        editLogisticsButton.setOnClickListener(v -> returnToLogistics());
         bellLayout.setOnClickListener(v -> {
                 Intent intent = new Intent(OrderSummaryDropOffActivity.this, NotificationsActivity.class);
                 startActivity(intent);
@@ -89,5 +93,34 @@ public class OrderSummaryDropOffActivity extends AppCompatActivity {
             intent.putExtra("weight_kg", weightKg);
             startActivity(intent);
         });
+    }
+
+    private void returnToProviderServices() {
+        String providerId = getIntent().getStringExtra("provider_id");
+        if (providerId == null || providerId.trim().isEmpty()) {
+            Toast.makeText(this, "Provider details are unavailable. Choose a provider again.",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+        Intent intent = new Intent(this, ProviderDetailsActivity.class);
+        intent.putExtras(getIntent());
+        intent.putExtra("selected_service", getIntent().getStringExtra("selected_service"));
+        intent.putStringArrayListExtra("repeat_service_names",
+                getIntent().getStringArrayListExtra("selected_laundry_services"));
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+    private void returnToLogistics() {
+        String providerId = getIntent().getStringExtra("provider_id");
+        if (providerId == null || providerId.trim().isEmpty()) {
+            Toast.makeText(this, "Booking details are unavailable. Choose a provider again.",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+        Intent intent = new Intent(this, DropOffActivity.class);
+        intent.putExtras(getIntent());
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 }

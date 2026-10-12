@@ -1,5 +1,8 @@
 package com.example.washlink.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A single order, from the moment a customer books it through delivery.
  * Stored in Firestore at: bookings/{bookingId}
@@ -22,16 +25,18 @@ public class Booking {
     private String providerName;
     private String serviceType;       // SERVICE_TYPE_PICKUP or SERVICE_TYPE_DROPOFF
     private String serviceName;       // e.g. "Wash & Fold"
+    private List<String> serviceNames;
     private String status;            // stores OrderStatus.name(), e.g. "WASHING"
     private String address;
     private String scheduledDateTime; // display string, e.g. "Friday, March 15, 2024 - 10:00 AM"
     private int itemCount;
+    private int weightKg;
     private String estimatedWeight;   // e.g. "10-15 lbs"
     private String specialInstructions;
     private double subtotal;
     private double tax;
     private double total;
-    private String paymentMethod;     // e.g. "Visa •••• 4242"
+    private String paymentMethod;     // e.g. "Flutterwave card"
     private String paymentStatus;     // PENDING, PAID, FAILED, or REFUND_PENDING
     private String paymentProvider;
     private String paymentReference;
@@ -56,6 +61,8 @@ public class Booking {
         this.providerName = providerName;
         this.serviceType = serviceType;
         this.serviceName = serviceName;
+        this.serviceNames = new ArrayList<>();
+        this.serviceNames.add(serviceName);
         this.address = address;
         this.status = OrderStatus.BOOKED.name();
         this.paymentStatus = "PENDING";
@@ -127,6 +134,15 @@ public class Booking {
         this.serviceName = serviceName;
     }
 
+    public List<String> getServiceNames() {
+        return serviceNames;
+    }
+
+    public void setServiceNames(List<String> serviceNames) {
+        this.serviceNames = serviceNames == null
+                ? new ArrayList<>() : new ArrayList<>(serviceNames);
+    }
+
     public String getStatus() {
         return status;
     }
@@ -157,6 +173,14 @@ public class Booking {
 
     public void setItemCount(int itemCount) {
         this.itemCount = itemCount;
+    }
+
+    public int getWeightKg() {
+        return weightKg;
+    }
+
+    public void setWeightKg(int weightKg) {
+        this.weightKg = weightKg;
     }
 
     public String getEstimatedWeight() {
@@ -249,6 +273,10 @@ public class Booking {
 
     public double getServiceFee() {
         return serviceFee;
+    }
+
+    public double getServiceFeeForDisplay() {
+        return serviceFee > 0 ? serviceFee : tax;
     }
 
     public void setServiceFee(double serviceFee) {

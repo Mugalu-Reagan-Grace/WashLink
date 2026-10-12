@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.example.washlink.data.ProviderCapabilities;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +45,8 @@ public class NearbyProvidersActivity extends AppCompatActivity {
     private Location userLocation;
     private boolean providersLoaded;
     private boolean providerLoadFailed;
+    private int approvedProviderCount;
+    private int matchingModeProviderCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +57,11 @@ public class NearbyProvidersActivity extends AppCompatActivity {
                 com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
         selectedService = getIntent().getStringExtra("selected_service");
         if (selectedService == null || selectedService.trim().isEmpty()) selectedService = "Pickup & Delivery";
+        TextView headerTitle = findViewById(R.id.tv_header_title);
+        if (headerTitle != null) {
+            headerTitle.setText("Drop Off".equalsIgnoreCase(selectedService)
+                    ? R.string.nearby_dropoff_providers : R.string.nearby_pickup_providers);
+        }
 
         findViewById(R.id.btn_open_map).setOnClickListener(v -> {
             Intent mapIntent = new Intent(this, NearbyLaundryMapActivity.class);
@@ -150,11 +158,18 @@ public class NearbyProvidersActivity extends AppCompatActivity {
                 .addOnSuccessListener(snapshot -> {
                     providersLoaded = true;
                     providerLoadFailed = false;
+                    approvedProviderCount = 0;
+                    matchingModeProviderCount = 0;
                     allProviders.clear();
                     for (DocumentSnapshot document : snapshot.getDocuments()) {
-                        if (Boolean.FALSE.equals(document.get("isApproved"))) continue;
+                        if (!Boolean.TRUE.equals(document.get("isApproved"))) continue;
+                        approvedProviderCount++;
+                        if (!ProviderCapabilities.supportsBookingMode(selectedService,
+                                document.get("supportsDropoff"),
+                                document.get("supportsPickupDelivery"))) continue;
                         String name = stringValue(document.get("businessName"));
                         if (name.isEmpty()) continue;
+                        matchingModeProviderCount++;
                         double minPrice = Double.MAX_VALUE;
                         int serviceCount = 0;
                         Object serviceData = document.get("services");
@@ -166,10 +181,10 @@ public class NearbyProvidersActivity extends AppCompatActivity {
                                     Object nameValue = service.get("name");
                                     Object priceValue = service.get("pricePerKg");
                                     if (nameValue instanceof String
-                                            && !((String) nameValue).trim().isEmpty()) {
+                                            && !((String) nameValue).trim().isEmpty()
+                                            && priceValue instanceof Number
+                                            && ((Number) priceValue).doubleValue() > 0) {
                                         serviceCount++;
-                                    }
-                                    if (priceValue instanceof Number) {
                                         minPrice = Math.min(minPrice,
                                                 ((Number) priceValue).doubleValue());
                                     }
@@ -290,9 +305,14 @@ public class NearbyProvidersActivity extends AppCompatActivity {
         }
         adapter.replace(visible);
         if (resultCount != null) resultCount.setText(visible.size() + " providers found");
-        if (visible.isEmpty()) showState(allProviders.isEmpty()
-                ? "No laundry providers are registered yet."
-                : "No providers match your search.");
+        if (visible.isEmpty()) {
+            int emptyMessage = allProviders.isEmpty()
+                    ? approvedProviderCount == 0 ? R.string.providers_none_verified
+                    : matchingModeProviderCount == 0 ? R.string.providers_none_for_booking_mode
+                    : R.string.providers_no_bookable_services
+                    : R.string.providers_no_search_matches;
+            showState(getString(emptyMessage));
+        }
         else showList();
     }
 
@@ -399,11 +419,12 @@ public class NearbyProvidersActivity extends AppCompatActivity {
             holder.distance.setText(provider.distance);
             holder.price.setText(provider.price);
             if (provider.serviceCount == 0) {
-                holder.serviceCount.setText(R.string.provider_service_count_unknown);
+                holder.serviceCount.setText(R.string.provider_verified);
             } else {
-                holder.serviceCount.setText(holder.itemView.getResources().getQuantityString(
-                        R.plurals.provider_service_count, provider.serviceCount,
-                        provider.serviceCount));
+                String serviceCount = holder.itemView.getResources().getQuantityString(
+                        R.plurals.provider_service_count, provider.serviceCount, provider.serviceCount);
+                holder.serviceCount.setText(holder.itemView.getResources().getString(
+                        R.string.provider_verified_service_count, serviceCount));
             }
             holder.itemView.setOnClickListener(v -> {
                 if (listener != null) {

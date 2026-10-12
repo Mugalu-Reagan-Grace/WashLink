@@ -1,24 +1,30 @@
 package com.example.washlink;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.View;
-import android.widget.AdapterView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.washlink.data.BookingPricing;
+import com.example.washlink.data.ProviderCapabilities;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FieldValue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +53,8 @@ public class ProviderDetailsActivity extends AppCompatActivity {
         View chatBtn = findViewById(R.id.btn_chat_provider);
         View whatsappBtn = findViewById(R.id.btn_whatsapp_provider);
         Button bookBtn = findViewById(R.id.btn_book_provider);
-        Spinner serviceSpinner = findViewById(R.id.spinner_provider_services);
+        ImageButton favoriteButton = findViewById(R.id.btn_favorite_provider);
+        ChipGroup serviceGroup = findViewById(R.id.group_provider_services);
 
         Intent in = getIntent();
         String name = in != null ? in.getStringExtra("provider_name") : null;
@@ -60,6 +67,12 @@ public class ProviderDetailsActivity extends AppCompatActivity {
         String providerId = in != null ? in.getStringExtra("provider_id") : null;
         String address = in != null ? in.getStringExtra("provider_address") : null;
         String selectedService = in != null ? in.getStringExtra("selected_service") : null;
+        if (favoriteButton != null && providerId != null && !providerId.trim().isEmpty()) {
+            bindFavoriteButton(favoriteButton, providerId,
+                    nonEmpty(name, getString(R.string.provider_business_name_fallback)));
+        } else if (favoriteButton != null) {
+            favoriteButton.setVisibility(View.GONE);
+        }
         int imageRes = in != null ? in.getIntExtra("provider_image_res",
                 R.drawable.ic_provider_business) : R.drawable.ic_provider_business;
 
@@ -115,20 +128,33 @@ public class ProviderDetailsActivity extends AppCompatActivity {
         if (bookBtn != null) {
             bookBtn.setEnabled(false);
             bookBtn.setOnClickListener(v -> {
-                int selectedIndex = serviceSpinner == null ? -1 : serviceSpinner.getSelectedItemPosition();
-                if (selectedIndex < 0 || selectedIndex >= serviceOptions.size()) {
+                ArrayList<String> selectedNames = new ArrayList<>();
+                double combinedPricePerKg = 0;
+                if (serviceGroup != null) {
+                    for (int i = 0; i < serviceGroup.getChildCount(); i++) {
+                        View child = serviceGroup.getChildAt(i);
+                        if (child instanceof Chip && ((Chip) child).isChecked()
+                                && child.getTag() instanceof ProviderServiceOption) {
+                            ProviderServiceOption selected = (ProviderServiceOption) child.getTag();
+                            selectedNames.add(selected.name);
+                            combinedPricePerKg += selected.pricePerKg;
+                        }
+                    }
+                }
+                if (selectedNames.isEmpty()) {
                     Toast.makeText(this, "This provider has no services available to book.",
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
-                ProviderServiceOption serviceOption = serviceOptions.get(selectedIndex);
                 boolean dropOff = "Drop Off".equalsIgnoreCase(selectedService);
                 Intent intent = new Intent(ProviderDetailsActivity.this,
                         dropOff ? DropOffActivity.class : PickupAddressActivity.class);
                 intent.putExtra("selected_service", selectedService == null
                         ? "Pickup & Delivery" : selectedService);
-                intent.putExtra("selected_laundry_service", serviceOption.name);
-                intent.putExtra("price_per_kg", serviceOption.pricePerKg);
+                intent.putExtra("selected_laundry_service",
+                        android.text.TextUtils.join(", ", selectedNames));
+                intent.putStringArrayListExtra("selected_laundry_services", selectedNames);
+                intent.putExtra("price_per_kg", combinedPricePerKg);
                 intent.putExtra("provider_id", providerId);
                 intent.putExtra("provider_name", name);
                 intent.putExtra("provider_phone", phone);
@@ -137,28 +163,74 @@ public class ProviderDetailsActivity extends AppCompatActivity {
             });
         }
 
-        if (serviceSpinner != null && providerId != null && !providerId.trim().isEmpty()) {
-            loadProviderServices(providerId, serviceSpinner, bookBtn,
-                    !"Closed".equalsIgnoreCase(status), status, statusTv);
-            serviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    if (position >= 0 && position < serviceOptions.size() && priceTv != null) {
-                        priceTv.setText(getString(R.string.provider_price_from,
-                                BookingPricing.format((int) Math.round(
-                                        serviceOptions.get(position).pricePerKg))));
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) { }
-            });
+        if (serviceGroup != null && providerId != null && !providerId.trim().isEmpty()) {
+            loadProviderServices(providerId, serviceGroup, bookBtn,
+                    !"Closed".equalsIgnoreCase(status), selectedService, status, statusTv);
             loadRecentReviews(providerId, findViewById(R.id.tv_recent_reviews));
         } else if (bookBtn != null) {
             bookBtn.setEnabled(false);
         }
 
         BottomNavHelper.bind(this);
+    }
+
+    private void bindFavoriteButton(ImageButton button, String providerId, String providerName) {
+        String customerId = FirebaseAuth.getInstance().getUid();
+        if (customerId == null) {
+            button.setEnabled(false);
+            return;
+        }
+        button.setContentDescription(getString(R.string.favorite_add_description));
+        button.setEnabled(false);
+        button.setImageResource(R.drawable.ic_favorite_border);
+        com.google.firebase.firestore.DocumentReference favorite = FirebaseFirestore.getInstance()
+                .collection("users").document(customerId).collection("favoriteProviders")
+                .document(providerId);
+        favorite.get().addOnSuccessListener(document -> {
+            if (isFinishing() || isDestroyed()) return;
+            boolean[] saved = {document.exists()};
+            setFavoriteButton(button, saved[0]);
+            button.setEnabled(true);
+            button.setOnClickListener(v -> {
+                button.setEnabled(false);
+                if (saved[0]) {
+                    favorite.delete().addOnSuccessListener(unused -> {
+                        saved[0] = false;
+                        setFavoriteButton(button, false);
+                        button.setEnabled(true);
+                        Toast.makeText(this, R.string.favorite_removed, Toast.LENGTH_SHORT).show();
+                    }).addOnFailureListener(error -> {
+                        button.setEnabled(true);
+                        Toast.makeText(this, R.string.favorite_update_error, Toast.LENGTH_LONG).show();
+                    });
+                } else {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("providerId", providerId);
+                    data.put("businessName", providerName);
+                    data.put("createdAt", FieldValue.serverTimestamp());
+                    favorite.set(data).addOnSuccessListener(unused -> {
+                        saved[0] = true;
+                        setFavoriteButton(button, true);
+                        button.setEnabled(true);
+                        Toast.makeText(this, R.string.favorite_added, Toast.LENGTH_SHORT).show();
+                    }).addOnFailureListener(error -> {
+                        button.setEnabled(true);
+                        Toast.makeText(this, R.string.favorite_update_error, Toast.LENGTH_LONG).show();
+                    });
+                }
+            });
+        }).addOnFailureListener(error -> {
+            if (isFinishing() || isDestroyed()) return;
+            button.setEnabled(false);
+            Toast.makeText(this, R.string.favorite_load_error, Toast.LENGTH_LONG).show();
+        });
+    }
+
+    private void setFavoriteButton(ImageButton button, boolean saved) {
+        button.setImageResource(saved ? R.drawable.ic_favorite_filled
+                : R.drawable.ic_favorite_border);
+        button.setContentDescription(getString(saved
+                ? R.string.favorite_remove_description : R.string.favorite_add_description));
     }
 
     private void openWhatsApp(String phone) {
@@ -222,12 +294,20 @@ public class ProviderDetailsActivity extends AppCompatActivity {
                 });
     }
 
-    private void loadProviderServices(String providerId, Spinner spinner, Button bookButton,
-                                      boolean providerOpen, String providerStatus,
+    private void loadProviderServices(String providerId, ChipGroup serviceGroup, Button bookButton,
+                                      boolean providerOpen, String selectedService, String providerStatus,
                                       TextView statusView) {
+        TextView priceView = findViewById(R.id.tv_provider_price);
         if (bookButton != null) bookButton.setEnabled(false);
         FirebaseFirestore.getInstance().collection("providers").document(providerId).get()
                 .addOnSuccessListener(document -> {
+                    boolean supportsSelectedService = ProviderCapabilities.supportsBookingMode(
+                            selectedService, document.get("supportsDropoff"),
+                            document.get("supportsPickupDelivery"));
+                    boolean approved = Boolean.TRUE.equals(document.get("isApproved"));
+                    Object openValue = document.get("isOpen");
+                    boolean providerCurrentlyOpen = !(openValue instanceof Boolean)
+                            || (Boolean) openValue;
                     serviceOptions.clear();
                     Object value = document.get("services");
                     if (value instanceof List<?>) {
@@ -244,29 +324,89 @@ public class ProviderDetailsActivity extends AppCompatActivity {
                             }
                         }
                     }
-                    List<String> labels = new ArrayList<>();
-                    for (ProviderServiceOption option : serviceOptions) labels.add(option.toString());
-                    if (labels.isEmpty()) labels.add(getString(R.string.provider_no_services));
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                            android.R.layout.simple_spinner_item, labels);
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    spinner.setAdapter(adapter);
-                    boolean hasServices = !serviceOptions.isEmpty();
-                    spinner.setEnabled(hasServices);
+                    serviceGroup.removeAllViews();
+                    for (ProviderServiceOption option : serviceOptions) {
+                        Chip chip = new Chip(this);
+                        chip.setText(option.toString());
+                        chip.setCheckable(true);
+                        chip.setClickable(true);
+                        chip.setTag(option);
+                        chip.setTextColor(ColorStateList.valueOf(getColor(R.color.text_primary)));
+                        chip.setChipBackgroundColor(new ColorStateList(
+                                new int[][]{{android.R.attr.state_checked}, new int[]{}},
+                                new int[]{Color.rgb(226, 240, 255), Color.WHITE}));
+                        chip.setChipStrokeColorResource(R.color.divider_gray);
+                        chip.setOnCheckedChangeListener((button, checked) -> {
+                            double selectedPrice = 0;
+                            for (int i = 0; i < serviceGroup.getChildCount(); i++) {
+                                View child = serviceGroup.getChildAt(i);
+                                if (child instanceof Chip && ((Chip) child).isChecked()
+                                        && child.getTag() instanceof ProviderServiceOption) {
+                                    selectedPrice += ((ProviderServiceOption) child.getTag()).pricePerKg;
+                                }
+                            }
+                            if (priceView != null) {
+                                priceView.setText(selectedPrice > 0
+                                        ? getString(R.string.provider_price_from,
+                                        BookingPricing.format((int) Math.round(selectedPrice)))
+                                        : getString(R.string.provider_contact_for_quote));
+                            }
+                        });
+                        serviceGroup.addView(chip);
+                    }
+                    boolean hasServices = !serviceOptions.isEmpty() && approved;
+                    serviceGroup.setEnabled(hasServices);
+                    ArrayList<String> repeatServiceNames = getIntent()
+                            .getStringArrayListExtra("repeat_service_names");
                     if (bookButton != null) {
-                        bookButton.setEnabled(hasServices && providerOpen);
-                        bookButton.setText(hasServices ? R.string.provider_book_action
+                        bookButton.setEnabled(hasServices && providerCurrentlyOpen
+                                && supportsSelectedService);
+                        bookButton.setText(!approved ? R.string.provider_approval_pending
+                                : !supportsSelectedService
+                                ? R.string.provider_service_mode_unavailable
+                                : hasServices ? R.string.provider_book_action
                                 : R.string.provider_no_services);
                     }
                     if (statusView != null) {
-                        statusView.setText(providerStatus);
+                        if (!approved) {
+                            statusView.setText(R.string.provider_approval_pending);
+                        } else if (supportsSelectedService) {
+                            if (openValue instanceof Boolean) {
+                                statusView.setText((Boolean) openValue
+                                        ? R.string.open_now : R.string.closed);
+                            } else {
+                                statusView.setText(providerStatus);
+                            }
+                        } else {
+                            statusView.setText(R.string.provider_service_mode_unavailable);
+                        }
                         statusView.setClickable(false);
                         statusView.setFocusable(false);
                         statusView.setOnClickListener(null);
+                        if (!approved || !supportsSelectedService) {
+                            statusView.setTextColor(getColor(R.color.text_secondary));
+                        } else if (openValue instanceof Boolean) {
+                            statusView.setTextColor(getColor((Boolean) openValue
+                                    ? R.color.success_green : R.color.text_secondary));
+                        }
+                    }
+                    serviceGroup.setVisibility(approved ? View.VISIBLE : View.GONE);
+                    for (int index = 0; index < serviceGroup.getChildCount(); index++) {
+                        View child = serviceGroup.getChildAt(index);
+                        if (!(child instanceof Chip) || !(child.getTag() instanceof ProviderServiceOption)
+                                || repeatServiceNames == null) continue;
+                        String optionName = ((ProviderServiceOption) child.getTag()).name;
+                        for (String repeatName : repeatServiceNames) {
+                            if (optionName.equalsIgnoreCase(repeatName)) {
+                                ((Chip) child).setChecked(true);
+                                break;
+                            }
+                        }
                     }
                     if (!hasServices) {
                         TextView price = findViewById(R.id.tv_provider_price);
-                        if (price != null) price.setText(R.string.provider_no_services);
+                        if (price != null) price.setText(approved
+                                ? R.string.provider_no_services : R.string.provider_approval_pending);
                     }
                 })
                 .addOnFailureListener(error -> {
@@ -275,7 +415,7 @@ public class ProviderDetailsActivity extends AppCompatActivity {
                         statusView.setClickable(true);
                         statusView.setFocusable(true);
                         statusView.setOnClickListener(v -> loadProviderServices(
-                                providerId, spinner, bookButton, providerOpen,
+                                providerId, serviceGroup, bookButton, providerOpen, selectedService,
                                 providerStatus, statusView));
                     }
                 });

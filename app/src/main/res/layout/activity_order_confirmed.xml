@@ -195,7 +195,7 @@
                         android:id="@+id/tv_payment_method_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/visa_4242"
+                        android:text="@string/default_card_payment_method"
                         android:textColor="@color/text_primary"
                         android:textSize="13sp"
                         android:textStyle="bold" />

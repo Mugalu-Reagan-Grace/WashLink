@@ -25,11 +25,11 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.washlink.data.AuthRepository;
+import com.example.washlink.data.ProfilePhotoManager;
 import com.example.washlink.models.UserAccount;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.IOException;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -65,21 +65,19 @@ public class ProfileActivity extends AppCompatActivity {
         imagePicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
                 uri -> {
                     if (uri == null || account == null) return;
-                    try {
-                        getContentResolver().takePersistableUriPermission(
-                                uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        if (!displayAvatar(uri)) {
-                            showDefaultAvatar();
-                            return;
-                        }
-                        photoUri = uri.toString();
-                        saveProfile();
-                    } catch (SecurityException | IllegalArgumentException e) {
-                        showDefaultAvatar();
-                        Toast.makeText(ProfileActivity.this,
-                                "The selected image could not be accessed. Please choose another image.",
-                                Toast.LENGTH_SHORT).show();
-                    }
+                    avatar.setImageURI(uri);
+                    ProfilePhotoManager.upload(ProfileActivity.this, uri, account.getUid(),
+                            new ProfilePhotoManager.UploadCallback() {
+                                @Override public void onSuccess(String downloadUrl) {
+                                    photoUri = downloadUrl;
+                                    saveProfile();
+                                }
+                                @Override public void onError(String message) {
+                                    showDefaultAvatar();
+                                    Toast.makeText(ProfileActivity.this, message,
+                                            Toast.LENGTH_LONG).show();
+                                }
+                            });
                 });
 
         loadProfile();
@@ -107,14 +105,16 @@ public class ProfileActivity extends AppCompatActivity {
             password.setOnClickListener(v -> sendPasswordReset());
         }
 
-        avatar.setOnClickListener(v -> imagePicker.launch(new String[]{"image/*"}));
+        avatar.setOnClickListener(v -> imagePicker.launch(new String[]{
+                "image/jpeg", "image/png", "image/webp", "image/gif"}));
 
         LinearLayout paymentMethods = findViewById(R.id.row_payment_methods);
         if (paymentMethods != null) {
-            paymentMethods.setOnClickListener(v -> {
-                Intent intent = new Intent(ProfileActivity.this, PaymentActivity.class);
-                startActivity(intent);
-            });
+            paymentMethods.setOnClickListener(v -> new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle(R.string.payment_methods_title)
+                    .setMessage(R.string.payment_methods_checkout_info)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show());
         }
 
         LinearLayout orderHistory = findViewById(R.id.row_order_history);
@@ -173,14 +173,10 @@ public class ProfileActivity extends AppCompatActivity {
                         ? getString(R.string.profile_saved_addresses_desc)
                         : user.getAddress());
                 photoUri = valueOrFallback(user.getPhotoUri(), "");
-                if (!photoUri.isEmpty()) {
-                    Uri savedUri = Uri.parse(photoUri);
-                    if (!displayAvatar(savedUri)) {
-                        photoUri = "";
-                        showDefaultAvatar();
-                        saveProfile();
-                    }
-                }
+                String authPhotoUrl = FirebaseAuth.getInstance().getCurrentUser() == null
+                        || FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl() == null ? ""
+                        : FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
+                ProfilePhotoManager.display(avatar, photoUri, authPhotoUrl, user.getEmail());
             }
 
             @Override
@@ -336,32 +332,12 @@ public class ProfileActivity extends AppCompatActivity {
         return value == null ? fallback : value;
     }
 
-    private boolean canReadUri(Uri uri) {
-        try (android.os.ParcelFileDescriptor descriptor =
-                     getContentResolver().openFileDescriptor(uri, "r")) {
-            return descriptor != null;
-        } catch (SecurityException | FileNotFoundException e) {
-            return false;
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-    private boolean displayAvatar(Uri uri) {
-        if (!canReadUri(uri)) {
-            return false;
-        }
-        try {
-            avatar.setImageURI(uri);
-            return true;
-        } catch (SecurityException | IllegalArgumentException e) {
-            return false;
-        }
-    }
-
     private void showDefaultAvatar() {
-        photoUri = "";
-        avatar.setImageDrawable(null);
+        String authPhotoUrl = FirebaseAuth.getInstance().getCurrentUser() == null
+                || FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl() == null ? ""
+                : FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
+        ProfilePhotoManager.display(avatar, photoUri, authPhotoUrl,
+                account == null ? "" : account.getEmail());
     }
 
     @Override

@@ -7,6 +7,7 @@ public class BookingNotification {
     private String title;
     private String body;
     private long createdAt;
+    private Boolean read;
 
     public BookingNotification() {
     }
@@ -57,5 +58,21 @@ public class BookingNotification {
 
     public void setCreatedAt(long createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Boolean getRead() {
+        return read;
+    }
+
+    public void setRead(Boolean read) {
+        this.read = read;
+    }
+
+    public boolean isUnread() {
+        return !Boolean.TRUE.equals(read);
+    }
+
+    public void markRead() {
+        read = true;
     }
 }

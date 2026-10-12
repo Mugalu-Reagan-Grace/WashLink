@@ -82,6 +82,19 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <TextView
+                android:id="@+id/tv_provider_approval_notice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_status_pill"
+                android:padding="12dp"
+                android:text="@string/provider_approval_checking"
+                android:textColor="@color/pending_text"
+                android:textSize="13sp"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/card_order_info" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_call_customer"
                 android:layout_width="match_parent"
@@ -89,7 +102,7 @@
                 android:layout_marginTop="8dp"
                 android:text="Call customer"
                 android:textAllCaps="false"
-                app:layout_constraintTop_toBottomOf="@id/card_order_info" />
+                app:layout_constraintTop_toBottomOf="@id/tv_provider_approval_notice" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_assign_rider"

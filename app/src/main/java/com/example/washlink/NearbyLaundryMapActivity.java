@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.example.washlink.models.Provider;
+import com.example.washlink.data.ProviderCapabilities;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -37,6 +38,7 @@ public class NearbyLaundryMapActivity extends AppCompatActivity implements OnMap
     private FusedLocationProviderClient locationClient;
     private LatLng userLocation;
     private int radiusKm = 5;
+    private String selectedService;
     private SeekBar radiusBar;
     private TextView radiusLabel;
     private final List<Provider> providers = new ArrayList<>();
@@ -48,6 +50,10 @@ public class NearbyLaundryMapActivity extends AppCompatActivity implements OnMap
         setContentView(R.layout.activity_nearby_laundry_map);
         com.example.washlink.data.AuthGuard.requireRole(this,
                 com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
+        selectedService = getIntent().getStringExtra("selected_service");
+        if (selectedService == null || selectedService.trim().isEmpty()) {
+            selectedService = "Pickup & Delivery";
+        }
         radiusBar = findViewById(R.id.map_radius);
         radiusLabel = findViewById(R.id.tv_map_radius);
         locationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -118,7 +124,10 @@ public class NearbyLaundryMapActivity extends AppCompatActivity implements OnMap
                 .addOnSuccessListener(snapshot -> {
                     providers.clear();
                     snapshot.getDocuments().forEach(document -> {
-                        if (Boolean.FALSE.equals(document.getBoolean("isApproved"))) return;
+                        if (!Boolean.TRUE.equals(document.get("isApproved"))) return;
+                        if (!ProviderCapabilities.supportsBookingMode(selectedService,
+                                document.get("supportsDropoff"),
+                                document.get("supportsPickupDelivery"))) return;
                         Provider provider = document.toObject(Provider.class);
                         if (provider != null) {
                             provider.setUid(document.getId());

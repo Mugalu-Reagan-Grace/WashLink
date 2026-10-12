@@ -19,10 +19,10 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 
-import com.example.washlink.PaymentActivity;
 import com.example.washlink.R;
 import com.example.washlink.SignInActivity;
 import com.example.washlink.data.AuthRepository;
+import com.example.washlink.data.ProfilePhotoManager;
 import com.example.washlink.models.UserAccount;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -41,16 +41,21 @@ public class ProfileFragment extends CustomerTabFragment {
         super.onCreate(savedInstanceState);
         imagePicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
             if (uri == null || account == null) return;
-            try {
-                requireContext().getContentResolver().takePersistableUriPermission(
-                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                saveProfile(uri.toString(), () -> {
-                    photoUri = uri.toString();
-                    if (avatar != null) avatar.setImageURI(uri);
-                });
-            } catch (SecurityException | IllegalArgumentException e) {
-                Toast.makeText(requireContext(), "Unable to access that image.", Toast.LENGTH_SHORT).show();
-            }
+            if (avatar != null) avatar.setImageURI(uri);
+            ProfilePhotoManager.upload(requireContext(), uri, account.getUid(),
+                    new ProfilePhotoManager.UploadCallback() {
+                        @Override public void onSuccess(String downloadUrl) {
+                            saveProfile(downloadUrl, () -> {
+                                photoUri = downloadUrl;
+                                showSavedAvatar();
+                            });
+                        }
+                        @Override public void onError(String message) {
+                            if (isAdded()) Toast.makeText(requireContext(), message,
+                                    Toast.LENGTH_LONG).show();
+                            showSavedAvatar();
+                        }
+                    });
         });
     }
 
@@ -71,7 +76,8 @@ public class ProfileFragment extends CustomerTabFragment {
 
         avatar = view.findViewById(R.id.iv_avatar);
         if (avatar != null) {
-            avatar.setOnClickListener(v -> imagePicker.launch(new String[]{"image/*"}));
+            avatar.setOnClickListener(v -> imagePicker.launch(new String[]{
+                    "image/jpeg", "image/png", "image/webp", "image/gif"}));
         }
         view.findViewById(R.id.card_account_info).setOnClickListener(v -> {
             if (account == null) loadProfile(view);
@@ -79,10 +85,17 @@ public class ProfileFragment extends CustomerTabFragment {
         });
 
         view.findViewById(R.id.row_saved_addresses).setOnClickListener(v -> showAddressDialog());
+        view.findViewById(R.id.row_favorite_providers).setOnClickListener(v ->
+                startActivity(new Intent(requireContext(),
+                        com.example.washlink.FavoriteProvidersActivity.class)));
         view.findViewById(R.id.row_order_history).setOnClickListener(v ->
                 ((MainActivity) requireActivity()).showTab(MainActivity.TAB_HISTORY));
         view.findViewById(R.id.row_payment_methods).setOnClickListener(v ->
-                startActivity(new Intent(requireContext(), PaymentActivity.class)));
+                new AlertDialog.Builder(requireContext())
+                        .setTitle(R.string.payment_methods_title)
+                        .setMessage(R.string.payment_methods_checkout_info)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show());
         view.findViewById(R.id.row_password).setOnClickListener(v ->
                 authRepository.sendPasswordReset(new AuthRepository.SimpleCallback() {
                     @Override public void onSuccess() {
@@ -136,15 +149,7 @@ public class ProfileFragment extends CustomerTabFragment {
                 }
 
                 photoUri = value(user.getPhotoUri(), "");
-                if (!photoUri.isEmpty() && avatar != null) {
-                    try {
-                        avatar.setImageURI(Uri.parse(photoUri));
-                    } catch (SecurityException | IllegalArgumentException e) {
-                        Toast.makeText(requireContext(),
-                                "Saved profile picture is unavailable on this device.",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
+                showSavedAvatar();
             }
             @Override public void onError(String message) {
                 if (!isAdded() || getView() != view) return;
@@ -156,6 +161,15 @@ public class ProfileFragment extends CustomerTabFragment {
                 Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void showSavedAvatar() {
+        if (avatar == null || !isAdded()) return;
+        String authPhotoUrl = FirebaseAuth.getInstance().getCurrentUser() == null
+                || FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl() == null ? ""
+                : FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
+        ProfilePhotoManager.display(avatar, photoUri, authPhotoUrl,
+                account == null ? "" : account.getEmail());
     }
 
     private void showAddressDialog() {

@@ -19,24 +19,22 @@ import com.example.washlink.models.Booking;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Locale;
 
 public class DropOffPaymentActivity extends AppCompatActivity {
 
     private ImageView backButton;
     private FrameLayout bellLayout;
-    private ConstraintLayout visaCard;
-    private ConstraintLayout mastercardCard;
+    private ConstraintLayout cardPaymentCard;
     private ConstraintLayout airtelCard;
     private ConstraintLayout mtnCard;
     private ConstraintLayout cashCard;
-    private RadioButton visaRadio;
-    private RadioButton mcRadio;
+    private RadioButton cardPaymentRadio;
     private RadioButton airtelRadio;
     private RadioButton mtnRadio;
     private RadioButton cashRadio;
-    private MaterialButton googlePayButton;
-    private MaterialButton addNewCardButton;
     private MaterialButton payButton;
     private Booking pendingBooking;
     private BookingPricing.Quote pendingQuote;
@@ -52,18 +50,14 @@ public class DropOffPaymentActivity extends AppCompatActivity {
 
         backButton = findViewById(R.id.btn_back);
         bellLayout = findViewById(R.id.iv_bell);
-        visaCard = findViewById(R.id.card_visa);
-        mastercardCard = findViewById(R.id.card_mastercard);
+        cardPaymentCard = findViewById(R.id.card_payment);
         airtelCard = findViewById(R.id.card_airtel);
         mtnCard = findViewById(R.id.card_mtn);
         cashCard = findViewById(R.id.card_cash);
-        visaRadio = findViewById(R.id.radio_visa);
-        mcRadio = findViewById(R.id.radio_mc);
+        cardPaymentRadio = findViewById(R.id.radio_card_payment);
         airtelRadio = findViewById(R.id.radio_airtel);
         mtnRadio = findViewById(R.id.radio_mtn);
         cashRadio = findViewById(R.id.radio_cash);
-        googlePayButton = findViewById(R.id.btn_google_pay);
-        addNewCardButton = findViewById(R.id.btn_add_new_card);
         payButton = findViewById(R.id.btn_pay);
 
         backButton.setOnClickListener(v -> finish());
@@ -72,35 +66,22 @@ public class DropOffPaymentActivity extends AppCompatActivity {
                 startActivity(intent);
             });
 
-        visaCard.setOnClickListener(v -> selectPaymentMethod("visa"));
-        mastercardCard.setOnClickListener(v -> selectPaymentMethod("mastercard"));
+        cardPaymentCard.setOnClickListener(v -> selectPaymentMethod("card"));
         airtelCard.setOnClickListener(v -> selectPaymentMethod("airtel"));
         mtnCard.setOnClickListener(v -> selectPaymentMethod("mtn"));
         cashCard.setOnClickListener(v -> selectPaymentMethod("cash"));
 
-        visaRadio.setOnClickListener(v -> selectPaymentMethod("visa"));
-        mcRadio.setOnClickListener(v -> selectPaymentMethod("mastercard"));
+        cardPaymentRadio.setOnClickListener(v -> selectPaymentMethod("card"));
         airtelRadio.setOnClickListener(v -> selectPaymentMethod("airtel"));
         mtnRadio.setOnClickListener(v -> selectPaymentMethod("mtn"));
         cashRadio.setOnClickListener(v -> selectPaymentMethod("cash"));
 
-        googlePayButton.setOnClickListener(v -> {
-                Toast.makeText(this, "Choose card or Uganda mobile money for hosted checkout.",
-                        Toast.LENGTH_SHORT).show();
-            });
-        googlePayButton.setEnabled(false);
-
-        addNewCardButton.setOnClickListener(v -> {
-            Toast.makeText(this, "Card details are entered securely on Flutterwave checkout.",
-                    Toast.LENGTH_SHORT).show();
-        });
-
-        int itemCount = getIntent().getIntExtra("item_count", 15);
+        int itemCount = getIntent().getIntExtra("item_count", 1);
         int weightKg = getIntent().getIntExtra("weight_kg", BookingPricing.estimateWeightKg(itemCount));
         double pricePerKg = getIntent().getDoubleExtra("price_per_kg", BookingPricing.PRICE_PER_KG);
         BookingPricing.Quote quote = BookingPricing.quote(weightKg, false, pricePerKg);
         payButton.setText(String.format(Locale.US, "Pay UGX %,d", quote.total));
-        selectPaymentMethod("visa");
+        selectPaymentMethod("card");
 
         payButton.setOnClickListener(v -> {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -138,7 +119,15 @@ public class DropOffPaymentActivity extends AppCompatActivity {
                             : getIntent().getStringExtra("provider_address"));
             booking.setScheduledDateTime((date == null ? "Date pending" : date)
                     + " • " + (time == null ? "Time pending" : time));
-            booking.setItemCount(getIntent().getIntExtra("item_count", 15));
+            booking.setItemCount(getIntent().getIntExtra("item_count", 1));
+            booking.setWeightKg(weightKg);
+            ArrayList<String> serviceNames = getIntent().getStringArrayListExtra(
+                    "selected_laundry_services");
+            if (serviceNames == null || serviceNames.isEmpty()) {
+                serviceNames = new ArrayList<>(Collections.singletonList(
+                        booking.getServiceName()));
+            }
+            booking.setServiceNames(serviceNames);
             booking.setEstimatedWeight(weightKg + " kg");
             booking.setSpecialInstructions(getIntent().getStringExtra("special_instructions"));
             booking.setSubtotal(quote.laundry);
@@ -217,10 +206,7 @@ public class DropOffPaymentActivity extends AppCompatActivity {
     private String selectedPaymentCode = "card";
 
     private void selectPaymentMethod(String method) {
-        if ("visa".equals(method)) {
-            selectedPaymentMethod = "Flutterwave card";
-            selectedPaymentCode = "card";
-        } else if ("mastercard".equals(method)) {
+        if ("card".equals(method)) {
             selectedPaymentMethod = "Flutterwave card";
             selectedPaymentCode = "card";
         } else if ("airtel".equals(method)) {
@@ -234,14 +220,12 @@ public class DropOffPaymentActivity extends AppCompatActivity {
             selectedPaymentCode = "cash";
         }
 
-        visaRadio.setChecked("visa".equals(method));
-        mcRadio.setChecked("mastercard".equals(method));
+        cardPaymentRadio.setChecked("card".equals(method));
         airtelRadio.setChecked("airtel".equals(method));
         mtnRadio.setChecked("mtn".equals(method));
         cashRadio.setChecked("cash".equals(method));
 
-        setCardSelectedState(visaCard, "visa".equals(method));
-        setCardSelectedState(mastercardCard, "mastercard".equals(method));
+        setCardSelectedState(cardPaymentCard, "card".equals(method));
         setCardSelectedState(airtelCard, "airtel".equals(method));
         setCardSelectedState(mtnCard, "mtn".equals(method));
         setCardSelectedState(cashCard, "cash".equals(method));

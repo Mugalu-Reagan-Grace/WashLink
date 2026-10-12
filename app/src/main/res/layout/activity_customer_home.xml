@@ -25,11 +25,13 @@
             android:paddingTop="20dp">
 
             <!-- Top bar: avatar, name + address, bell -->
-            <View
+            <ImageView
                 android:id="@+id/iv_avatar"
                 android:layout_width="44dp"
                 android:layout_height="44dp"
+                android:contentDescription="@string/profile_photo"
                 android:background="@drawable/bg_thumbnail_placeholder"
+                android:scaleType="centerCrop"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
@@ -398,7 +400,7 @@
                     android:letterSpacing="0.05"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/tv_promo_code" />
+                    app:layout_constraintEnd_toEndOf="parent" />
 
                 <TextView
                     android:id="@+id/tv_offer_desc"
@@ -408,26 +410,9 @@
                     android:text="@string/welcome_offer_desc"
                     android:textColor="@color/text_primary"
                     android:textSize="13sp"
-                    android:textStyle="bold"
+                    android:textStyle="normal"
                     app:layout_constraintTop_toBottomOf="@id/tv_offer_label"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/tv_promo_code" />
-
-                <TextView
-                    android:id="@+id/tv_promo_code"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_promo_chip"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:text="@string/promo_code_placeholder"
-                    android:textColor="@color/laundr_blue"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

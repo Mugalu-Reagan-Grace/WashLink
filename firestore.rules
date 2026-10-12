@@ -47,6 +47,23 @@ service cloud.firestore {
               .hasOnly(['isSuspended'])));
       allow delete: if false;
 
+      match /favoriteProviders/{providerId} {
+        allow read, delete: if isActiveUser()
+          && request.auth.uid == uid
+          && get(/databases/$(database)/documents/users/$(uid)).data.role == 'customer';
+        allow create: if isActiveUser()
+          && request.auth.uid == uid
+          && get(/databases/$(database)/documents/users/$(uid)).data.role == 'customer'
+          && request.resource.data.keys().hasOnly(['providerId', 'businessName', 'createdAt'])
+          && request.resource.data.providerId == providerId
+          && request.resource.data.businessName is string
+          && request.resource.data.createdAt == request.time
+          && exists(/databases/$(database)/documents/providers/$(providerId))
+          && get(/databases/$(database)/documents/providers/$(providerId))
+            .data.get('isApproved', false) == true;
+        allow update: if false;
+      }
+
       match /notifications/{notificationId} {
         allow read, delete: if isActiveUser() && request.auth.uid == uid;
         allow update: if isActiveUser()

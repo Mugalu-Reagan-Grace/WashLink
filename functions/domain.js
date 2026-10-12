@@ -10,6 +10,10 @@ function hasActiveRole(user, role) {
   return !!user && user.role === role && user.isSuspended !== true;
 }
 
+function isApprovedProvider(provider) {
+  return !!provider && provider.isApproved === true;
+}
+
 function quoteBooking(booking, provider) {
   if (!booking || !provider || !Array.isArray(provider.services)) {
     throw new Error("Provider or service is unavailable.");
@@ -19,17 +23,21 @@ function quoteBooking(booking, provider) {
   if (typeof providerId !== "string" || providerId.length === 0) {
     throw new Error("Booking provider is invalid.");
   }
-  if (typeof booking.serviceName !== "string" || booking.serviceName.trim().length === 0) {
+  const serviceNames = Array.isArray(booking.serviceNames) && booking.serviceNames.length > 0
+    ? booking.serviceNames : [booking.serviceName];
+  if (serviceNames.length > 20
+      || serviceNames.some((name) => typeof name !== "string" || name.trim().length === 0)
+      || new Set(serviceNames).size !== serviceNames.length) {
     throw new Error("Booking service is invalid.");
   }
 
-  const service = provider.services.find((item) =>
-    item && typeof item.name === "string" && item.name === booking.serviceName
-  );
-  if (!service || service.isAvailable === false
+  const services = serviceNames.map((serviceName) => provider.services.find((item) =>
+    item && typeof item.name === "string" && item.name === serviceName
+  ));
+  if (services.some((service) => !service || service.isAvailable === false
       || typeof service.pricePerKg !== "number"
-      || !Number.isFinite(service.pricePerKg) || service.pricePerKg <= 0) {
-    throw new Error("Selected service is not currently offered by this provider.");
+      || !Number.isFinite(service.pricePerKg) || service.pricePerKg <= 0)) {
+    throw new Error("One or more selected services are not currently offered by this provider.");
   }
 
   const itemCount = booking.itemCount;
@@ -40,8 +48,15 @@ function quoteBooking(booking, provider) {
     throw new Error("Booking service type is invalid.");
   }
 
-  const kilograms = Math.max(MINIMUM_KG, Math.round(itemCount * 0.45));
-  const laundry = Math.round(kilograms * service.pricePerKg);
+  const requestedWeight = booking.weightKg;
+  if (requestedWeight !== undefined
+      && (!Number.isInteger(requestedWeight) || requestedWeight < 1 || requestedWeight > 100)) {
+    throw new Error("Booking estimated weight is invalid.");
+  }
+  const kilograms = Math.max(MINIMUM_KG,
+    requestedWeight === undefined ? Math.round(itemCount * 0.45) : requestedWeight);
+  const laundry = Math.round(kilograms
+    * services.reduce((total, service) => total + service.pricePerKg, 0));
   const pickup = booking.serviceType === "pickup_delivery" ? PICKUP_FEE : 0;
   const delivery = booking.serviceType === "pickup_delivery" ? DELIVERY_FEE : 0;
   const serviceFee = Math.round((laundry + pickup + delivery) * SERVICE_FEE_RATE);
@@ -177,6 +192,7 @@ function canClaimProviderPayout(attempt, now) {
 module.exports = {
   MAX_BOOKING_AMOUNT,
   hasActiveRole,
+  isApprovedProvider,
   quoteBooking,
   isVerifiedFlutterwavePayment,
   isValidStatusTransition,

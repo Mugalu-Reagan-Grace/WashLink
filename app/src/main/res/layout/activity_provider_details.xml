@@ -100,6 +100,17 @@
                         android:textColor="@color/chip_unselected_text"
                         android:textSize="12sp" />
                 </LinearLayout>
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_favorite_provider"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="4dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/favorite_add_description"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_favorite_border"
+                    app:tint="@color/reject_red" />
             </LinearLayout>
 
             <LinearLayout
@@ -178,14 +189,13 @@
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
 
-                <Spinner
-                    android:id="@+id/spinner_provider_services"
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/group_provider_services"
                     android:layout_width="match_parent"
-                    android:layout_height="52dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:background="@drawable/bg_card_bordered"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp" />
+                    app:singleSelection="false"
+                    app:selectionRequired="false" />
             </LinearLayout>
 
             <LinearLayout
@@ -240,20 +250,21 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_call_provider_details"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="0dp"
                 android:layout_height="44dp"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
                 android:text="@string/provider_call"
                 android:textAllCaps="false"
+                android:textColor="@color/white"
                 android:textSize="11sp"
-                app:cornerRadius="12dp"
-                app:strokeColor="@color/divider_gray" />
+                android:backgroundTint="#1FA855"
+                app:cornerRadius="12dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_chat_provider"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="0dp"
                 android:layout_height="44dp"
                 android:layout_marginStart="6dp"
@@ -261,22 +272,24 @@
                 android:layout_weight="1"
                 android:text="@string/provider_chat"
                 android:textAllCaps="false"
+                android:textColor="@color/white"
                 android:textSize="11sp"
-                app:cornerRadius="12dp"
-                app:strokeColor="@color/divider_gray" />
+                android:backgroundTint="#246BCE"
+                app:cornerRadius="12dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_whatsapp_provider"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="0dp"
                 android:layout_height="44dp"
                 android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 android:text="@string/provider_whatsapp"
                 android:textAllCaps="false"
+                android:textColor="#102A15"
                 android:textSize="11sp"
-                app:cornerRadius="12dp"
-                app:strokeColor="@color/divider_gray" />
+                android:backgroundTint="#25D366"
+                app:cornerRadius="12dp" />
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton

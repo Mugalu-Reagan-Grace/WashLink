@@ -34,6 +34,8 @@ public class OrderSummaryActivity extends AppCompatActivity {
         backButton = findViewById(R.id.btn_back);
         bellLayout = findViewById(R.id.iv_bell);
         proceedPaymentButton = findViewById(R.id.btn_proceed_payment);
+        TextView changeServiceButton = findViewById(R.id.tv_change_service);
+        TextView editLogisticsButton = findViewById(R.id.tv_edit_logistics);
         serviceTypeValueText = findViewById(R.id.tv_service_type_value);
         dateTimeValueText = findViewById(R.id.tv_datetime_value);
         addressValueText = findViewById(R.id.tv_address_value);
@@ -44,7 +46,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
         String date = getIntent() != null ? getIntent().getStringExtra("selected_date") : null;
         String time = getIntent() != null ? getIntent().getStringExtra("selected_time") : null;
         String contact = getIntent() != null ? getIntent().getStringExtra("selected_contact") : null;
-        int itemCount = getIntent() != null ? getIntent().getIntExtra("item_count", 15) : 15;
+        int itemCount = getIntent() != null ? getIntent().getIntExtra("item_count", 1) : 1;
         int weightKg = getIntent() != null ? getIntent().getIntExtra("weight_kg", com.example.washlink.data.BookingPricing.estimateWeightKg(itemCount)) : com.example.washlink.data.BookingPricing.estimateWeightKg(itemCount);
 
         if (serviceName == null || serviceName.trim().isEmpty()) {
@@ -83,10 +85,14 @@ public class OrderSummaryActivity extends AppCompatActivity {
                 .setText(BookingPricing.format(quote.pickup + quote.delivery));
         ((TextView) findViewById(R.id.tv_summary_subtotal_amount))
                 .setText(BookingPricing.format(quote.laundry + quote.pickup + quote.delivery));
-        ((TextView) findViewById(R.id.tv_summary_total_amount))
+        ((TextView) findViewById(R.id.tv_summary_service_fee))
+                .setText(BookingPricing.format(quote.serviceFee));
+        ((TextView) findViewById(R.id.tv_summary_total_value))
                 .setText(BookingPricing.format(quote.total));
 
         backButton.setOnClickListener(v -> finish());
+        changeServiceButton.setOnClickListener(v -> returnToProviderServices());
+        editLogisticsButton.setOnClickListener(v -> returnToLogistics());
         bellLayout.setOnClickListener(v -> {
                 Intent intent = new Intent(OrderSummaryActivity.this, NotificationsActivity.class);
                 startActivity(intent);
@@ -105,5 +111,35 @@ public class OrderSummaryActivity extends AppCompatActivity {
             intent.putExtra("quote_total", quote.total);
             startActivity(intent);
         });
+    }
+
+    private void returnToProviderServices() {
+        String providerId = getIntent().getStringExtra("provider_id");
+        if (providerId == null || providerId.trim().isEmpty()) {
+            Toast.makeText(this, "Provider details are unavailable. Choose a provider again.",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+        Intent intent = new Intent(this, ProviderDetailsActivity.class);
+        intent.putExtras(getIntent());
+        intent.putExtra("selected_service",
+                getIntent().getStringExtra("selected_service"));
+        intent.putStringArrayListExtra("repeat_service_names",
+                getIntent().getStringArrayListExtra("selected_laundry_services"));
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+    private void returnToLogistics() {
+        String providerId = getIntent().getStringExtra("provider_id");
+        if (providerId == null || providerId.trim().isEmpty()) {
+            Toast.makeText(this, "Booking details are unavailable. Choose a provider again.",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+        Intent intent = new Intent(this, PickupAddressActivity.class);
+        intent.putExtras(getIntent());
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 }

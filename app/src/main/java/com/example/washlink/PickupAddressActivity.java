@@ -84,6 +84,22 @@ public class PickupAddressActivity extends AppCompatActivity {
         continueCheckoutButton.setEnabled(false);
         updateAddressSuggestions();
         loadPrimaryAddress();
+        fullAddressInput.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence text, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence text, int start, int before, int count) {
+                if (selectedAddress == null
+                        || !selectedAddress.equals(text.toString().trim())) {
+                    selectedAddress = null;
+                    disableContinue();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable text) { }
+        });
         fullAddressInput.setOnItemClickListener((parent, view, position, id) -> {
             String address = (String) parent.getItemAtPosition(position);
             selectedAddress = address;
@@ -276,5 +292,12 @@ public class PickupAddressActivity extends AppCompatActivity {
         continueCheckoutButton.setEnabled(true);
         continueCheckoutButton.setTextColor(ContextCompat.getColor(this, R.color.white));
         continueCheckoutButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.laundr_blue));
+    }
+
+    private void disableContinue() {
+        continueCheckoutButton.setEnabled(false);
+        continueCheckoutButton.setTextColor(ContextCompat.getColor(this, R.color.button_disabled_text));
+        continueCheckoutButton.setBackgroundTintList(
+                ContextCompat.getColorStateList(this, R.color.button_disabled_bg));
     }
 }

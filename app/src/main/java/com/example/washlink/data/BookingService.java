@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.functions.FirebaseFunctions;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -222,6 +223,11 @@ public class BookingService {
         data.put("providerId", booking.getProviderId());
         data.put("serviceType", booking.getServiceType());
         data.put("serviceName", booking.getServiceName());
+        data.put("serviceNames", booking.getServiceNames() == null
+                || booking.getServiceNames().isEmpty()
+                ? Collections.singletonList(booking.getServiceName())
+                : booking.getServiceNames());
+        if (booking.getWeightKg() > 0) data.put("weightKg", booking.getWeightKg());
         data.put("address", booking.getAddress());
         data.put("scheduledDateTime", booking.getScheduledDateTime());
         data.put("itemCount", booking.getItemCount());

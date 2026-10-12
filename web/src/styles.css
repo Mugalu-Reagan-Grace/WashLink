@@ -61,7 +61,13 @@
 .notification-item strong{font-size:12px}
 .notification-item span{font-size:11px;line-height:1.45;color:#62748a}
 .notification-popover .empty-state{padding:24px 8px}
+.avatar-control{position:relative;width:38px;height:38px;flex:0 0 38px;margin-left:14px;overflow:hidden;display:grid;place-items:center;border:0;border-radius:50%;background:#e8f3fb;color:#1769aa;font-weight:700;cursor:pointer}
+.avatar-file-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.avatar-image{width:100%;height:100%;object-fit:cover}
+.avatar-initial{font-size:14px}
+.avatar-edit-mark{position:absolute;right:0;bottom:0;width:15px;height:15px;display:grid;place-items:center;border:1px solid #fff;border-radius:50%;background:#1652E6;color:#fff;font-size:12px;line-height:1}
 @media(max-width:720px){.heading-actions{width:100%;justify-content:flex-start}.notification-menu{margin-left:8px}.notification-popover{right:-44px}.table-controls .status-select{max-width:none}.export-actions{gap:5px}}
+@media(max-width:720px){.avatar-control{width:30px;height:30px;flex-basis:30px;margin-left:0}}
 .login-story .brand{align-items:center}
 .nav-link.active .nav-dot{background:#fff;box-shadow:0 0 0 4px #ffffff30}
 .avatar{background:#EFF3FE;color:#1652E6}
@@ -214,4 +220,44 @@
     min-width:0;
     line-height:1.45;
   }
+}
+
+/* Keep web controls aligned with WashLink's Android palette and touch targets. */
+:root{
+  --blue:#1652E6;
+  --blue-dark:#0F3FB8;
+  --surface:#FFFFFF;
+  --surface-soft:#F4F5F7;
+  --text-primary:#1A1A1A;
+  --text-secondary:#5F6368;
+}
+:focus-visible{
+  outline:3px solid var(--blue);
+  outline-offset:2px;
+}
+.nav-link,.menu-toggle,.notification-toggle,.primary,.secondary,.danger,
+.text-button,.filter,.range-switch button,.signout{
+  min-height:44px;
+}
+.booking-mode-options{
+  min-width:0;
+  margin:0;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:9px;
+}
+.booking-mode-options legend{
+  padding:0 5px;
+  color:var(--text-primary);
+  font-size:12px;
+  font-weight:700;
+}
+.booking-mode-options p{
+  margin:0 0 6px;
+  color:var(--text-secondary);
+  font-size:12px;
+}
+.booking-mode-options .availability-check{
+  min-height:44px;
+  margin:0;
 }

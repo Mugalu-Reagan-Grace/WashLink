@@ -68,16 +68,39 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tv_order_type" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_review_booking"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
+    <LinearLayout
+        android:id="@+id/layout_order_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Rate service"
-        android:textAllCaps="false"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/tv_order_type"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_order_type">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_review_booking"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:text="@string/review_order_action"
+            android:textAllCaps="false"
+            android:visibility="gone"
+            app:cornerRadius="10dp"
+            app:strokeColor="@color/divider_gray" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_book_again"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:text="@string/book_again_action"
+            android:textAllCaps="false"
+            android:visibility="gone"
+            app:cornerRadius="10dp" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

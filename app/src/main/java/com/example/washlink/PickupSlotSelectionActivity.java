@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -15,9 +14,10 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.example.washlink.data.BookingDateLabels;
+import com.example.washlink.data.BookingSlotAvailability;
 import com.google.android.material.button.MaterialButton;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -26,20 +26,19 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
     private ImageView backButton;
     private FrameLayout bellLayout;
     private MaterialButton payButton;
-    private CheckBox pickupFeeCheckBox;
-
     private LinearLayout[] dateChips;
     private TextView[] timeChips;
     private TextView callChip;
     private TextView textChip;
 
     private int selectedDateIndex = 0;
-    private int selectedTimeIndex = 2;
+    private int selectedTimeIndex = -1;
     private boolean callSelected = true;
     private String selectedService = "Pickup & Delivery";
     private String selectedAddress = "Home address";
     private String selectedDateLabel = "";
     private String selectedTimeLabel = "";
+    private Calendar dateRangeStart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +63,6 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
         backButton = findViewById(R.id.btn_back);
         bellLayout = findViewById(R.id.iv_bell);
         payButton = findViewById(R.id.btn_pay);
-        pickupFeeCheckBox = findViewById(R.id.cb_pickup_fee);
 
         dateChips = new LinearLayout[] {
                 findViewById(R.id.chip_date_today),
@@ -72,6 +70,8 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
                 findViewById(R.id.chip_date_wed),
                 findViewById(R.id.chip_date_thu)
         };
+        dateRangeStart = Calendar.getInstance();
+        updateDateChipLabels();
 
         timeChips = new TextView[] {
                 findViewById(R.id.chip_time_800),
@@ -109,11 +109,12 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
         textChip.setOnClickListener(v -> selectContact(false));
 
         payButton.setOnClickListener(v -> {
-            if (!pickupFeeCheckBox.isChecked()) {
-                Toast.makeText(this, "Pickup fee not selected", Toast.LENGTH_SHORT).show();
+            if (!isTimeAvailable(selectedTimeIndex)) {
+                refreshExpiredSelection();
+                Toast.makeText(this, "That pickup time has passed. Choose another slot.",
+                        Toast.LENGTH_LONG).show();
                 return;
             }
-
             Toast.makeText(this, "Pickup slot selected", Toast.LENGTH_SHORT).show();
 
             Intent intent = new Intent(PickupSlotSelectionActivity.this, PickupConfirmationActivity.class);
@@ -126,10 +127,7 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        selectedDateLabel = getDateLabel(0);
-        selectedTimeLabel = getTimeLabel(2);
-        selectDate(selectedDateIndex);
-        selectTime(selectedTimeIndex);
+        selectInitialAvailableSlot();
         selectContact(callSelected);
     }
 
@@ -146,9 +144,16 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
         }
         selectedDateIndex = index;
         selectedDateLabel = getDateLabel(index);
+        updateAvailableTimes();
+        if (!isTimeAvailable(selectedTimeIndex)) {
+            int nextTime = findFirstAvailableTime(index);
+            if (nextTime >= 0) selectTime(nextTime);
+            else clearSelectedTime();
+        }
     }
 
     private void selectTime(int index) {
+        if (!isTimeAvailable(index)) return;
         for (int i = 0; i < timeChips.length; i++) {
             TextView chip = timeChips[i];
             chip.setBackgroundResource(i == index ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
@@ -158,6 +163,88 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
         }
         selectedTimeIndex = index;
         selectedTimeLabel = getTimeLabel(index);
+        payButton.setEnabled(true);
+    }
+
+    private void selectInitialAvailableSlot() {
+        Calendar now = Calendar.getInstance();
+        String previousDate = getIntent().getStringExtra("selected_date");
+        String previousTime = getIntent().getStringExtra("selected_time");
+        for (int dayOffset = 0; dayOffset < dateChips.length; dayOffset++) {
+            if (!getDateLabel(dayOffset).equalsIgnoreCase(previousDate == null
+                    ? "" : previousDate.trim())) continue;
+            for (int timeIndex = 0; timeIndex < timeChips.length; timeIndex++) {
+                if (getTimeLabel(timeIndex).equalsIgnoreCase(previousTime == null
+                        ? "" : previousTime.trim())
+                        && isTimeAvailable(timeIndex, dayOffset, now)) {
+                    selectDate(dayOffset);
+                    selectTime(timeIndex);
+                    return;
+                }
+            }
+        }
+        for (int dayOffset = 0; dayOffset < dateChips.length; dayOffset++) {
+            int firstTime = findFirstAvailableTime(dayOffset, now);
+            if (firstTime >= 0) {
+                selectDate(dayOffset);
+                selectTime(firstTime);
+                return;
+            }
+        }
+        selectDate(0);
+        clearSelectedTime();
+    }
+
+    private void updateAvailableTimes() {
+        Calendar now = Calendar.getInstance();
+        for (int i = 0; i < timeChips.length; i++) {
+            boolean available = isTimeAvailable(i, selectedDateIndex, now);
+            TextView chip = timeChips[i];
+            chip.setEnabled(available);
+            chip.setAlpha(available ? 1f : 0.45f);
+            chip.setContentDescription(getTimeLabel(i)
+                    + (available ? "" : ", unavailable"));
+        }
+    }
+
+    private boolean isTimeAvailable(int index) {
+        return isTimeAvailable(index, selectedDateIndex, Calendar.getInstance());
+    }
+
+    private boolean isTimeAvailable(int index, int dayOffset, Calendar now) {
+        int[] hours = {8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
+        return index >= 0 && index < hours.length
+                && BookingSlotAvailability.isFutureSlot(
+                        dateRangeStart, dayOffset, hours[index], now);
+    }
+
+    private int findFirstAvailableTime(int dayOffset) {
+        return findFirstAvailableTime(dayOffset, Calendar.getInstance());
+    }
+
+    private int findFirstAvailableTime(int dayOffset, Calendar now) {
+        for (int i = 0; i < timeChips.length; i++) {
+            if (isTimeAvailable(i, dayOffset, now)) return i;
+        }
+        return -1;
+    }
+
+    private void clearSelectedTime() {
+        selectedTimeIndex = -1;
+        selectedTimeLabel = "";
+        for (TextView chip : timeChips) {
+            chip.setBackgroundResource(R.drawable.bg_chip_unselected);
+            chip.setTextColor(ContextCompat.getColor(this, R.color.chip_unselected_text));
+            chip.setTypeface(null, Typeface.NORMAL);
+        }
+        payButton.setEnabled(false);
+    }
+
+    private void refreshExpiredSelection() {
+        updateAvailableTimes();
+        int nextTime = findFirstAvailableTime(selectedDateIndex);
+        if (nextTime >= 0) selectTime(nextTime);
+        else clearSelectedTime();
     }
 
     private void selectContact(boolean call) {
@@ -169,13 +256,18 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
     }
 
     private String getDateLabel(int index) {
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dayFormat = new SimpleDateFormat("EEE", Locale.getDefault());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d", Locale.getDefault());
-        calendar.add(Calendar.DAY_OF_YEAR, index);
-        String day = dayFormat.format(calendar.getTime());
-        String date = dateFormat.format(calendar.getTime());
-        return day + ", " + date;
+        return BookingDateLabels.selectedDate(dateRangeStart, index, Locale.getDefault());
+    }
+
+    private void updateDateChipLabels() {
+        for (int i = 0; i < dateChips.length; i++) {
+            LinearLayout chip = dateChips[i];
+            ((TextView) chip.getChildAt(0)).setText(i == 0
+                    ? getString(R.string.today)
+                    : BookingDateLabels.weekday(dateRangeStart, i, Locale.getDefault()));
+            ((TextView) chip.getChildAt(1)).setText(
+                    BookingDateLabels.chipDate(dateRangeStart, i, Locale.getDefault()));
+        }
     }
 
     private String getTimeLabel(int index) {

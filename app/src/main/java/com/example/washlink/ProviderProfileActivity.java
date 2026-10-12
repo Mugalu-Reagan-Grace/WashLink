@@ -1,6 +1,7 @@
 package com.example.washlink;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
@@ -9,20 +10,26 @@ import android.widget.LinearLayout;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.CheckBox;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
 
 import com.example.washlink.data.AuthGuard;
 import com.example.washlink.data.AuthRepository;
+import com.example.washlink.data.ProfilePhotoManager;
 import com.example.washlink.models.UserAccount;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +45,10 @@ public class ProviderProfileActivity extends AppCompatActivity {
     private String description = "";
     private String operatingHours = "";
     private boolean isOpen = true;
+    private ImageView profilePhoto;
+    private ListenerRegistration profileRegistration;
+    private String displayedProfilePhotoUrl;
+    private ActivityResultLauncher<String[]> photoPicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +56,15 @@ public class ProviderProfileActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_provider_profile);
         AuthGuard.requireRole(this, UserAccount.ROLE_PROVIDER, ProviderLoginActivity.class);
+
+        profilePhoto = findViewById(R.id.iv_logo);
+        photoPicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
+                this::uploadProfilePhoto);
+        if (profilePhoto != null) {
+            profilePhoto.setContentDescription(getString(R.string.edit_profile_picture));
+            profilePhoto.setOnClickListener(v -> photoPicker.launch(new String[]{
+                    "image/jpeg", "image/png", "image/webp", "image/gif"}));
+        }
 
         View back = findViewById(R.id.btn_back);
         if (back != null) back.setOnClickListener(v -> finish());
@@ -90,8 +110,15 @@ public class ProviderProfileActivity extends AppCompatActivity {
     }
 
     private void loadProviderProfile() {
-        FirebaseFirestore.getInstance().collection("providers").document(providerId).get()
-                .addOnSuccessListener(document -> {
+        if (profileRegistration != null) profileRegistration.remove();
+        profileRegistration = FirebaseFirestore.getInstance().collection("providers")
+                .document(providerId).addSnapshotListener((document, error) -> {
+                    if (error != null || document == null || !document.exists()) {
+                        Toast.makeText(this, "Could not load business profile: "
+                                + (error == null ? "Profile unavailable." : error.getMessage()),
+                                Toast.LENGTH_LONG).show();
+                        return;
+                    }
                     businessName = text(document.get("businessName"));
                     ownerName = text(document.get("ownerName"));
                     phone = text(document.get("phone"));
@@ -100,7 +127,17 @@ public class ProviderProfileActivity extends AppCompatActivity {
                     operatingHours = text(document.get("operatingHours"));
                     Object availability = document.get("isOpen");
                     isOpen = !(availability instanceof Boolean) || (Boolean) availability;
-                    boolean approved = !Boolean.FALSE.equals(document.get("isApproved"));
+                    boolean approved = Boolean.TRUE.equals(document.get("isApproved"));
+                    String authPhotoUrl = FirebaseAuth.getInstance().getCurrentUser() == null
+                            || FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl() == null ? ""
+                            : FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
+                    String photoUrl = text(document.get("profilePhotoUrl"));
+                    if (!photoUrl.equals(displayedProfilePhotoUrl)) {
+                        displayedProfilePhotoUrl = photoUrl;
+                        ProfilePhotoManager.display(profilePhoto, photoUrl, authPhotoUrl,
+                                FirebaseAuth.getInstance().getCurrentUser() == null ? ""
+                                        : FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                    }
                     TextView nameView = findViewById(R.id.tv_business_name);
                     TextView addressView = findViewById(R.id.tv_address);
                     TextView phoneView = findViewById(R.id.tv_provider_phone);
@@ -167,9 +204,36 @@ public class ProviderProfileActivity extends AppCompatActivity {
                                 ? R.color.pending_text
                                 : isOpen ? R.color.success_green : R.color.text_secondary));
                     }
-                })
-                .addOnFailureListener(error -> Toast.makeText(this,
-                        "Could not load business profile: " + error.getMessage(), Toast.LENGTH_LONG).show());
+                });
+    }
+
+    private void uploadProfilePhoto(Uri imageUri) {
+        if (imageUri == null || providerId == null) return;
+        profilePhoto.setImageURI(imageUri);
+        ProfilePhotoManager.upload(this, imageUri, providerId,
+                new ProfilePhotoManager.UploadCallback() {
+            @Override public void onSuccess(String downloadUrl) {
+                FirebaseFirestore.getInstance().collection("providers").document(providerId)
+                        .update("profilePhotoUrl", downloadUrl)
+                        .addOnSuccessListener(unused -> {
+                            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                                FirebaseAuth.getInstance().getCurrentUser().updateProfile(
+                                        new UserProfileChangeRequest.Builder()
+                                                .setPhotoUri(Uri.parse(downloadUrl)).build());
+                            }
+                            loadProviderProfile();
+                            Toast.makeText(ProviderProfileActivity.this,
+                                    "Profile picture updated.", Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(error -> Toast.makeText(ProviderProfileActivity.this,
+                                "Could not save profile picture: " + error.getMessage(),
+                                Toast.LENGTH_LONG).show());
+            }
+            @Override public void onError(String message) {
+                loadProviderProfile();
+                Toast.makeText(ProviderProfileActivity.this, message, Toast.LENGTH_LONG).show();
+            }
+                });
     }
 
     private void showEditDialog() {
@@ -537,5 +601,11 @@ public class ProviderProfileActivity extends AppCompatActivity {
 
     private String text(Object value) {
         return value instanceof String ? (String) value : "";
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (profileRegistration != null) profileRegistration.remove();
+        super.onDestroy();
     }
 }

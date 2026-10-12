@@ -99,7 +99,7 @@
 
     <!-- Home -->
     <string name="promo_banner_title">Laundry day simplified.</string>
-    <string name="promo_banner_subtitle">Clean clothes, fast service, delivered to your doorstep.</string>
+    <string name="promo_banner_subtitle">Choose pickup &amp; delivery or drop-off from local laundry providers.</string>
     <string name="book_a_service">Book a Service</string>
     <string name="active_order">Active Order</string>
     <string name="view_details">View Details</string>
@@ -108,9 +108,10 @@
     <string name="label_pickup">Pickup</string>
     <string name="label_cleaning">Cleaning</string>
     <string name="label_delivery">Delivery</string>
+    <string name="label_dropoff">Drop-off</string>
     <string name="estimated_arrival">Estimated Arrival</string>
-    <string name="welcome_offer">WELCOME OFFER</string>
-    <string name="welcome_offer_desc">UGX 500,000 off your first laundry</string>
+    <string name="welcome_offer">CLEAR PRICING</string>
+    <string name="welcome_offer_desc">Compare provider rates and review all fees before confirming your order.</string>
     <string name="more_options">More Options</string>
     <string name="order_history_desc">View past orders</string>
     <string name="profile_settings">Profile Settings</string>
@@ -157,13 +158,14 @@
     <string name="pick_up_slot_title">Pick Up Slot Selection</string>
     <string name="when_expect_you">When should we expect you?</string>
     <string name="select_preferred_date_time">Select your preferred date and time</string>
-    <string name="reservation_fee_note">UGX 5,000 reservation fee applies, deducted from the total.</string>
+    <string name="pickup_delivery_fee_note">Pickup and delivery each cost UGX 5,000. Both fees are included in your order total.</string>
     <string name="pickup_date">Pickup Date</string>
     <string name="select_time">Select Time</string>
     <string name="contact_preference">Contact Preference</string>
     <string name="contact_call">Call</string>
     <string name="contact_text">Text</string>
-    <string name="pick_up_fee">Pick Up Fee</string>
+    <string name="pick_up_fee">Pickup &amp; delivery fees</string>
+    <string name="pickup_delivery_fee_amount">UGX 10,000</string>
     <string name="pay_amount">Pay UGX 26,000</string>
 
     <!-- Pickup Confirmation -->
@@ -183,24 +185,23 @@
     <!-- Order Summary -->
     <string name="order_summary_title">Order Summary</string>
     <string name="service_type">Service Type</string>
+    <string name="change_service_action">Change provider or laundry services</string>
+    <string name="edit_logistics_action">Edit address, date, or time</string>
     <string name="service_type_pickup">Pick Up</string>
     <string name="price_summary">Price Summary</string>
     <string name="base_service_label">Base Service (10–15 lbs)</string>
     <string name="pickup_delivery_fee_label">Pickup &amp; Delivery</string>
     <string name="subtotal">Subtotal</string>
     <string name="tax">Tax</string>
+    <string name="service_fee">Service fee</string>
     <string name="total">Total</string>
-    <string name="promo_code_hint">Promo Code</string>
-    <string name="apply">Apply</string>
     <string name="proceed_to_payment">Proceed to Payment</string>
 
     <!-- Payment -->
     <string name="payment_title">Payment</string>
     <string name="secure_payment">Secure Payment</string>
-    <string name="secure_payment_note">Your payment information is encrypted</string>
-    <string name="add_new_card">Add New Card</string>
+    <string name="secure_payment_note">Online payments are processed by Flutterwave.</string>
     <string name="order_total">Order Total</string>
-    <string name="pay_with_google_pay">Pay with Google Pay</string>
     <string name="authorize_payment_note">I authorize this payment and understand it will be processed securely.</string>
     <string name="payment_airtel_money">Airtel Money</string>
     <string name="payment_airtel_desc">Pay directly from Airtel Money</string>
@@ -212,12 +213,12 @@
     <string name="payment_tax_amount">UGX 3,000</string>
     <string name="payment_total_amount">UGX 26,000</string>
     <string name="summary_subtotal_amount">UGX 18,000</string>
-    <string name="summary_pickup_fee_amount">UGX 5,000</string>
+    <string name="summary_pickup_fee_amount">UGX 10,000</string>
     <string name="summary_total_amount">UGX 23,000</string>
     <string name="dropoff_summary_total_amount">UGX 20,000</string>
-    <string name="default_item_count">15</string>
+    <string name="default_item_count">1</string>
     <string name="default_order_id">#0150502</string>
-    <string name="default_visa_method">Visa •••• 4242</string>
+    <string name="default_card_payment_method">Flutterwave card</string>
 
     <!-- Add Card -->
     <string name="card_number">Card Number</string>
@@ -229,9 +230,47 @@
     <string name="contactless">Contactless payment</string>
     <string name="card_brand">Card brand</string>
     <string name="cvv_placeholder">123</string>
-    <string name="visa_card_label">Visa •••• 4242</string>
-    <string name="mastercard_label">Mastercard •••• 8888</string>
-    <string name="expiry_label">Expiry 12/28</string>
+    <string name="payment_card_label">Debit or credit card</string>
+    <string name="payment_card_checkout_note">Continue to Flutterwave checkout. WashLink does not save card details.</string>
+    <string name="payment_methods_title">Payment methods</string>
+    <string name="payment_methods_checkout_info">Choose a payment method during checkout. Online payments are processed by Flutterwave; WashLink does not currently store cards.</string>
+    <string name="profile_photo">Profile photo</string>
+    <string name="nearby_dropoff_providers">Drop-off providers</string>
+    <string name="nearby_pickup_providers">Pickup providers</string>
+    <string name="home_welcome">Welcome to WashLink</string>
+    <string name="home_greeting">Hi, %1$s</string>
+    <string name="home_add_pickup_address">Add your pickup address</string>
+    <string name="home_address_unavailable_retry">Address unavailable · Tap to retry</string>
+    <string name="provider_verified">Verified provider</string>
+    <string name="provider_verified_service_count">Verified · %1$s</string>
+    <string name="provider_booking_options">Booking options you offer</string>
+    <string name="provider_supports_pickup">Pickup and delivery</string>
+    <string name="provider_supports_dropoff">Customer drop-off</string>
+    <string name="save_booking_options">Save booking options</string>
+    <string name="provider_select_booking_option">Select at least one booking option.</string>
+    <string name="review_order_action">Rate service</string>
+    <string name="book_again_action">Book again</string>
+    <string name="provider_booking_options_saved">Booking options saved.</string>
+    <string name="provider_booking_options_save_error">Could not save booking options: %1$s</string>
+    <string name="provider_service_mode_unavailable">This provider does not offer this option</string>
+    <string name="providers_none_verified">No verified laundry providers are available yet.</string>
+    <string name="providers_none_for_booking_mode">No approved providers currently offer this booking option.</string>
+    <string name="providers_no_bookable_services">No approved providers have available services and prices yet.</string>
+    <string name="providers_no_search_matches">No providers match your search.</string>
+    <string name="profile_favorite_providers">Favorite providers</string>
+    <string name="profile_favorite_providers_desc">Quickly find laundries you saved</string>
+    <string name="favorite_providers_title">Favorite providers</string>
+    <string name="favorite_loading">Loading your favorite providers…</string>
+    <string name="favorite_empty">No favorite providers yet. Save a provider from its profile to find it here.</string>
+    <string name="favorite_empty_name">Laundry provider</string>
+    <string name="favorite_remove">Remove</string>
+    <string name="favorite_added">Provider saved to favorites.</string>
+    <string name="favorite_removed">Provider removed from favorites.</string>
+    <string name="favorite_update_error">Could not update favorites. Please try again.</string>
+    <string name="favorite_load_error">Could not load favorites. Tap to retry.</string>
+    <string name="favorite_unavailable">Provider unavailable</string>
+    <string name="favorite_add_description">Save provider to favorites</string>
+    <string name="favorite_remove_description">Remove provider from favorites</string>
 
     <!-- Order Confirmed -->
     <string name="order_confirmed_title">Order Confirmed</string>
@@ -264,7 +303,7 @@
 
     <!-- Drop Off -->
     <string name="drop_off_screen_title">Drop Off</string>
-    <string name="dropoff_fee_note">UGX 5,000 fee applies for early or late drop-off outside the selected time.</string>
+    <string name="dropoff_fee_note">Drop-off has no pickup or delivery charge. The service fee is shown in your order total.</string>
     <string name="confirm_drop_off">Confirm Drop-Off</string>
 
     <!-- Drop Off Confirmation -->
@@ -314,7 +353,7 @@
     <string name="profile_password">Password</string>
     <string name="profile_password_desc">Send a password reset link to your email</string>
     <string name="profile_payment_methods">Payment Methods</string>
-    <string name="profile_payment_methods_desc">Manage payment options</string>
+    <string name="profile_payment_methods_desc">See payment options at checkout</string>
     <string name="profile_order_history">Order History</string>
     <string name="profile_order_history_desc">View past orders</string>
     <string name="profile_support">Help &amp; Support</string>
@@ -332,6 +371,15 @@
 
     <!-- Order History -->
     <string name="order_history_title">History</string>
+    <string name="history_filter_active">Active</string>
+    <string name="history_filter_completed">Completed</string>
+    <string name="history_filter_all">All</string>
+    <string name="history_load_error_retry">Could not load orders. Tap to retry.</string>
+    <string name="history_loading">Loading orders…</string>
+    <string name="history_sign_in_required">Sign in to view your orders.</string>
+    <string name="history_no_completed_orders">No completed orders yet.</string>
+    <string name="history_no_active_orders">No active orders.</string>
+    <string name="history_no_orders">No orders yet. Book a laundry service to get started.</string>
     <string name="order_1_id">Order #0105001</string>
     <string name="order_1_type">Pickup &amp; Delivery</string>
     <string name="order_1_date">4/3/2026</string>
@@ -448,6 +496,7 @@
     <string name="provider_orders_awaiting_response">Awaiting response</string>
     <string name="provider_collected_this_week">Collected this week</string>
     <string name="provider_approval_pending">Business review pending</string>
+    <string name="provider_approval_unavailable">Could not verify business approval. Order updates are unavailable; try again later.</string>
     <string name="provider_status_accepting">Accepting new bookings</string>
     <string name="provider_status_paused">Bookings paused</string>
     <string name="provider_booking_customer_fallback">Customer booking</string>
@@ -457,6 +506,8 @@
     <string name="provider_booking_view_details">View booking details  ›</string>
     <string name="provider_booking_pickup">Pickup and delivery</string>
     <string name="provider_booking_dropoff">Customer drop-off</string>
+    <string name="provider_booking_mode_unavailable">Not specified</string>
+    <string name="provider_booking_subtotal_label">Service &amp; logistics subtotal</string>
     <string name="provider_pending_count">Pending · %1$d</string>
     <string name="provider_in_progress_count">In progress · %1$d</string>
     <string name="provider_history_count">History · %1$d</string>
@@ -483,7 +534,7 @@
     <!-- Provider: Booking Requests -->
     <string name="booking_requests_title">Booking Requests</string>
     <string name="tab_pending">Pending</string>
-    <string name="tab_accepted">Accepted</string>
+    <string name="tab_accepted">In progress</string>
     <string name="tab_history">History</string>
     <string name="accept">Accept</string>
     <string name="reject">Reject</string>

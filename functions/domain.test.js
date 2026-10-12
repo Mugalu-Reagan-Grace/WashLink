@@ -5,6 +5,7 @@ const assert = require("node:assert/strict");
 const {
   quoteBooking,
   hasActiveRole,
+  isApprovedProvider,
   isVerifiedFlutterwavePayment,
   isValidStatusTransition,
   canCancelBooking,
@@ -43,6 +44,13 @@ test("accounts can only act within their active stored role", () => {
   assert.equal(hasActiveRole(null, "admin"), false);
 });
 
+test("providers must be explicitly approved before marketplace operations", () => {
+  assert.equal(isApprovedProvider({ isApproved: true }), true);
+  assert.equal(isApprovedProvider({ isApproved: false }), false);
+  assert.equal(isApprovedProvider({}), false);
+  assert.equal(isApprovedProvider(null), false);
+});
+
 test("prices a drop-off without pickup or delivery fees", () => {
   const dropoff = {
     ...booking,
@@ -74,6 +82,31 @@ test("does not quote a service a provider marked unavailable", () => {
 
 test("treats legacy services without availability metadata as available", () => {
   assert.equal(quoteBooking(booking, provider).total, booking.total);
+});
+
+test("quotes multiple provider services and a customer-selected weight", () => {
+  const multiServiceProvider = {
+    services: [
+      { name: "Wash & Fold", pricePerKg: 5000 },
+      { name: "Dry Cleaning", pricePerKg: 7000 },
+    ],
+  };
+  const multiServiceBooking = {
+    ...booking,
+    serviceName: "Wash & Fold, Dry Cleaning",
+    serviceNames: ["Wash & Fold", "Dry Cleaning"],
+    weightKg: 10,
+    subtotal: 130000,
+    serviceFee: 3900,
+    tax: 3900,
+    total: 133900,
+  };
+  assert.equal(quoteBooking(multiServiceBooking, multiServiceProvider).kilograms, 10);
+  assert.equal(quoteBooking(multiServiceBooking, multiServiceProvider).total, 133900);
+  assert.throws(() => quoteBooking({
+    ...multiServiceBooking,
+    serviceNames: ["Wash & Fold", "Unavailable"],
+  }, multiServiceProvider), /not currently offered/);
 });
 
 test("only accepts a successful, matching UGX Flutterwave transaction", () => {

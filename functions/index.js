@@ -14,6 +14,7 @@ const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const {
   quoteBooking,
   hasActiveRole,
+  isApprovedProvider,
   isVerifiedFlutterwavePayment,
   isValidStatusTransition,
   canCancelBooking,
@@ -446,11 +447,21 @@ exports.createBooking = onCall({ region: REGION }, async (request) => {
     throw new HttpsError("invalid-argument", "The booking provider is invalid.");
   }
   const serviceType = data.serviceType;
+  const serviceNames = data.serviceNames === undefined
+    ? [inputText(data.serviceName, "Service", 120)]
+    : data.serviceNames;
+  if (!Array.isArray(serviceNames) || serviceNames.length < 1 || serviceNames.length > 20) {
+    throw new HttpsError("invalid-argument", "Select between 1 and 20 services.");
+  }
+  const normalizedServiceNames = serviceNames.map((name) =>
+    inputText(name, "Service", 120));
   const bookingInput = {
     providerId,
     serviceType,
-    serviceName: inputText(data.serviceName, "Service", 120),
+    serviceNames: normalizedServiceNames,
+    serviceName: normalizedServiceNames.join(", "),
     itemCount: data.itemCount,
+    weightKg: data.weightKg,
     subtotal: data.subtotal,
     pickupFee: data.pickupFee,
     deliveryFee: data.deliveryFee,
@@ -474,7 +485,7 @@ exports.createBooking = onCall({ region: REGION }, async (request) => {
       || !providerSnapshot.exists) {
     throw new HttpsError("failed-precondition", "The booking customer or provider is not valid.");
   }
-  if (providerSnapshot.get("isApproved") === false) {
+  if (!isApprovedProvider(providerSnapshot.data())) {
     throw new HttpsError("failed-precondition", "This provider is awaiting administrator approval.");
   }
   let quote;
@@ -498,11 +509,13 @@ exports.createBooking = onCall({ region: REGION }, async (request) => {
     providerName: provider.businessName || "Laundry provider",
     serviceType,
     serviceName: bookingInput.serviceName,
+    serviceNames: bookingInput.serviceNames,
     status: "BOOKED",
     address: serviceType === "dropoff"
       ? (provider.address || address) : address,
     scheduledDateTime,
     itemCount: bookingInput.itemCount,
+    weightKg: quote.kilograms,
     estimatedWeight: `${quote.kilograms} kg`,
     specialInstructions,
     subtotal: quote.subtotal,
@@ -712,7 +725,7 @@ exports.updateBookingStatus = onCall({ region: REGION }, async (request) => {
     if (!bookingSnapshot.exists) {
       throw new HttpsError("not-found", "Booking not found.");
     }
-    if (providerProfileSnapshot.get("isApproved") === false) {
+    if (!isApprovedProvider(providerProfileSnapshot.data())) {
       throw new HttpsError("permission-denied", "This provider is awaiting administrator approval.");
     }
     const booking = bookingSnapshot.data();
@@ -903,7 +916,7 @@ exports.assignBookingRider = onCall({ region: REGION }, async (request) => {
         || !providerSnapshot.exists) {
       throw new HttpsError("permission-denied", "Only an active provider can assign riders.");
     }
-    if (providerSnapshot.get("isApproved") === false) {
+    if (!isApprovedProvider(providerSnapshot.data())) {
       throw new HttpsError("permission-denied", "This provider is awaiting administrator approval.");
     }
     if (!bookingSnapshot.exists) {
@@ -1102,7 +1115,7 @@ exports.initializeFlutterwaveCheckout = onCall(
           || !providerSnapshot.exists) {
         throw new HttpsError("failed-precondition", "The booking customer or provider is not valid.");
       }
-      if (providerSnapshot.get("isApproved") === false) {
+      if (!isApprovedProvider(providerSnapshot.data())) {
         throw new HttpsError("failed-precondition", "This provider is awaiting administrator approval.");
       }
 

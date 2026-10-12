@@ -105,7 +105,7 @@
                 android:layout_marginTop="10dp"
                 android:background="@drawable/bg_offer_card"
                 android:padding="10dp"
-                android:text="@string/reservation_fee_note"
+                android:text="@string/pickup_delivery_fee_note"
                 android:textColor="@color/laundr_blue"
                 android:textSize="12sp"
                 app:layout_constraintTop_toBottomOf="@id/tv_subtitle"
@@ -527,13 +527,6 @@
                 android:gravity="center_vertical"
                 app:layout_constraintTop_toBottomOf="@id/row_contact_pref">
 
-                <CheckBox
-                    android:id="@+id/cb_pickup_fee"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:buttonTint="@color/laundr_blue" />
-
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -545,7 +538,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/pick_up_fee_amount"
+                    android:text="@string/pickup_delivery_fee_amount"
                     android:textColor="@color/text_primary"
                     android:textSize="13sp"
                     android:textStyle="bold" />

@@ -5,6 +5,8 @@ import android.app.Application;
 import android.os.Bundle;
 
 import com.example.washlink.ui.SystemBarInsets;
+import com.example.washlink.ui.BlueHeaderStyler;
+import com.example.washlink.ui.NotificationBadgeManager;
 
 public class WashLinkApplication extends Application {
     @Override
@@ -20,10 +22,14 @@ public class WashLinkApplication extends Application {
             @Override
             public void onActivityResumed(Activity activity) {
                 SystemBarInsets.apply(activity);
+                BlueHeaderStyler.apply(activity);
+                NotificationBadgeManager.onActivityResumed(activity);
             }
 
             @Override
-            public void onActivityPaused(Activity activity) { }
+            public void onActivityPaused(Activity activity) {
+                NotificationBadgeManager.onActivityPaused(activity);
+            }
 
             @Override
             public void onActivityStopped(Activity activity) { }
@@ -32,7 +38,9 @@ public class WashLinkApplication extends Application {
             public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
 
             @Override
-            public void onActivityDestroyed(Activity activity) { }
+            public void onActivityDestroyed(Activity activity) {
+                NotificationBadgeManager.onActivityDestroyed(activity);
+            }
         });
     }
 }

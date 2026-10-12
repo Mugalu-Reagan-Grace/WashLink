@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -11,7 +12,10 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.washlink.data.AuthGuard;
+import com.example.washlink.data.ProfilePhotoManager;
 import com.example.washlink.models.UserAccount;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -27,6 +31,21 @@ public class HomeActivity extends AppCompatActivity {
 
         btn_book_service = findViewById(R.id.btn_book_service);
         bellLayout = findViewById(R.id.iv_bell);
+        ImageView avatar = findViewById(R.id.iv_avatar);
+        if (avatar != null && FirebaseAuth.getInstance().getCurrentUser() != null) {
+            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            String email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+            String authPhotoUrl = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl() == null ? ""
+                    : FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
+            ProfilePhotoManager.display(avatar, "", authPhotoUrl, email);
+            FirebaseFirestore.getInstance().collection("users").document(uid).get()
+                    .addOnSuccessListener(profile -> ProfilePhotoManager.display(avatar,
+                            profile.getString("photoUrl") != null ? profile.getString("photoUrl")
+                                    : profile.getString("photoUri"), authPhotoUrl, email));
+            avatar.setContentDescription(getString(R.string.edit_profile_picture));
+            avatar.setOnClickListener(v ->
+                    startActivity(new Intent(HomeActivity.this, ProfileActivity.class)));
+        }
 
         btn_book_service.setOnClickListener(v -> bookServiceButtonClicked());
         bellLayout.setOnClickListener(v -> {

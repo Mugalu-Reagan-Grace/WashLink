@@ -27,6 +27,7 @@ import java.util.List;
 
 public class ProviderDashboardActivity extends AppCompatActivity {
     private ListenerRegistration bookingsRegistration;
+    private com.google.firebase.firestore.ListenerRegistration profileRegistration;
     private String providerId;
     private LinearLayout recentBookings;
 
@@ -87,8 +88,17 @@ public class ProviderDashboardActivity extends AppCompatActivity {
     }
 
     private void loadBusinessName(String providerId) {
-        FirebaseFirestore.getInstance().collection("providers").document(providerId).get()
-                .addOnSuccessListener(document -> {
+        if (profileRegistration != null) profileRegistration.remove();
+        profileRegistration = FirebaseFirestore.getInstance().collection("providers")
+                .document(providerId).addSnapshotListener((document, error) -> {
+                    if (error != null || document == null || !document.exists()) {
+                        TextView approval = findViewById(R.id.tv_provider_approval);
+                        if (approval != null) {
+                            approval.setText(R.string.provider_approval_unavailable);
+                            approval.setTextColor(getColor(R.color.pending_text));
+                        }
+                        return;
+                    }
                     Object name = document.get("businessName");
                     TextView business = findViewById(R.id.tv_business_name);
                     if (business != null && name instanceof String && !((String) name).trim().isEmpty()) {
@@ -96,7 +106,7 @@ public class ProviderDashboardActivity extends AppCompatActivity {
                     }
                     TextView approval = findViewById(R.id.tv_provider_approval);
                     if (approval != null) {
-                        boolean approved = !Boolean.FALSE.equals(document.get("isApproved"));
+                        boolean approved = Boolean.TRUE.equals(document.get("isApproved"));
                         boolean isOpen = !Boolean.FALSE.equals(document.get("isOpen"));
                         approval.setText(!approved
                                 ? R.string.provider_approval_pending
@@ -124,9 +134,7 @@ public class ProviderDashboardActivity extends AppCompatActivity {
                     } else if (reviews != null) {
                         reviews.setText(R.string.provider_no_reviews);
                     }
-                })
-                .addOnFailureListener(error -> showBookingsState(
-                        "Could not load provider profile: " + error.getMessage()));
+                });
     }
 
     private void renderBookings(List<Booking> bookings) {
@@ -240,6 +248,7 @@ public class ProviderDashboardActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         if (bookingsRegistration != null) bookingsRegistration.remove();
+        if (profileRegistration != null) profileRegistration.remove();
         super.onDestroy();
     }
 }

@@ -8,6 +8,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -16,6 +17,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -33,6 +36,18 @@ public class ProviderNavBarHelper {
     public static void bind(Activity activity, int activeTab) {
         View menuButton = activity.findViewById(R.id.btn_provider_menu);
         if (menuButton != null) menuButton.setOnClickListener(v -> showDrawer(activity));
+
+        View notifications = activity.findViewById(R.id.iv_bell);
+        if (notifications != null) {
+            notifications.setContentDescription(activity.getString(R.string.notifications));
+            notifications.setOnClickListener(v ->
+                    activity.startActivity(new Intent(activity, NotificationsActivity.class)));
+        }
+
+        View bottomNav = activity.findViewById(R.id.bottom_nav_bar);
+        if (bottomNav == null) bottomNav = activity.findViewById(R.id.provider_chat_nav);
+        if (bottomNav == null) bottomNav = activity.findViewById(R.id.provider_chat_thread_nav);
+        applyBottomNavigationInset(bottomNav);
 
         ImageView dashboard = activity.findViewById(R.id.iv_nav_dashboard);
         if (dashboard != null) {
@@ -59,6 +74,23 @@ public class ProviderNavBarHelper {
             chat.setOnClickListener(v -> navigateTo(activity, ChatInboxActivity.class));
             animateTint(activity, chat, activeTab == TAB_CHAT);
         }
+    }
+
+    private static void applyBottomNavigationInset(View bottomNav) {
+        if (bottomNav == null) return;
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (view, insets) -> {
+            int bottomInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+            ViewGroup.LayoutParams rawParams = view.getLayoutParams();
+            if (rawParams instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) rawParams;
+                if (params.bottomMargin != bottomInset) {
+                    params.bottomMargin = bottomInset;
+                    view.setLayoutParams(params);
+                }
+            }
+            return insets;
+        });
+        ViewCompat.requestApplyInsets(bottomNav);
     }
 
     private static void showDrawer(Activity activity) {
@@ -179,9 +211,9 @@ public class ProviderNavBarHelper {
     }
 
     private static void animateTint(Activity activity, ImageView image, boolean active) {
-        int from = ContextCompat.getColor(activity, R.color.nav_inactive);
+        int from = ContextCompat.getColor(activity, R.color.splash_tagline_text);
         int to = ContextCompat.getColor(activity,
-                active ? R.color.laundr_blue : R.color.nav_inactive);
+                active ? R.color.white : R.color.splash_tagline_text);
         android.animation.ValueAnimator animator = android.animation.ValueAnimator.ofObject(
                 new android.animation.ArgbEvaluator(), from, to);
         animator.setDuration(220);

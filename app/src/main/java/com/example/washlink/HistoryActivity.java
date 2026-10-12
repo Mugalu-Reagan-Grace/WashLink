@@ -1,14 +1,15 @@
 package com.example.washlink;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,11 +17,11 @@ import com.example.washlink.data.BookingService;
 import com.example.washlink.data.BookingServiceFacade;
 import com.example.washlink.data.ListenerRegistration;
 import com.example.washlink.models.Booking;
+import com.example.washlink.models.OrderStatus;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class HistoryActivity extends AppCompatActivity {
@@ -30,6 +31,8 @@ public class HistoryActivity extends AppCompatActivity {
     private TextView emptyState;
     private String filter = "active";
     private ListenerRegistration registration;
+    private boolean loaded;
+    private boolean loadFailed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,18 +55,34 @@ public class HistoryActivity extends AppCompatActivity {
         bindFilter(R.id.filter_active, "active");
         bindFilter(R.id.filter_completed, "completed");
         bindFilter(R.id.filter_all, "all");
-        updateEmptyState();
+        renderFilterSelection();
+        emptyState.setOnClickListener(v -> {
+            if (loadFailed) loadBookings();
+        });
+        loadBookings();
+    }
 
+    private void loadBookings() {
+        if (registration != null) registration.remove();
+        registration = null;
+        loaded = false;
+        loadFailed = false;
+        allBookings.clear();
+        adapter.replace(filteredBookings());
+        updateEmptyState();
         String uid = FirebaseAuth.getInstance().getCurrentUser() == null
                 ? null : FirebaseAuth.getInstance().getCurrentUser().getUid();
         if (uid == null) {
-            Toast.makeText(this, "Sign in to view your orders", Toast.LENGTH_SHORT).show();
+            loaded = true;
+            updateEmptyState();
             return;
         }
         registration = BookingServiceFacade.getBookingService().addCustomerBookingsListener(uid,
                 new BookingService.CustomerBookingsListener() {
                     @Override
                     public void onBookingsChanged(List<Booking> bookings) {
+                        loaded = true;
+                        loadFailed = false;
                         allBookings.clear();
                         allBookings.addAll(bookings);
                         adapter.replace(filteredBookings());
@@ -72,7 +91,9 @@ public class HistoryActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(String message) {
-                        Toast.makeText(HistoryActivity.this, message, Toast.LENGTH_LONG).show();
+                        loaded = false;
+                        loadFailed = true;
+                        updateEmptyState();
                     }
                 });
     }
@@ -80,9 +101,29 @@ public class HistoryActivity extends AppCompatActivity {
     private void bindFilter(int id, String value) {
         findViewById(id).setOnClickListener(v -> {
             filter = value;
+            renderFilterSelection();
             adapter.replace(filteredBookings());
             updateEmptyState();
         });
+    }
+
+    private void renderFilterSelection() {
+        setFilterStyle(findViewById(R.id.filter_active), "active".equals(filter));
+        setFilterStyle(findViewById(R.id.filter_completed), "completed".equals(filter));
+        setFilterStyle(findViewById(R.id.filter_all), "all".equals(filter));
+    }
+
+    private void setFilterStyle(View view, boolean selected) {
+        if (!(view instanceof MaterialButton)) return;
+        MaterialButton button = (MaterialButton) view;
+        int fill = selected ? R.color.laundr_blue : R.color.white;
+        int text = selected ? R.color.white : R.color.chip_unselected_text;
+        button.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, fill)));
+        button.setTextColor(ContextCompat.getColor(this, text));
+        button.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(
+                this, selected ? R.color.laundr_blue : R.color.divider_gray)));
+        button.setStrokeWidth(Math.round(getResources().getDisplayMetrics().density));
+        button.setSelected(selected);
     }
 
     private List<Booking> filteredBookings() {
@@ -105,6 +146,22 @@ public class HistoryActivity extends AppCompatActivity {
         boolean hasItems = adapter != null && adapter.getItemCount() > 0;
         recyclerView.setVisibility(hasItems ? View.VISIBLE : View.GONE);
         emptyState.setVisibility(hasItems ? View.GONE : View.VISIBLE);
+        if (hasItems) return;
+        if (loadFailed) {
+            emptyState.setText(R.string.history_load_error_retry);
+        } else if (!loaded) {
+            emptyState.setText(R.string.history_loading);
+        } else if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            emptyState.setText(R.string.history_sign_in_required);
+        } else if ("completed".equals(filter) && !allBookings.isEmpty()) {
+            emptyState.setText(R.string.history_no_completed_orders);
+        } else if ("active".equals(filter) && !allBookings.isEmpty()) {
+            emptyState.setText(R.string.history_no_active_orders);
+        } else {
+            emptyState.setText(R.string.history_no_orders);
+        }
+        emptyState.setClickable(loadFailed);
+        emptyState.setFocusable(loadFailed);
     }
 
     @Override
@@ -135,8 +192,7 @@ public class HistoryActivity extends AppCompatActivity {
                     ? "Date pending" : booking.getScheduledDateTime());
             holder.type.setText(booking.getServiceName() == null
                     ? "Laundry service" : booking.getServiceName());
-            holder.status.setText(booking.getStatus() == null
-                    ? "BOOKED" : booking.getStatus().replace('_', ' '));
+            holder.status.setText(OrderStatus.fromString(booking.getStatus()).getDisplayName());
             holder.price.setText(com.example.washlink.data.BookingPricing.format(
                     (int) booking.getTotal()));
             holder.itemView.setOnClickListener(v -> {

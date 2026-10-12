@@ -84,6 +84,7 @@ public class ProviderReportsActivity extends AppCompatActivity {
                     ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
             filter.setTextColor(ContextCompat.getColor(this,
                     selected ? R.color.white : R.color.chip_unselected_text));
+            filter.setSelected(selected);
         }
     }
 

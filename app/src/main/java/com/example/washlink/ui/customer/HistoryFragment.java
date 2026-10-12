@@ -2,6 +2,8 @@ package com.example.washlink.ui.customer;
 
 import android.os.Bundle;
 import android.text.InputFilter;
+import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -12,13 +14,16 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
 import com.example.washlink.data.BookingService;
 import com.example.washlink.data.BookingServiceFacade;
 import com.example.washlink.data.ListenerRegistration;
 import com.example.washlink.models.Booking;
+import com.example.washlink.models.OrderStatus;
 import com.example.washlink.R;
 import com.google.firebase.auth.FirebaseAuth;
 import java.util.ArrayList;
@@ -53,6 +58,7 @@ public class HistoryFragment extends CustomerTabFragment {
         bindFilter(view, R.id.filter_active, "active");
         bindFilter(view, R.id.filter_completed, "completed");
         bindFilter(view, R.id.filter_all, "all");
+        renderFilterSelection(view);
         emptyState.setOnClickListener(v -> {
             if (loadFailed) loadBookings();
         });
@@ -96,9 +102,30 @@ public class HistoryFragment extends CustomerTabFragment {
     private void bindFilter(View view, int id, String value) {
         view.findViewById(id).setOnClickListener(v -> {
             filter = value;
+            renderFilterSelection(requireView());
             adapter.replace(filteredBookings());
             updateEmptyState();
         });
+    }
+
+    private void renderFilterSelection(View view) {
+        setFilterStyle(view.findViewById(R.id.filter_active), "active".equals(filter));
+        setFilterStyle(view.findViewById(R.id.filter_completed), "completed".equals(filter));
+        setFilterStyle(view.findViewById(R.id.filter_all), "all".equals(filter));
+    }
+
+    private void setFilterStyle(View view, boolean selected) {
+        if (!(view instanceof MaterialButton)) return;
+        MaterialButton button = (MaterialButton) view;
+        int fill = selected ? R.color.laundr_blue : R.color.white;
+        int text = selected ? R.color.white : R.color.chip_unselected_text;
+        button.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), fill)));
+        button.setTextColor(ContextCompat.getColor(requireContext(), text));
+        button.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(
+                requireContext(), selected ? R.color.laundr_blue : R.color.divider_gray)));
+        button.setStrokeWidth(Math.round(getResources().getDisplayMetrics().density));
+        button.setSelected(selected);
     }
 
     private List<Booking> filteredBookings() {
@@ -121,17 +148,17 @@ public class HistoryFragment extends CustomerTabFragment {
         emptyState.setVisibility(hasItems ? View.GONE : View.VISIBLE);
         if (hasItems) return;
         if (loadFailed) {
-            emptyState.setText("Could not load orders. Tap to retry.");
+            emptyState.setText(R.string.history_load_error_retry);
         } else if (!loaded) {
-            emptyState.setText("Loading orders...");
+            emptyState.setText(R.string.history_loading);
         } else if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            emptyState.setText("Sign in to view your orders.");
+            emptyState.setText(R.string.history_sign_in_required);
         } else if ("completed".equals(filter) && !allBookings.isEmpty()) {
-            emptyState.setText("No completed orders yet.");
+            emptyState.setText(R.string.history_no_completed_orders);
         } else if ("active".equals(filter) && !allBookings.isEmpty()) {
-            emptyState.setText("No active orders.");
+            emptyState.setText(R.string.history_no_active_orders);
         } else {
-            emptyState.setText("No orders yet.");
+            emptyState.setText(R.string.history_no_orders);
         }
         emptyState.setClickable(loadFailed);
         emptyState.setFocusable(loadFailed);
@@ -159,12 +186,16 @@ public class HistoryFragment extends CustomerTabFragment {
             holder.id.setText("Order #" + booking.getId());
             holder.date.setText(booking.getScheduledDateTime() == null ? "Date pending" : booking.getScheduledDateTime());
             holder.type.setText(booking.getServiceName() == null ? "Laundry service" : booking.getServiceName());
-            holder.status.setText(booking.getStatus() == null ? "BOOKED" : booking.getStatus().replace('_', ' '));
+            holder.status.setText(OrderStatus.fromString(booking.getStatus()).getDisplayName());
             holder.price.setText(com.example.washlink.data.BookingPricing.format((int) booking.getTotal()));
             boolean reviewAvailable = "DELIVERED".equals(booking.getStatus())
                     && !booking.isReviewSubmitted();
             holder.review.setVisibility(reviewAvailable ? View.VISIBLE : View.GONE);
             holder.review.setOnClickListener(v -> showReviewDialog(booking));
+            boolean canBookAgain = "DELIVERED".equals(booking.getStatus())
+                    && booking.getProviderId() != null && !booking.getProviderId().trim().isEmpty();
+            holder.bookAgain.setVisibility(canBookAgain ? View.VISIBLE : View.GONE);
+            holder.bookAgain.setOnClickListener(v -> openRepeatBooking(booking));
             holder.itemView.setOnClickListener(v -> {
                 ((MainActivity) requireActivity()).showTab(MainActivity.TAB_TRACKING, booking.getId());
             });
@@ -177,8 +208,38 @@ public class HistoryFragment extends CustomerTabFragment {
             final TextView type = itemView.findViewById(R.id.tv_order_type);
             final TextView price = itemView.findViewById(R.id.tv_order_price);
             final View review = itemView.findViewById(R.id.btn_review_booking);
+            final View bookAgain = itemView.findViewById(R.id.btn_book_again);
             Holder(View itemView) { super(itemView); }
         }
+    }
+
+    private void openRepeatBooking(Booking booking) {
+        if (!isAdded()) return;
+        String bookingMode = Booking.SERVICE_TYPE_DROPOFF.equals(booking.getServiceType())
+                ? "Drop Off" : "Pickup & Delivery";
+        Intent intent = new Intent(requireContext(),
+                com.example.washlink.ProviderDetailsActivity.class);
+        intent.putExtra("provider_id", booking.getProviderId());
+        intent.putExtra("provider_name", booking.getProviderName());
+        intent.putExtra("selected_service", bookingMode);
+        intent.putExtra("provider_image_res", R.drawable.ic_provider_business);
+        ArrayList<String> serviceNames = new ArrayList<>();
+        if (booking.getServiceNames() != null) {
+            for (String serviceName : booking.getServiceNames()) {
+                if (serviceName != null && !serviceName.trim().isEmpty()) {
+                    serviceNames.add(serviceName.trim());
+                }
+            }
+        }
+        if (serviceNames.isEmpty() && booking.getServiceName() != null) {
+            for (String serviceName : booking.getServiceName().split(",")) {
+                if (!serviceName.trim().isEmpty()) serviceNames.add(serviceName.trim());
+            }
+        }
+        if (!serviceNames.isEmpty()) {
+            intent.putStringArrayListExtra("repeat_service_names", serviceNames);
+        }
+        startActivity(intent);
     }
 
     private void showReviewDialog(Booking booking) {

@@ -14,8 +14,19 @@
         android:paddingEnd="16dp">
 
         <ImageView
+            android:id="@+id/btn_provider_menu"
+            android:layout_width="36dp"
+            android:layout_height="48dp"
+            android:padding="6dp"
+            android:src="@drawable/ic_menu_lines"
+            android:contentDescription="@string/provider_nav_more"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <ImageView
             android:id="@+id/btn_chat_back"
-            style="@style/WashLinkBackButton" />
+            style="@style/WashLinkBackButton"
+            android:layout_marginStart="4dp" />
 
         <TextView
             android:id="@+id/tv_chat_title"
@@ -27,15 +38,6 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <ImageView
-            android:id="@+id/btn_provider_menu"
-            android:layout_width="40dp"
-            android:layout_height="48dp"
-            android:padding="8dp"
-            android:src="@drawable/ic_menu_lines"
-            android:contentDescription="@string/provider_nav_more"
-            android:clickable="true"
-            android:focusable="true" />
     </LinearLayout>
 
     <TextView

@@ -16,7 +16,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.washlink.data.AuthGuard;
 import com.example.washlink.data.AuthRepository;
 import com.example.washlink.models.UserAccount;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +32,13 @@ public class ManageServicesActivity extends AppCompatActivity {
     private TextView stateView;
     private ServiceAdapter adapter;
     private String providerId;
+    private MaterialCheckBox pickupOption;
+    private MaterialCheckBox dropoffOption;
+    private View saveBookingOptionsButton;
+    private ListenerRegistration profileRegistration;
+    private boolean bookingOptionsDirty;
+    private boolean applyingProfileSnapshot;
+    private boolean savingBookingOptions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +54,17 @@ public class ManageServicesActivity extends AppCompatActivity {
         providerId = AuthRepository.getInstance().getCurrentUserId();
         recyclerView = findViewById(R.id.rv_services);
         stateView = findViewById(R.id.tv_services_state);
+        pickupOption = findViewById(R.id.cb_supports_pickup);
+        dropoffOption = findViewById(R.id.cb_supports_dropoff);
+        saveBookingOptionsButton = findViewById(R.id.btn_save_booking_options);
+        setBookingOptionsEnabled(false);
+        saveBookingOptionsButton.setOnClickListener(v -> saveBookingOptions());
+        pickupOption.setOnCheckedChangeListener((button, checked) -> {
+            if (!applyingProfileSnapshot) bookingOptionsDirty = true;
+        });
+        dropoffOption.setOnCheckedChangeListener((button, checked) -> {
+            if (!applyingProfileSnapshot) bookingOptionsDirty = true;
+        });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ServiceAdapter();
         recyclerView.setAdapter(adapter);
@@ -58,10 +78,26 @@ public class ManageServicesActivity extends AppCompatActivity {
     }
 
     private void loadServices() {
+        if (profileRegistration != null) profileRegistration.remove();
         showState("Loading services...");
-        FirebaseFirestore.getInstance().collection("providers").document(providerId).get()
-                .addOnSuccessListener(document -> {
+        profileRegistration = FirebaseFirestore.getInstance().collection("providers")
+                .document(providerId).addSnapshotListener((document, error) -> {
+                    if (error != null || document == null || !document.exists()) {
+                        showState("Could not load services. Tap to retry.");
+                        stateView.setClickable(true);
+                        stateView.setOnClickListener(v -> loadServices());
+                        return;
+                    }
                     services.clear();
+                    if (!bookingOptionsDirty) {
+                        applyingProfileSnapshot = true;
+                        pickupOption.setChecked(!Boolean.FALSE.equals(
+                                document.get("supportsPickupDelivery")));
+                        dropoffOption.setChecked(!Boolean.FALSE.equals(
+                                document.get("supportsDropoff")));
+                        applyingProfileSnapshot = false;
+                    }
+                    setBookingOptionsEnabled(!savingBookingOptions);
                     Object value = document.get("services");
                     if (value instanceof List<?>) {
                         for (Object item : (List<?>) value) {
@@ -79,12 +115,44 @@ public class ManageServicesActivity extends AppCompatActivity {
                     adapter.notifyDataSetChanged();
                     if (services.isEmpty()) showState("No services yet. Add your first service.");
                     else showList();
-                })
-                .addOnFailureListener(error -> {
-                    showState("Could not load services. Tap to retry.");
-                    stateView.setClickable(true);
-                    stateView.setOnClickListener(v -> loadServices());
                 });
+    }
+
+    private void saveBookingOptions() {
+        if (providerId == null) return;
+        if (!pickupOption.isChecked() && !dropoffOption.isChecked()) {
+            Toast.makeText(this, R.string.provider_select_booking_option,
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        savingBookingOptions = true;
+        setBookingOptionsEnabled(false);
+        Map<String, Object> options = new HashMap<>();
+        options.put("supportsPickupDelivery", pickupOption.isChecked());
+        options.put("supportsDropoff", dropoffOption.isChecked());
+        FirebaseFirestore.getInstance().collection("providers").document(providerId)
+                .update(options)
+                .addOnSuccessListener(unused -> {
+                    savingBookingOptions = false;
+                    bookingOptionsDirty = false;
+                    setBookingOptionsEnabled(true);
+                    Toast.makeText(this, R.string.provider_booking_options_saved,
+                            Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(error -> Toast.makeText(this,
+                        getString(R.string.provider_booking_options_save_error,
+                                error.getMessage() == null ? "" : error.getMessage()),
+                        Toast.LENGTH_LONG).show())
+                .addOnCompleteListener(task -> {
+                    savingBookingOptions = false;
+                    setBookingOptionsEnabled(true);
+                });
+    }
+
+    private void setBookingOptionsEnabled(boolean enabled) {
+        pickupOption.setEnabled(enabled);
+        dropoffOption.setEnabled(enabled);
+        saveBookingOptionsButton.setEnabled(enabled);
     }
 
     private void showServiceDialog(int position) {
@@ -261,5 +329,12 @@ public class ManageServicesActivity extends AppCompatActivity {
                 availability = itemView.findViewById(R.id.btn_service_availability);
             }
         }
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (profileRegistration != null) profileRegistration.remove();
+        super.onDestroy();
     }
 }

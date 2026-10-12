@@ -148,7 +148,7 @@ public class AdminManagementActivity extends AppCompatActivity {
 
     private void addProviderRow(DocumentSnapshot document) {
         String uid = document.getId();
-        boolean approved = !Boolean.FALSE.equals(document.get("isApproved"));
+        boolean approved = Boolean.TRUE.equals(document.get("isApproved"));
         LinearLayout row = createRow();
         TextView description = new TextView(this);
         description.setText(text(document.get("businessName"), "Unnamed provider")

@@ -12,7 +12,7 @@
         android:id="@+id/tv_header_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="12dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="12dp"
         android:text="@string/booking_requests_title"
@@ -20,22 +20,22 @@
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btn_provider_menu" />
+        app:layout_constraintStart_toEndOf="@id/btn_provider_menu"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
         android:id="@+id/btn_provider_menu"
-        android:layout_width="40dp"
+        android:layout_width="36dp"
         android:layout_height="40dp"
-        android:layout_marginEnd="16dp"
-        android:padding="8dp"
+        android:layout_marginStart="12dp"
+        android:padding="6dp"
         android:src="@drawable/ic_menu_lines"
         android:contentDescription="@string/provider_nav_more"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintTop_toTopOf="@id/tv_header_title"
         app:layout_constraintBottom_toBottomOf="@id/tv_header_title"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/tv_booking_requests_subtitle"
@@ -65,7 +65,7 @@
         <TextView
             android:id="@+id/tab_pending"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:gravity="center"
             android:paddingTop="10dp"
@@ -81,7 +81,7 @@
         <TextView
             android:id="@+id/tab_accepted"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:gravity="center"
@@ -98,7 +98,7 @@
         <TextView
             android:id="@+id/tab_history"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:gravity="center"

@@ -80,7 +80,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Active" />
+            android:text="@string/history_filter_active" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/filter_completed"
@@ -88,7 +88,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Completed" />
+            android:text="@string/history_filter_completed" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/filter_all"
@@ -96,7 +96,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="All" />
+            android:text="@string/history_filter_all" />
     </LinearLayout>
 
     <!-- Order list -->

@@ -88,11 +88,16 @@
                 android:padding="16dp"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <View
+                <ImageView
                     android:id="@+id/iv_logo"
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:background="@drawable/bg_thumbnail_placeholder"
+                    android:scaleType="centerCrop"
+                    android:clipToOutline="true"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="@string/edit_profile_picture"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
 

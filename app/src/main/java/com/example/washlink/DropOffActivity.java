@@ -14,9 +14,10 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.example.washlink.data.BookingDateLabels;
+import com.example.washlink.data.BookingSlotAvailability;
 import com.google.android.material.button.MaterialButton;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -30,9 +31,10 @@ public class DropOffActivity extends AppCompatActivity {
     private TextView[] timeChips;
 
     private int selectedDateIndex = 0;
-    private int selectedTimeIndex = 1;
+    private int selectedTimeIndex = -1;
     private String selectedDateLabel = "";
     private String selectedTimeLabel = "";
+    private Calendar dateRangeStart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +54,8 @@ public class DropOffActivity extends AppCompatActivity {
                 findViewById(R.id.chip_date_wed),
                 findViewById(R.id.chip_date_thu)
         };
+        dateRangeStart = Calendar.getInstance();
+        updateDateChipLabels();
 
         timeChips = new TextView[] {
                 findViewById(R.id.chip_time_900),
@@ -82,6 +86,12 @@ public class DropOffActivity extends AppCompatActivity {
         }
 
         confirmDropoffButton.setOnClickListener(v -> {
+            if (!isTimeAvailable(selectedTimeIndex)) {
+                refreshExpiredSelection();
+                Toast.makeText(this, "That drop-off time has passed. Choose another slot.",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
             Intent intent = new Intent(DropOffActivity.this, DropOffConfirmationActivity.class);
             intent.putExtras(getIntent());
             intent.putExtra("selected_service", "Drop Off");
@@ -90,10 +100,7 @@ public class DropOffActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        selectedDateLabel = getDateLabel(selectedDateIndex);
-        selectedTimeLabel = getTimeLabel(selectedTimeIndex);
-        selectDate(selectedDateIndex);
-        selectTime(selectedTimeIndex);
+        selectInitialAvailableSlot();
     }
 
     private void selectDate(int index) {
@@ -112,9 +119,16 @@ public class DropOffActivity extends AppCompatActivity {
 
         selectedDateIndex = index;
         selectedDateLabel = getDateLabel(index);
+        updateAvailableTimes();
+        if (!isTimeAvailable(selectedTimeIndex)) {
+            int nextTime = findFirstAvailableTime(index);
+            if (nextTime >= 0) selectTime(nextTime);
+            else clearSelectedTime();
+        }
     }
 
     private void selectTime(int index) {
+        if (!isTimeAvailable(index)) return;
         for (int i = 0; i < timeChips.length; i++) {
             TextView chip = timeChips[i];
             boolean selected = i == index;
@@ -126,13 +140,103 @@ public class DropOffActivity extends AppCompatActivity {
 
         selectedTimeIndex = index;
         selectedTimeLabel = getTimeLabel(index);
+        confirmDropoffButton.setEnabled(true);
+    }
+
+    private void selectInitialAvailableSlot() {
+        Calendar now = Calendar.getInstance();
+        String previousDate = getIntent().getStringExtra("selected_date");
+        String previousTime = getIntent().getStringExtra("selected_time");
+        for (int dayOffset = 0; dayOffset < dateChips.length; dayOffset++) {
+            if (!getDateLabel(dayOffset).equalsIgnoreCase(previousDate == null
+                    ? "" : previousDate.trim())) continue;
+            for (int timeIndex = 0; timeIndex < timeChips.length; timeIndex++) {
+                if (getTimeLabel(timeIndex).equalsIgnoreCase(previousTime == null
+                        ? "" : previousTime.trim())
+                        && isTimeAvailable(timeIndex, dayOffset, now)) {
+                    selectDate(dayOffset);
+                    selectTime(timeIndex);
+                    return;
+                }
+            }
+        }
+        for (int dayOffset = 0; dayOffset < dateChips.length; dayOffset++) {
+            int firstTime = findFirstAvailableTime(dayOffset, now);
+            if (firstTime >= 0) {
+                selectDate(dayOffset);
+                selectTime(firstTime);
+                return;
+            }
+        }
+        selectDate(0);
+        clearSelectedTime();
+    }
+
+    private void updateAvailableTimes() {
+        Calendar now = Calendar.getInstance();
+        for (int i = 0; i < timeChips.length; i++) {
+            boolean available = isTimeAvailable(i, selectedDateIndex, now);
+            TextView chip = timeChips[i];
+            chip.setEnabled(available);
+            chip.setAlpha(available ? 1f : 0.45f);
+            chip.setContentDescription(getTimeLabel(i)
+                    + (available ? "" : ", unavailable"));
+        }
+    }
+
+    private boolean isTimeAvailable(int index) {
+        return isTimeAvailable(index, selectedDateIndex, Calendar.getInstance());
+    }
+
+    private boolean isTimeAvailable(int index, int dayOffset, Calendar now) {
+        int[] hours = {9, 10, 11, 12, 13, 14, 15, 16, 17};
+        return index >= 0 && index < hours.length
+                && BookingSlotAvailability.isFutureSlot(
+                        dateRangeStart, dayOffset, hours[index], now);
+    }
+
+    private int findFirstAvailableTime(int dayOffset) {
+        return findFirstAvailableTime(dayOffset, Calendar.getInstance());
+    }
+
+    private int findFirstAvailableTime(int dayOffset, Calendar now) {
+        for (int i = 0; i < timeChips.length; i++) {
+            if (isTimeAvailable(i, dayOffset, now)) return i;
+        }
+        return -1;
+    }
+
+    private void clearSelectedTime() {
+        selectedTimeIndex = -1;
+        selectedTimeLabel = "";
+        for (TextView chip : timeChips) {
+            chip.setBackgroundResource(R.drawable.bg_chip_unselected);
+            chip.setTextColor(ContextCompat.getColor(this, R.color.chip_unselected_text));
+            chip.setTypeface(null, Typeface.NORMAL);
+        }
+        confirmDropoffButton.setEnabled(false);
+    }
+
+    private void refreshExpiredSelection() {
+        updateAvailableTimes();
+        int nextTime = findFirstAvailableTime(selectedDateIndex);
+        if (nextTime >= 0) selectTime(nextTime);
+        else clearSelectedTime();
     }
 
     private String getDateLabel(int index) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, index);
-        SimpleDateFormat formatter = new SimpleDateFormat("EEE, MMM d", Locale.getDefault());
-        return formatter.format(calendar.getTime());
+        return BookingDateLabels.selectedDate(dateRangeStart, index, Locale.getDefault());
+    }
+
+    private void updateDateChipLabels() {
+        for (int i = 0; i < dateChips.length; i++) {
+            LinearLayout chip = dateChips[i];
+            ((TextView) chip.getChildAt(0)).setText(i == 0
+                    ? getString(R.string.today)
+                    : BookingDateLabels.weekday(dateRangeStart, i, Locale.getDefault()));
+            ((TextView) chip.getChildAt(1)).setText(
+                    BookingDateLabels.chipDate(dateRangeStart, i, Locale.getDefault()));
+        }
     }
 
     private String getTimeLabel(int index) {

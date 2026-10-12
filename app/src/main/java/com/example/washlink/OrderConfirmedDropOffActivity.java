@@ -70,7 +70,7 @@ public class OrderConfirmedDropOffActivity extends AppCompatActivity {
             int total = getIntent().getIntExtra("quote_total", 0);
             if (totalAmountValue != null) {
                 if (total <= 0) {
-                    int itemCount = getIntent().getIntExtra("item_count", 15);
+                    int itemCount = getIntent().getIntExtra("item_count", 1);
                     int weightKg = getIntent().getIntExtra("weight_kg",
                             BookingPricing.estimateWeightKg(itemCount));
                     double rate = getIntent().getDoubleExtra(

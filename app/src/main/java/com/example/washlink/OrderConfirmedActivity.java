@@ -67,7 +67,7 @@ public class OrderConfirmedActivity extends AppCompatActivity {
         int total = getIntent() != null
                 ? getIntent().getIntExtra("quote_total", 0) : 0;
         if (total <= 0) {
-            int itemCount = getIntent().getIntExtra("item_count", 15);
+            int itemCount = getIntent().getIntExtra("item_count", 1);
             int weightKg = getIntent().getIntExtra("weight_kg",
                     BookingPricing.estimateWeightKg(itemCount));
             double rate = getIntent().getDoubleExtra("price_per_kg", BookingPricing.PRICE_PER_KG);
