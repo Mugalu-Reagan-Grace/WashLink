@@ -40,7 +40,7 @@ public class FavoriteProvidersActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_favorite_providers);
+        setContentView(R.layout.activity_customer_favorite_providers);
         AuthGuard.requireRole(this, UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 
         customerId = FirebaseAuth.getInstance().getUid();
@@ -256,7 +256,7 @@ public class FavoriteProvidersActivity extends AppCompatActivity {
         @Override
         public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new Holder(LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_favorite_provider, parent, false));
+                    .inflate(R.layout.activity_customer_favorite_provider_item, parent, false));
         }
 
         @Override

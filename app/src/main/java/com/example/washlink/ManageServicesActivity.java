@@ -44,7 +44,7 @@ public class ManageServicesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_manage_services);
+        setContentView(R.layout.activity_provider_manage_services);
         AuthGuard.requireRole(this, UserAccount.ROLE_PROVIDER, ProviderLoginActivity.class);
 
         View back = findViewById(R.id.btn_back);
@@ -276,7 +276,7 @@ public class ManageServicesActivity extends AppCompatActivity {
     private class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.Holder> {
         @Override
         public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new Holder(getLayoutInflater().inflate(R.layout.item_provider_service, parent, false));
+            return new Holder(getLayoutInflater().inflate(R.layout.activity_provider_service_item, parent, false));
         }
 
         @Override

@@ -107,5 +107,5 @@
     <include
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        layout="@layout/provider_nav_bar" />
+        layout="@layout/activity_provider_nav_bar" />
 </LinearLayout>

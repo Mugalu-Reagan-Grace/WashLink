@@ -42,7 +42,7 @@ public class SignInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_sign_in);
+        setContentView(R.layout.activity_customer_sign_in);
 
         mAuth = FirebaseAuth.getInstance();
 

@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
+import com.example.washlink.ui.customer.MainActivity;
+
 public final class BottomNavHelper {
     private BottomNavHelper() {
     }
@@ -31,11 +33,8 @@ public final class BottomNavHelper {
 
         int activeTab = -1;
         Class<?> cls = activity.getClass();
-        if (cls.equals(HomeActivity.class)) activeTab = TAB_HOME;
-        else if (cls.equals(SelectServiceActivity.class) || cls.equals(NearbyProvidersActivity.class)) activeTab = TAB_SERVICES;
+        if (cls.equals(NearbyProvidersActivity.class)) activeTab = TAB_SERVICES;
         else if (cls.equals(OrderTrackingActivity.class)) activeTab = TAB_TRACKING;
-        else if (cls.equals(HistoryActivity.class)) activeTab = TAB_HISTORY;
-        else if (cls.equals(ProfileActivity.class)) activeTab = TAB_PROFILE;
 
         View navHome = rootView.findViewById(R.id.nav_home);
         View navServices = rootView.findViewById(R.id.nav_services);
@@ -44,23 +43,23 @@ public final class BottomNavHelper {
         View navProfile = rootView.findViewById(R.id.nav_profile);
 
         if (navHome != null) {
-            navHome.setOnClickListener(v -> openScreen(activity, HomeActivity.class));
+            navHome.setOnClickListener(v -> openTab(activity, TAB_HOME));
             updateNavState(activity, navHome, activeTab == TAB_HOME);
         }
         if (navServices != null) {
-            navServices.setOnClickListener(v -> openScreen(activity, SelectServiceActivity.class));
+            navServices.setOnClickListener(v -> openTab(activity, TAB_SERVICES));
             updateNavState(activity, navServices, activeTab == TAB_SERVICES);
         }
         if (navTracking != null) {
-            navTracking.setOnClickListener(v -> openScreen(activity, OrderTrackingActivity.class));
+            navTracking.setOnClickListener(v -> openTab(activity, TAB_TRACKING));
             updateNavState(activity, navTracking, activeTab == TAB_TRACKING);
         }
         if (navHistory != null) {
-            navHistory.setOnClickListener(v -> openScreen(activity, HistoryActivity.class));
+            navHistory.setOnClickListener(v -> openTab(activity, TAB_HISTORY));
             updateNavState(activity, navHistory, activeTab == TAB_HISTORY);
         }
         if (navProfile != null) {
-            navProfile.setOnClickListener(v -> openScreen(activity, ProfileActivity.class));
+            navProfile.setOnClickListener(v -> openTab(activity, TAB_PROFILE));
             updateNavState(activity, navProfile, activeTab == TAB_PROFILE);
         }
     }
@@ -119,12 +118,29 @@ public final class BottomNavHelper {
         return null;
     }
 
-    private static void openScreen(Activity activity, Class<?> targetActivity) {
-        if (activity.getClass().equals(targetActivity)) {
-            return;
+    private static void openTab(Activity activity, int tab) {
+        String tabName;
+        switch (tab) {
+            case TAB_SERVICES:
+                tabName = MainActivity.TAB_SERVICES;
+                break;
+            case TAB_TRACKING:
+                tabName = MainActivity.TAB_TRACKING;
+                break;
+            case TAB_HISTORY:
+                tabName = MainActivity.TAB_HISTORY;
+                break;
+            case TAB_PROFILE:
+                tabName = MainActivity.TAB_PROFILE;
+                break;
+            case TAB_HOME:
+            default:
+                tabName = MainActivity.TAB_HOME;
+                break;
         }
-
-        Intent intent = new Intent(activity, targetActivity);
+        Intent intent = new Intent(activity, MainActivity.class);
+        intent.putExtra(MainActivity.EXTRA_TAB, tabName);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         activity.startActivity(intent);
     }
 }

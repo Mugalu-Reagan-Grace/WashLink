@@ -27,7 +27,7 @@ public class AddPhoneNumberActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_phone_number);
+        setContentView(R.layout.activity_customer_add_phone_number);
         AuthGuard.requireRole(this, UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 
         userName = getIntent().getStringExtra(EXTRA_USER_NAME);

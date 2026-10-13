@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AutoCompleteTextView;
+import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,6 +27,13 @@ import com.example.washlink.data.AuthRepository;
 import com.example.washlink.data.ProfilePhotoManager;
 import com.example.washlink.models.UserAccount;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.Places;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +44,7 @@ public class ProfileFragment extends CustomerTabFragment {
     private String photoUri = "";
     private ImageView avatar;
     private ActivityResultLauncher<String[]> imagePicker;
+    private PlacesClient placesClient;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -49,6 +59,9 @@ public class ProfileFragment extends CustomerTabFragment {
                                 photoUri = downloadUrl;
                                 showSavedAvatar();
                             });
+                            if (Places.isInitialized()) {
+                                placesClient = Places.createClient(requireContext());
+                            }
                         }
                         @Override public void onError(String message) {
                             if (isAdded()) Toast.makeText(requireContext(), message,
@@ -246,27 +259,95 @@ public class ProfileFragment extends CustomerTabFragment {
     }
 
     private void showNewAddressDialog(List<String> addresses) {
-        EditText input = new EditText(requireContext());
+        AutoCompleteTextView input = new AutoCompleteTextView(requireContext());
         input.setHint(R.string.enter_your_address);
-        input.setSingleLine(false);
+        input.setSingleLine(true);
+        input.setThreshold(1);
         input.setPadding(32, 24, 32, 24);
-        new AlertDialog.Builder(requireContext())
+        ArrayAdapter<String> suggestionsAdapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
+        input.setAdapter(suggestionsAdapter);
+        final List<AutocompletePrediction> predictions = new ArrayList<>();
+        final boolean[] selectedPlace = {false};
+        AutocompleteSessionToken sessionToken = AutocompleteSessionToken.newInstance();
+        input.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s == null ? "" : s.toString().trim();
+                selectedPlace[0] = false;
+                predictions.clear();
+                suggestionsAdapter.clear();
+                if (query.length() < 2 || placesClient == null) {
+                    return;
+                }
+                FindAutocompletePredictionsRequest request =
+                        FindAutocompletePredictionsRequest.builder()
+                                .setSessionToken(sessionToken)
+                                .setQuery(query)
+                                .build();
+                placesClient.findAutocompletePredictions(request)
+                        .addOnSuccessListener(response -> {
+                            if (!isAdded() || !query.equals(input.getText().toString().trim())) return;
+                            predictions.addAll(response.getAutocompletePredictions());
+                            for (AutocompletePrediction prediction : predictions) {
+                                suggestionsAdapter.add(prediction.getFullText(null).toString());
+                            }
+                            suggestionsAdapter.notifyDataSetChanged();
+                            if (!predictions.isEmpty()) input.showDropDown();
+                        })
+                        .addOnFailureListener(error -> {
+                            if (isAdded() && query.equals(input.getText().toString().trim())) {
+                                Toast.makeText(requireContext(),
+                                        "Could not load place suggestions.",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+            @Override public void afterTextChanged(android.text.Editable s) { }
+        });
+        input.setOnItemClickListener((parent, view, position, id) -> {
+            if (position < 0 || position >= predictions.size() || placesClient == null) return;
+            AutocompletePrediction prediction = predictions.get(position);
+            FetchPlaceRequest request = FetchPlaceRequest.builder(prediction.getPlaceId(),
+                    java.util.Arrays.asList(Place.Field.ADDRESS, Place.Field.NAME))
+                    .setSessionToken(sessionToken)
+                    .build();
+            placesClient.fetchPlace(request).addOnSuccessListener(response -> {
+                String address = response.getPlace().getAddress();
+                String selected = address == null || address.trim().isEmpty()
+                        ? prediction.getFullText(null).toString() : address;
+                input.setText(selected);
+                input.setSelection(selected.length());
+                selectedPlace[0] = true;
+            }).addOnFailureListener(error -> {
+                if (isAdded()) Toast.makeText(requireContext(),
+                        "Could not load that place.", Toast.LENGTH_SHORT).show();
+            });
+        });
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle("Add saved address")
+                .setMessage("Start typing a place and select a Google Maps result.")
                 .setView(input)
                 .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.save, (dialog, which) -> {
-                    String address = input.getText().toString().trim();
-                    if (address.isEmpty()) {
-                        Toast.makeText(requireContext(), "Enter an address.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    List<String> updated = new ArrayList<>(addresses);
-                    addUniqueAddress(updated, address);
-                    String primary = account.getAddress() == null || account.getAddress().trim().isEmpty()
-                            ? address : account.getAddress();
-                    persistAddresses(updated, primary, this::showAddressDialog);
-                })
+                .setPositiveButton(R.string.save, null)
                 .show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String address = input.getText().toString().trim();
+            if (address.isEmpty()) {
+                input.setError("Select a place first");
+                return;
+            }
+            if (placesClient == null || !selectedPlace[0]) {
+                input.setError("Select a Google Maps suggestion");
+                return;
+            }
+            List<String> updated = new ArrayList<>(addresses);
+            addUniqueAddress(updated, address);
+            String primary = account.getAddress() == null || account.getAddress().trim().isEmpty()
+                    ? address : account.getAddress();
+            dialog.dismiss();
+            persistAddresses(updated, primary, this::showAddressDialog);
+        });
     }
 
     private void persistAddresses(List<String> addresses, String primaryAddress, Runnable onSuccess) {

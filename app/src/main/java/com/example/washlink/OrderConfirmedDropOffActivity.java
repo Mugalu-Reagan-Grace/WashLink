@@ -21,7 +21,7 @@ public class OrderConfirmedDropOffActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_order_confirmed_dropoff);
+        setContentView(R.layout.activity_customer_order_confirmed_dropoff);
         com.example.washlink.data.AuthGuard.requireRole(this,
                 com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 

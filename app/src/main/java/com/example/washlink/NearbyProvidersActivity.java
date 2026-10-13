@@ -52,7 +52,7 @@ public class NearbyProvidersActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_nearby_providers);
+        setContentView(R.layout.activity_customer_nearby_providers);
         com.example.washlink.data.AuthGuard.requireRole(this,
                 com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
         selectedService = getIntent().getStringExtra("selected_service");
@@ -405,7 +405,7 @@ public class NearbyProvidersActivity extends AppCompatActivity {
         @Override
         public ProviderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_provider, parent, false);
+                    .inflate(R.layout.activity_provider_item, parent, false);
             return new ProviderViewHolder(view);
         }
 

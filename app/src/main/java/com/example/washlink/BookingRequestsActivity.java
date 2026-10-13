@@ -38,7 +38,7 @@ public class BookingRequestsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_booking_requests);
+        setContentView(R.layout.activity_provider_booking_requests);
         AuthGuard.requireRole(this, com.example.washlink.models.UserAccount.ROLE_PROVIDER,
                 ProviderLoginActivity.class);
 
@@ -183,7 +183,7 @@ public class BookingRequestsActivity extends AppCompatActivity {
 
         @Override
         public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-            View v = getLayoutInflater().inflate(R.layout.item_provider_booking, parent, false);
+            View v = getLayoutInflater().inflate(R.layout.activity_provider_booking_item, parent, false);
             return new VH(v);
         }
 

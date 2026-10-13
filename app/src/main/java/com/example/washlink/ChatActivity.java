@@ -52,7 +52,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chat);
+        setContentView(R.layout.activity_customer_provider_chat);
         firestore = FirebaseFirestore.getInstance();
         messages = findViewById(R.id.chat_messages);
         scroll = findViewById(R.id.chat_scroll);

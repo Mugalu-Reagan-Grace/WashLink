@@ -71,7 +71,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_create_account);
+        setContentView(R.layout.activity_customer_create_account);
 
         mAuth = FirebaseAuth.getInstance();
 

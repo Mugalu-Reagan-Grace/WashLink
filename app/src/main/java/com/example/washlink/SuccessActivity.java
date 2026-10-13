@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.washlink.ui.customer.MainActivity;
 import com.google.android.material.button.MaterialButton;
 import android.widget.TextView;
 
@@ -18,7 +19,7 @@ public class SuccessActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_success);
+        setContentView(R.layout.activity_customer_success);
 
         String userName = getIntent().getStringExtra(EXTRA_USER_NAME);
         if (userName != null && !userName.trim().isEmpty()) {
@@ -31,7 +32,8 @@ public class SuccessActivity extends AppCompatActivity {
     }
 
     private void bookWashClicked() {
-        Intent intent = new Intent(SuccessActivity.this, SelectServiceActivity.class);
+        Intent intent = new Intent(SuccessActivity.this, MainActivity.class);
+        intent.putExtra(MainActivity.EXTRA_TAB, MainActivity.TAB_SERVICES);
         startActivity(intent);
         finish();
     }

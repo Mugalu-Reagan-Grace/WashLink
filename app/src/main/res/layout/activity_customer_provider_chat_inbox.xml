@@ -70,7 +70,7 @@
 
     <include
         android:id="@+id/provider_chat_nav"
-        layout="@layout/provider_nav_bar"
+        layout="@layout/activity_provider_nav_bar"
         android:layout_width="match_parent"
         android:layout_height="56dp" />
 </LinearLayout>

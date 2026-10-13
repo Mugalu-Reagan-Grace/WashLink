@@ -44,7 +44,7 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_pickup_slot_selection);
+        setContentView(R.layout.activity_customer_pickup_slot_selection);
         com.example.washlink.data.AuthGuard.requireRole(this,
                 com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 

@@ -179,7 +179,7 @@ public class HistoryFragment extends CustomerTabFragment {
             notifyDataSetChanged();
         }
         @NonNull @Override public Holder onCreateViewHolder(@NonNull android.view.ViewGroup parent, int type) {
-            return new Holder(getLayoutInflater().inflate(R.layout.item_order_history, parent, false));
+            return new Holder(getLayoutInflater().inflate(R.layout.activity_customer_order_history_item, parent, false));
         }
         @Override public void onBindViewHolder(@NonNull Holder holder, int position) {
             Booking booking = items.get(position);

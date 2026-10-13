@@ -42,7 +42,7 @@ public class UpdateOrderStatusActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_update_order_status);
+        setContentView(R.layout.activity_provider_update_order_status);
         AuthGuard.requireRole(this, UserAccount.ROLE_PROVIDER, ProviderLoginActivity.class);
 
         View back = findViewById(R.id.btn_back);

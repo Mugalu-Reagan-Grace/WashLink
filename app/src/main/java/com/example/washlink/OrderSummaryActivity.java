@@ -27,7 +27,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_order_summary);
+        setContentView(R.layout.activity_customer_order_summary);
         com.example.washlink.data.AuthGuard.requireRole(this,
                 com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 

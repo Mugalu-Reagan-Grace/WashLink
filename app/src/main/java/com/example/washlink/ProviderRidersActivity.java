@@ -78,7 +78,7 @@ public class ProviderRidersActivity extends AppCompatActivity {
         String name = rider.getString("name");
         String phone = rider.getString("phone");
         boolean active = Boolean.TRUE.equals(rider.getBoolean("isActive"));
-        View row = getLayoutInflater().inflate(R.layout.item_provider_rider, rows, false);
+        View row = getLayoutInflater().inflate(R.layout.activity_provider_rider_item, rows, false);
         String displayName = name == null || name.trim().isEmpty() ? "Unnamed rider" : name.trim();
         TextView initial = row.findViewById(R.id.tv_rider_initial);
         TextView nameView = row.findViewById(R.id.tv_rider_name);

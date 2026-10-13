@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.washlink.data.AuthRepository;
 import com.example.washlink.models.UserAccount;
+import com.example.washlink.ui.customer.MainActivity;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -52,7 +53,7 @@ public class ProviderLoginActivity extends AppCompatActivity {
                         ? ProviderDashboardActivity.class
                         : UserAccount.ROLE_ADMIN.equals(user.getRole())
                         ? AdminManagementActivity.class
-                        : HomeActivity.class;
+                        : MainActivity.class;
                 Intent intent = new Intent(ProviderLoginActivity.this, destination);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);

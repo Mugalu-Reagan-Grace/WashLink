@@ -1,5 +1,6 @@
 package com.example.washlink.ui.customer;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -14,6 +15,7 @@ import com.example.washlink.data.PushTokenManager;
 import com.example.washlink.models.UserAccount;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String EXTRA_TAB = "customer_tab";
     public static final String TAB_HOME = "home";
     public static final String TAB_SERVICES = "services";
     public static final String TAB_TRACKING = "tracking";
@@ -24,12 +26,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_customer_main);
         AuthGuard.requireRole(this, UserAccount.ROLE_CUSTOMER, SignInActivity.class);
         NotificationPermissionHelper.requestIfNeeded(this);
         PushTokenManager.registerCurrentUser();
         if (savedInstanceState == null) {
-            showTab(TAB_HOME);
+            showTab(getIntent().getStringExtra(EXTRA_TAB));
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        String tab = intent.getStringExtra(EXTRA_TAB);
+        if (tab != null) {
+            showTab(tab);
         }
     }
 

@@ -47,7 +47,7 @@ public class NearbyLaundryMapActivity extends AppCompatActivity implements OnMap
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_nearby_laundry_map);
+        setContentView(R.layout.activity_customer_nearby_laundry_map);
         com.example.washlink.data.AuthGuard.requireRole(this,
                 com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
         selectedService = getIntent().getStringExtra("selected_service");

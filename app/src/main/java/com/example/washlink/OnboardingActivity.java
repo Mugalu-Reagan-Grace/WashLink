@@ -43,7 +43,7 @@ public class OnboardingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_onboarding);
+        setContentView(R.layout.activity_customer_onboarding);
 
         boolean forceShowOnboarding = getIntent() != null && getIntent().getBooleanExtra(EXTRA_SHOW_ONBOARDING, false);
         if (FirebaseAuth.getInstance().getCurrentUser() != null && !forceShowOnboarding) {

@@ -6,7 +6,7 @@
     android:background="@drawable/bg_card_bordered"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:showIn="@layout/activity_notifications">
+    tools:showIn="@layout/activity_customer_notifications">
 
     <TextView
         android:id="@+id/tv_notification_text"

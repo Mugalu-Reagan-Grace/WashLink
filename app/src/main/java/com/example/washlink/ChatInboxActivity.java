@@ -28,7 +28,7 @@ public class ChatInboxActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chat_inbox);
+        setContentView(R.layout.activity_customer_provider_chat_inbox);
         rows = findViewById(R.id.chat_inbox_rows);
         state = findViewById(R.id.tv_chat_inbox_state);
         findViewById(R.id.btn_chat_inbox_back).setOnClickListener(v -> finish());
@@ -96,7 +96,7 @@ public class ChatInboxActivity extends AppCompatActivity {
         }
         final String partnerName = partner;
         String lastMessage = chat.getString("lastMessage");
-        View row = getLayoutInflater().inflate(R.layout.item_chat_conversation, rows, false);
+        View row = getLayoutInflater().inflate(R.layout.activity_customer_chat_conversation_item, rows, false);
         TextView initial = row.findViewById(R.id.tv_chat_initial);
         TextView title = row.findViewById(R.id.tv_chat_partner);
         TextView preview = row.findViewById(R.id.tv_chat_last_message);

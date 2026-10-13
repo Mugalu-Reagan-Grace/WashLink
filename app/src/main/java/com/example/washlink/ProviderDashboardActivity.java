@@ -188,7 +188,7 @@ public class ProviderDashboardActivity extends AppCompatActivity {
         for (int i = 0; i < visibleCount; i++) {
             Booking booking = bookings.get(i);
             View row = getLayoutInflater().inflate(
-                    R.layout.item_provider_dashboard_booking, recentBookings, false);
+                    R.layout.activity_provider_dashboard_booking_item, recentBookings, false);
             bindRecentBooking(row, booking);
             recentBookings.addView(row);
         }

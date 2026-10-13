@@ -109,7 +109,7 @@
         android:paddingEnd="20dp"
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
-        tools:listitem="@layout/item_order_history"
+        tools:listitem="@layout/activity_customer_order_history_item"
         tools:itemCount="4"
         app:layout_constraintTop_toBottomOf="@id/order_filters"
         app:layout_constraintBottom_toTopOf="@id/bottom_nav_bar"
@@ -137,7 +137,7 @@
         android:id="@+id/bottom_nav_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        layout="@layout/bottom_nav_bar_history"
+        layout="@layout/activity_customer_nav_bar_history"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

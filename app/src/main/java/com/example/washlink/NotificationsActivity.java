@@ -40,13 +40,13 @@ public class NotificationsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_notifications);
+        setContentView(R.layout.activity_customer_notifications);
         ImageView back = findViewById(R.id.btn_back);
         if (back != null) back.setOnClickListener(v -> finish());
 
         listView = findViewById(R.id.lv_notifications);
         stateView = findViewById(R.id.tv_notifications_state);
-        adapter = new ArrayAdapter<BookingNotification>(this, R.layout.notification_item,
+        adapter = new ArrayAdapter<BookingNotification>(this, R.layout.activity_customer_notification_item,
                 R.id.tv_notification_text, notifications) {
             @Override
             public android.view.View getView(int position, android.view.View convertView,
