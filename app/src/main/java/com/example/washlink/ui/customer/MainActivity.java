@@ -10,11 +10,12 @@ import androidx.fragment.app.Fragment;
 import com.example.washlink.NotificationPermissionHelper;
 import com.example.washlink.R;
 import com.example.washlink.SignInActivity;
+import com.example.washlink.ui.ThemeManager;
 import com.example.washlink.data.AuthGuard;
 import com.example.washlink.data.PushTokenManager;
 import com.example.washlink.models.UserAccount;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends com.example.washlink.WashLinkActivity {
     public static final String EXTRA_TAB = "customer_tab";
     public static final String TAB_HOME = "home";
     public static final String TAB_SERVICES = "services";
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeManager.setActiveRole(this, ThemeManager.ROLE_CUSTOMER);
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_customer_main);

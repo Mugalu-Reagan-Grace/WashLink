@@ -8,12 +8,11 @@ import android.widget.Toast;
 import android.net.Uri;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
 import com.example.washlink.data.BookingPricing;
 
-public class OrderConfirmedDropOffActivity extends AppCompatActivity {
+public class OrderConfirmedDropOffActivity extends WashLinkActivity {
 
     private MaterialButton trackOrderButton;
 

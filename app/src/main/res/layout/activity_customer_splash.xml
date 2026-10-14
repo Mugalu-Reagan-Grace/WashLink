@@ -23,7 +23,7 @@
             android:layout_height="320dp"
             android:layout_marginEnd="8dp"
             android:contentDescription="@string/app_name"
-            android:src="@drawable/logo_main_washlink"
+            android:src="@drawable/logo_main_washlink_light"
             app:tint="@color/white" />
         <TextView
             android:id="@+id/tv_splash_tagline"

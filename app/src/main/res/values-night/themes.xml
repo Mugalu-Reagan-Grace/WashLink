@@ -5,6 +5,13 @@
         <item name="fontFamily">@font/poppins</item>
         <item name="android:textViewStyle">@style/Widget.WashLink.TextView</item>
         <item name="buttonStyle">@style/Widget.WashLink.Button</item>
+        <item name="android:colorBackground">@color/white</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
     <style name="Theme.WashLink" parent="Base.Theme.WashLink" />

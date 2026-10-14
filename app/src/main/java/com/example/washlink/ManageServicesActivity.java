@@ -6,6 +6,9 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
+import android.content.res.ColorStateList;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +22,7 @@ import com.example.washlink.models.UserAccount;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.example.washlink.ui.ThemeManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class ManageServicesActivity extends AppCompatActivity {
+public class ManageServicesActivity extends WashLinkActivity {
     private final List<Map<String, Object>> services = new ArrayList<>();
     private RecyclerView recyclerView;
     private TextView stateView;
@@ -34,6 +38,8 @@ public class ManageServicesActivity extends AppCompatActivity {
     private String providerId;
     private MaterialCheckBox pickupOption;
     private MaterialCheckBox dropoffOption;
+    private TextView pickupLabel;
+    private TextView dropoffLabel;
     private View saveBookingOptionsButton;
     private ListenerRegistration profileRegistration;
     private boolean bookingOptionsDirty;
@@ -45,6 +51,7 @@ public class ManageServicesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_provider_manage_services);
+        ThemeManager.apply(findViewById(android.R.id.content), this);
         AuthGuard.requireRole(this, UserAccount.ROLE_PROVIDER, ProviderLoginActivity.class);
 
         View back = findViewById(R.id.btn_back);
@@ -56,7 +63,23 @@ public class ManageServicesActivity extends AppCompatActivity {
         stateView = findViewById(R.id.tv_services_state);
         pickupOption = findViewById(R.id.cb_supports_pickup);
         dropoffOption = findViewById(R.id.cb_supports_dropoff);
+        pickupLabel = findViewById(R.id.tv_supports_pickup);
+        dropoffLabel = findViewById(R.id.tv_supports_dropoff);
         saveBookingOptionsButton = findViewById(R.id.btn_save_booking_options);
+        int accent = ThemeManager.accent(this, ThemeManager.ROLE_PROVIDER);
+        ColorStateList optionTint = new ColorStateList(new int[][] {
+                new int[] {android.R.attr.state_enabled, android.R.attr.state_checked},
+                new int[] {android.R.attr.state_enabled},
+                new int[] {android.R.attr.state_checked},
+                new int[] {}
+        }, new int[] {accent, accent, accent, accent});
+        pickupOption.setButtonTintList(optionTint);
+        dropoffOption.setButtonTintList(optionTint);
+        applyBookingOptionTextColor();
+        findViewById(R.id.row_supports_pickup).setOnClickListener(v ->
+                pickupOption.setChecked(!pickupOption.isChecked()));
+        findViewById(R.id.row_supports_dropoff).setOnClickListener(v ->
+                dropoffOption.setChecked(!dropoffOption.isChecked()));
         setBookingOptionsEnabled(false);
         saveBookingOptionsButton.setOnClickListener(v -> saveBookingOptions());
         pickupOption.setOnCheckedChangeListener((button, checked) -> {
@@ -152,17 +175,47 @@ public class ManageServicesActivity extends AppCompatActivity {
     private void setBookingOptionsEnabled(boolean enabled) {
         pickupOption.setEnabled(enabled);
         dropoffOption.setEnabled(enabled);
+        pickupLabel.setEnabled(enabled);
+        dropoffLabel.setEnabled(enabled);
         saveBookingOptionsButton.setEnabled(enabled);
+    }
+
+    private void applyBookingOptionTextColor() {
+        int color = ThemeManager.themeMode(this, ThemeManager.ROLE_PROVIDER)
+                .equals("cream") ? getColor(R.color.cream_text_primary)
+                : getColor(R.color.text_primary);
+        pickupLabel.setTextColor(color);
+        dropoffLabel.setTextColor(color);
     }
 
     private void showServiceDialog(int position) {
         Map<String, Object> existing = position < 0 ? null : services.get(position);
-        EditText name = new EditText(this);
-        name.setHint("Service name");
-        name.setSingleLine(true);
-        if (existing != null && existing.get("name") instanceof String) {
-            name.setText((String) existing.get("name"));
+        Spinner serviceName = new Spinner(this);
+        String[] knownServices = {"Wash & Fold", "Dry Cleaning", "Ironing & Pressing",
+                "Bedding & Blankets", "Shoe Cleaning", "Stain Removal", "Carpet Cleaning",
+                "Curtain Cleaning", "Express Laundry", "Custom service"};
+        serviceName.setAdapter(new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_dropdown_item, knownServices));
+        String existingName = existing != null && existing.get("name") instanceof String
+                ? (String) existing.get("name") : knownServices[0];
+        int selected = 0;
+        for (int i = 0; i < knownServices.length; i++) {
+            if (knownServices[i].equals(existingName)) selected = i;
         }
+        serviceName.setSelection(selected);
+        EditText customName = new EditText(this);
+        customName.setHint("Custom service name");
+        customName.setSingleLine(true);
+        customName.setVisibility(selected == knownServices.length - 1 ? View.VISIBLE : View.GONE);
+        customName.setText(selected == knownServices.length - 1 ? existingName : "");
+        serviceName.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(android.widget.AdapterView<?> parent, View view,
+                                                 int position, long id) {
+                customName.setVisibility(position == knownServices.length - 1
+                        ? View.VISIBLE : View.GONE);
+            }
+            @Override public void onNothingSelected(android.widget.AdapterView<?> parent) { }
+        });
 
         EditText price = new EditText(this);
         price.setHint("Price per kg (UGX)");
@@ -176,7 +229,8 @@ public class ManageServicesActivity extends AppCompatActivity {
         android.widget.LinearLayout fields = new android.widget.LinearLayout(this);
         fields.setOrientation(android.widget.LinearLayout.VERTICAL);
         fields.setPadding(32, 0, 32, 0);
-        fields.addView(name);
+        fields.addView(serviceName);
+        fields.addView(customName);
         fields.addView(price);
 
         new AlertDialog.Builder(this)
@@ -184,7 +238,10 @@ public class ManageServicesActivity extends AppCompatActivity {
                 .setView(fields)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.save, (dialog, which) -> {
-                    String serviceName = name.getText().toString().trim();
+                    String selectedName = serviceName.getSelectedItemPosition()
+                            == knownServices.length - 1
+                            ? customName.getText().toString().trim()
+                            : String.valueOf(serviceName.getSelectedItem());
                     double servicePrice;
                     try {
                         servicePrice = Double.parseDouble(price.getText().toString().trim());
@@ -192,14 +249,14 @@ public class ManageServicesActivity extends AppCompatActivity {
                         Toast.makeText(this, "Enter a valid price.", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    if (serviceName.isEmpty() || !Double.isFinite(servicePrice)
+                    if (selectedName.isEmpty() || !Double.isFinite(servicePrice)
                             || servicePrice <= 0) {
                         Toast.makeText(this, "Enter a service name and a price above zero.", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
                     Map<String, Object> service = new HashMap<>();
-                    service.put("name", serviceName);
+                    service.put("name", selectedName);
                     service.put("pricePerKg", servicePrice);
                     service.put("isAvailable", existing == null
                             || !Boolean.FALSE.equals(existing.get("isAvailable")));
@@ -207,7 +264,7 @@ public class ManageServicesActivity extends AppCompatActivity {
                         if (i == position) continue;
                         Object otherName = services.get(i).get("name");
                         if (otherName instanceof String
-                                && ((String) otherName).equalsIgnoreCase(serviceName)) {
+                                && ((String) otherName).equalsIgnoreCase(selectedName)) {
                             Toast.makeText(this, "A service with that name already exists.",
                                     Toast.LENGTH_SHORT).show();
                             return;

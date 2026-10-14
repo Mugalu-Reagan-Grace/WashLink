@@ -13,7 +13,7 @@ import com.example.washlink.models.Booking;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class PaymentReturnActivity extends AppCompatActivity {
+public class PaymentReturnActivity extends WashLinkActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

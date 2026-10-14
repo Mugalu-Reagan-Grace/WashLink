@@ -7,12 +7,15 @@ import android.os.Bundle;
 import com.example.washlink.ui.SystemBarInsets;
 import com.example.washlink.ui.BlueHeaderStyler;
 import com.example.washlink.ui.NotificationBadgeManager;
+import com.example.washlink.ui.ChatBadgeManager;
+import com.example.washlink.ui.ThemeManager;
 import com.google.android.libraries.places.api.Places;
 
 public class WashLinkApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        ThemeManager.applySavedNightMode(this);
         String placesKey = getApplicationInfo().metaData == null ? null
                 : getApplicationInfo().metaData.getString("com.google.android.geo.API_KEY");
         if (placesKey != null && !placesKey.trim().isEmpty() && !Places.isInitialized()) {
@@ -28,13 +31,20 @@ public class WashLinkApplication extends Application {
             @Override
             public void onActivityResumed(Activity activity) {
                 SystemBarInsets.apply(activity);
-                BlueHeaderStyler.apply(activity);
-                NotificationBadgeManager.onActivityResumed(activity);
+                if (!(activity instanceof SplashActivity)) {
+                    BlueHeaderStyler.apply(activity);
+                    ThemeManager.apply(activity.getWindow().getDecorView(), activity);
+                    NotificationBadgeManager.onActivityResumed(activity);
+                    ChatBadgeManager.onActivityResumed(activity);
+                }
             }
 
             @Override
             public void onActivityPaused(Activity activity) {
-                NotificationBadgeManager.onActivityPaused(activity);
+                if (!(activity instanceof SplashActivity)) {
+                    NotificationBadgeManager.onActivityPaused(activity);
+                    ChatBadgeManager.onActivityPaused(activity);
+                }
             }
 
             @Override
@@ -45,7 +55,10 @@ public class WashLinkApplication extends Application {
 
             @Override
             public void onActivityDestroyed(Activity activity) {
-                NotificationBadgeManager.onActivityDestroyed(activity);
+                if (!(activity instanceof SplashActivity)) {
+                    NotificationBadgeManager.onActivityDestroyed(activity);
+                    ChatBadgeManager.onActivityDestroyed(activity);
+                }
             }
         });
     }

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.content.res.ColorStateList;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,7 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class PickupConfirmationActivity extends AppCompatActivity {
+public class PickupConfirmationActivity extends WashLinkActivity {
 
     private ImageView backButton;
     private FrameLayout bellLayout;
@@ -84,6 +85,7 @@ public class PickupConfirmationActivity extends AppCompatActivity {
         minusButton = findViewById(R.id.btn_minus);
         plusButton = findViewById(R.id.btn_plus);
         weightValueText = findViewById(R.id.tv_weight_value);
+        styleContactPreference();
 
         backButton.setOnClickListener(v -> finish());
         bellLayout.setOnClickListener(v -> {
@@ -119,6 +121,26 @@ public class PickupConfirmationActivity extends AppCompatActivity {
             intent.putExtra("weight_kg", selectedWeightKg);
             startActivity(intent);
         });
+    }
+
+    private void styleContactPreference() {
+        TextView call = findViewById(R.id.chip_call_compact);
+        TextView text = findViewById(R.id.chip_text_compact);
+        int accent = com.example.washlink.ui.ThemeManager.accent(this,
+                com.example.washlink.ui.ThemeManager.ROLE_CUSTOMER);
+        boolean callSelected = !"Text".equalsIgnoreCase(selectedContact);
+        call.setBackgroundResource(callSelected ? R.drawable.bg_chip_selected
+                : R.drawable.bg_chip_unselected);
+        text.setBackgroundResource(callSelected ? R.drawable.bg_chip_unselected
+                : R.drawable.bg_chip_selected);
+        call.setBackgroundTintList(ColorStateList.valueOf(callSelected ? accent
+                : getColor(R.color.chip_unselected_bg)));
+        text.setBackgroundTintList(ColorStateList.valueOf(callSelected
+                ? getColor(R.color.chip_unselected_bg) : accent));
+        call.setTextColor(callSelected ? getColor(R.color.on_accent)
+                : getColor(R.color.chip_unselected_text));
+        text.setTextColor(callSelected ? getColor(R.color.chip_unselected_text)
+                : getColor(R.color.on_accent));
     }
 
     private void updateEstimatedWeight() {

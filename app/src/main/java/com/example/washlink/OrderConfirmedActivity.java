@@ -14,7 +14,7 @@ import com.example.washlink.data.BookingPricing;
 
 import java.util.Locale;
 
-public class OrderConfirmedActivity extends AppCompatActivity {
+public class OrderConfirmedActivity extends WashLinkActivity {
 
     private MaterialButton trackOrderButton;
 

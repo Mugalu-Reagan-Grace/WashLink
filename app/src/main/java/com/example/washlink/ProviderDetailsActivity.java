@@ -17,8 +17,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.washlink.data.BookingPricing;
 import com.example.washlink.data.ProviderCapabilities;
+import com.example.washlink.ui.ThemeManager;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FieldValue;
@@ -28,14 +30,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ProviderDetailsActivity extends AppCompatActivity {
+public class ProviderDetailsActivity extends WashLinkActivity {
     private final List<ProviderServiceOption> serviceOptions = new ArrayList<>();
+
+    private void applyContactButtonStyle() {
+        styleContactButton(R.id.btn_call_provider_details, Color.rgb(31, 168, 85),
+                R.drawable.ic_phone, Color.WHITE);
+        styleContactButton(R.id.btn_chat_provider, Color.rgb(36, 107, 206),
+                R.drawable.ic_chat_bubble, Color.WHITE);
+        styleContactButton(R.id.btn_whatsapp_provider, Color.rgb(37, 211, 102),
+                R.drawable.ic_whatsapp, Color.rgb(16, 42, 21));
+    }
+
+    private void styleContactButton(int id, int background, int icon, int foreground) {
+        View view = findViewById(id);
+        if (!(view instanceof MaterialButton)) return;
+        MaterialButton button = (MaterialButton) view;
+        button.setBackgroundTintList(ColorStateList.valueOf(background));
+        button.setTextColor(foreground);
+        button.setIconResource(icon);
+        button.setIconTint(ColorStateList.valueOf(foreground));
+        button.setIconPadding(2);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_provider_details);
+        applyContactButtonStyle();
         com.example.washlink.data.AuthGuard.requireRole(this,
                 com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 
@@ -100,11 +123,17 @@ public class ProviderDetailsActivity extends AppCompatActivity {
                 if (phoneFinal == null || phoneFinal.trim().isEmpty()) return;
                 Intent dial = new Intent(Intent.ACTION_DIAL,
                         Uri.fromParts("tel", phoneFinal.trim(), null));
-                if (dial.resolveActivity(getPackageManager()) != null) {
+                try {
                     startActivity(dial);
-                } else {
-                    Toast.makeText(this, R.string.provider_call_unavailable,
-                            Toast.LENGTH_SHORT).show();
+                } catch (android.content.ActivityNotFoundException error) {
+                    Intent phoneView = new Intent(Intent.ACTION_VIEW,
+                            Uri.fromParts("tel", phoneFinal.trim(), null));
+                    try {
+                        startActivity(phoneView);
+                    } catch (android.content.ActivityNotFoundException ignored) {
+                        Toast.makeText(this, R.string.provider_call_unavailable,
+                                Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
         }
@@ -248,14 +277,20 @@ public class ProviderDetailsActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.provider_phone_unavailable, Toast.LENGTH_SHORT).show();
             return;
         }
-        Intent whatsapp = new Intent(Intent.ACTION_VIEW,
-                Uri.parse("https://wa.me/" + number));
-        if (whatsapp.resolveActivity(getPackageManager()) != null) {
-            startActivity(whatsapp);
-        } else {
-            Toast.makeText(this, R.string.provider_whatsapp_unavailable,
-                    Toast.LENGTH_SHORT).show();
+        Intent whatsappApp = new Intent(Intent.ACTION_VIEW,
+                Uri.parse("whatsapp://send?phone=" + number));
+        whatsappApp.setPackage("com.whatsapp");
+        if (whatsappApp.resolveActivity(getPackageManager()) != null) {
+            startActivity(whatsappApp);
+            return;
         }
+        Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/" + number));
+        if (browser.resolveActivity(getPackageManager()) != null) {
+            startActivity(browser);
+            return;
+        }
+        Toast.makeText(this, R.string.provider_whatsapp_unavailable,
+                Toast.LENGTH_SHORT).show();
     }
 
     private void loadRecentReviews(String providerId, TextView reviewsView) {
@@ -330,12 +365,22 @@ public class ProviderDetailsActivity extends AppCompatActivity {
                         chip.setText(option.toString());
                         chip.setCheckable(true);
                         chip.setClickable(true);
+                        chip.setChecked(false);
                         chip.setTag(option);
-                        chip.setTextColor(ColorStateList.valueOf(getColor(R.color.text_primary)));
+                        int accent = ThemeManager.accent(this, ThemeManager.ROLE_CUSTOMER);
+                        ColorStateList chipTextColors = new ColorStateList(
+                                new int[][]{{android.R.attr.state_checked}, new int[]{}},
+                                new int[]{Color.WHITE, ThemeManager.isDarkMode(this,
+                                        ThemeManager.ROLE_CUSTOMER)
+                                        ? getColor(R.color.text_primary)
+                                        : Color.rgb(26, 26, 26)});
+                        chip.setTextColor(chipTextColors);
+                        chip.setEnsureMinTouchTargetSize(false);
+                        chip.setTextSize(13);
                         chip.setChipBackgroundColor(new ColorStateList(
                                 new int[][]{{android.R.attr.state_checked}, new int[]{}},
-                                new int[]{Color.rgb(226, 240, 255), Color.WHITE}));
-                        chip.setChipStrokeColorResource(R.color.divider_gray);
+                                new int[]{accent, getColor(R.color.input_bg)}));
+                        chip.setChipStrokeColor(ColorStateList.valueOf(accent));
                         chip.setOnCheckedChangeListener((button, checked) -> {
                             double selectedPrice = 0;
                             for (int i = 0; i < serviceGroup.getChildCount(); i++) {
@@ -353,6 +398,10 @@ public class ProviderDetailsActivity extends AppCompatActivity {
                             }
                         });
                         serviceGroup.addView(chip);
+                        chip.setTextColor(chipTextColors);
+                        chip.setChipBackgroundColor(new ColorStateList(
+                                new int[][]{{android.R.attr.state_checked}, new int[]{}},
+                                new int[]{accent, getColor(R.color.input_bg)}));
                     }
                     boolean hasServices = !serviceOptions.isEmpty() && approved;
                     serviceGroup.setEnabled(hasServices);

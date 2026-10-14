@@ -21,6 +21,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.example.washlink.ui.ThemeManager;
 
 public class ProviderNavBarHelper {
     public static final int TAB_DASHBOARD = 0;
@@ -142,6 +143,7 @@ public class ProviderNavBarHelper {
         panel.addView(signOut);
         signOut.setOnClickListener(v -> {
             dialog.dismiss();
+            ThemeManager.resetSignedOut(activity);
             FirebaseAuth.getInstance().signOut();
             Intent intent = new Intent(activity, ProviderLoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -208,12 +210,13 @@ public class ProviderNavBarHelper {
         if (activity.getClass().equals(cls)) return;
         activity.startActivity(new Intent(activity, cls));
         activity.finish();
+        activity.overridePendingTransition(0, 0);
     }
 
     private static void animateTint(Activity activity, ImageView image, boolean active) {
-        int from = ContextCompat.getColor(activity, R.color.splash_tagline_text);
-        int to = ContextCompat.getColor(activity,
-                active ? R.color.white : R.color.splash_tagline_text);
+        int from = ContextCompat.getColor(activity, R.color.nav_inactive);
+        int to = active ? ThemeManager.accent(activity)
+                : ContextCompat.getColor(activity, R.color.nav_inactive);
         android.animation.ValueAnimator animator = android.animation.ValueAnimator.ofObject(
                 new android.animation.ArgbEvaluator(), from, to);
         animator.setDuration(220);

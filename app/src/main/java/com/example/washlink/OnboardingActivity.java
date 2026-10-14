@@ -18,7 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-public class OnboardingActivity extends AppCompatActivity {
+public class OnboardingActivity extends WashLinkActivity {
 
     public static final String EXTRA_SHOW_ONBOARDING = "extra_show_onboarding";
 

@@ -5,7 +5,7 @@ import android.os.Bundle;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class AddCardActivity extends AppCompatActivity {
+public class AddCardActivity extends WashLinkActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

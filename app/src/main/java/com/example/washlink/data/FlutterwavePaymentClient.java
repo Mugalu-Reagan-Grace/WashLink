@@ -1,6 +1,7 @@
 package com.example.washlink.data;
 
 import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.functions.FirebaseFunctionsException;
 import com.example.washlink.models.Booking;
 
 import java.util.HashMap;
@@ -119,6 +120,11 @@ public final class FlutterwavePaymentClient {
     }
 
     private static String errorMessage(Exception error) {
+        if (error instanceof FirebaseFunctionsException
+                && ((FirebaseFunctionsException) error).getCode()
+                == FirebaseFunctionsException.Code.NOT_FOUND) {
+            return "Booking service is not deployed. Please enable Firebase billing and deploy the Functions backend.";
+        }
         String message = error.getLocalizedMessage();
         return message == null || message.trim().isEmpty()
                 ? "Could not connect to the payment service." : message;

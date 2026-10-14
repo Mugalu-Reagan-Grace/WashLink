@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="?attr/colorSurface"
     tools:context=".ManageServicesActivity">
 
     <!-- Header -->
@@ -90,21 +90,47 @@
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/tv_booking_options_title">
 
-        <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/cb_supports_pickup"
+        <LinearLayout
+            android:id="@+id/row_supports_pickup"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:text="@string/provider_supports_pickup"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/cb_supports_pickup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/provider_supports_pickup" />
+            <TextView
+                android:id="@+id/tv_supports_pickup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="@string/provider_supports_pickup"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp" />
+        </LinearLayout>
 
-        <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/cb_supports_dropoff"
+        <LinearLayout
+            android:id="@+id/row_supports_dropoff"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:text="@string/provider_supports_dropoff"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/cb_supports_dropoff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/provider_supports_dropoff" />
+            <TextView
+                android:id="@+id/tv_supports_dropoff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="@string/provider_supports_dropoff"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_save_booking_options"

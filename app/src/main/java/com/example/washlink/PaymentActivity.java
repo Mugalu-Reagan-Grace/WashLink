@@ -7,6 +7,9 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 
 import java.util.Locale;
 
@@ -24,7 +27,8 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class PaymentActivity extends AppCompatActivity {
+public class PaymentActivity extends WashLinkActivity {
+    private boolean dropOff;
 
     private ImageView backButton;
     private FrameLayout bellLayout;
@@ -47,6 +51,7 @@ public class PaymentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+        dropOff = getIntent().getBooleanExtra("drop_off", false);
         setContentView(R.layout.activity_customer_payment);
         com.example.washlink.data.AuthGuard.requireRole(this,
                 com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
@@ -62,6 +67,13 @@ public class PaymentActivity extends AppCompatActivity {
         mtnRadio = findViewById(R.id.radio_mtn);
         cashRadio = findViewById(R.id.radio_cash);
         payButton = findViewById(R.id.btn_pay);
+        int accent = com.example.washlink.ui.ThemeManager.accent(this,
+                com.example.washlink.ui.ThemeManager.ROLE_CUSTOMER);
+        ColorStateList radioTint = ColorStateList.valueOf(accent);
+        cardPaymentRadio.setButtonTintList(radioTint);
+        airtelRadio.setButtonTintList(radioTint);
+        mtnRadio.setButtonTintList(radioTint);
+        cashRadio.setButtonTintList(radioTint);
 
         backButton.setOnClickListener(v -> finish());
         bellLayout.setOnClickListener(v -> {
@@ -81,7 +93,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         int weightKg = getIntent() != null ? getIntent().getIntExtra("weight_kg", com.example.washlink.data.BookingPricing.estimateWeightKg(getIntent().getIntExtra("item_count", 1))) : com.example.washlink.data.BookingPricing.estimateWeightKg(getIntent() != null ? getIntent().getIntExtra("item_count", 1) : 1);
         double pricePerKg = getIntent().getDoubleExtra("price_per_kg", BookingPricing.PRICE_PER_KG);
-        BookingPricing.Quote quote = BookingPricing.quote(weightKg, true, pricePerKg);
+        BookingPricing.Quote quote = BookingPricing.quote(weightKg, !dropOff, pricePerKg);
         ((TextView) findViewById(R.id.tv_payment_subtotal))
                 .setText(BookingPricing.format(quote.laundry + quote.pickup + quote.delivery));
         ((TextView) findViewById(R.id.tv_payment_tax))
@@ -108,9 +120,13 @@ public class PaymentActivity extends AppCompatActivity {
                 return;
             }
             payButton.setEnabled(false);
-            String address = getIntent().getStringExtra("selected_address");
+            String address = dropOff
+                    ? getIntent().getStringExtra("provider_address")
+                    : getIntent().getStringExtra("selected_address");
             if (address == null) address = getIntent().getStringExtra("address");
-            if (address == null) address = "Address to be confirmed";
+            if (address == null) {
+                address = dropOff ? "Provider drop-off location" : "Address to be confirmed";
+            }
             final String requestedPaymentCode = selectedPaymentCode;
             final String requestedPaymentLabel = selectedPaymentMethod;
             Booking booking = new Booking(
@@ -118,9 +134,11 @@ public class PaymentActivity extends AppCompatActivity {
                     user.getDisplayName() == null ? "Customer" : user.getDisplayName(),
                     getIntent().getStringExtra("provider_id"),
                     getIntent().getStringExtra("provider_name"),
-                    Booking.SERVICE_TYPE_PICKUP,
+                    dropOff ? Booking.SERVICE_TYPE_DROPOFF : Booking.SERVICE_TYPE_PICKUP,
                     getIntent().getStringExtra("selected_laundry_service") == null
-                            ? getIntent().getStringExtra("selected_service")
+                            ? (getIntent().getStringExtra("selected_service") == null
+                            ? (dropOff ? "Drop Off" : "Laundry service")
+                            : getIntent().getStringExtra("selected_service"))
                             : getIntent().getStringExtra("selected_laundry_service"),
                     address);
             booking.setScheduledDateTime(getIntent().getStringExtra("selected_date")
@@ -135,7 +153,7 @@ public class PaymentActivity extends AppCompatActivity {
             }
             booking.setServiceNames(serviceNames);
             booking.setEstimatedWeight(weightKg + " kg");
-            booking.setSubtotal(quote.laundry + quote.pickup + quote.delivery);
+            booking.setSubtotal(dropOff ? quote.laundry : quote.laundry + quote.pickup + quote.delivery);
             booking.setPickupFee(quote.pickup);
             booking.setDeliveryFee(quote.delivery);
             booking.setServiceFee(quote.serviceFee);
@@ -196,13 +214,15 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void confirmBooking(Booking booking, BookingPricing.Quote quote) {
-        Intent intent = new Intent(PaymentActivity.this, OrderConfirmedActivity.class);
+        Intent intent = new Intent(PaymentActivity.this,
+                dropOff ? OrderConfirmedDropOffActivity.class : OrderConfirmedActivity.class);
         if (getIntent() != null) intent.putExtras(getIntent());
         intent.putExtra("booking_id", booking.getId());
         intent.putExtra("selected_payment_method", booking.getPaymentMethod());
         intent.putExtra("payment_status", booking.getPaymentStatus());
         intent.putExtra("provider_name", booking.getProviderName());
         intent.putExtra("selected_address", booking.getAddress());
+        intent.putExtra("provider_address", booking.getAddress());
         intent.putExtra("selected_date", getIntent().getStringExtra("selected_date"));
         intent.putExtra("selected_time", getIntent().getStringExtra("selected_time"));
         intent.putExtra("quote_total", quote.total);
@@ -237,6 +257,16 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void setCardSelectedState(ConstraintLayout card, boolean selected) {
-        card.setBackgroundResource(selected ? R.drawable.bg_card_selected_outline : R.drawable.bg_card_bordered);
+        if (!selected) {
+            card.setBackgroundResource(R.drawable.bg_card_bordered);
+            return;
+        }
+        GradientDrawable outline = new GradientDrawable();
+        outline.setColor(Color.TRANSPARENT);
+        outline.setCornerRadius(14 * getResources().getDisplayMetrics().density);
+        outline.setStroke((int) (1.5f * getResources().getDisplayMetrics().density),
+                com.example.washlink.ui.ThemeManager.accent(this,
+                        com.example.washlink.ui.ThemeManager.ROLE_CUSTOMER));
+        card.setBackground(outline);
     }
 }

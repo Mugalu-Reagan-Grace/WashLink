@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#121923</color>
+    <color name="on_accent">#FFFFFF</color>
+    <color name="black">#FFFFFF</color>
+    <color name="text_primary">#F1F5F9</color>
+    <color name="text_secondary">#B7C3D0</color>
+    <color name="text_secondary_accessible">#D0DAE4</color>
+    <color name="hint_gray">#8D9AAA</color>
+    <color name="input_bg">#202C3B</color>
+    <color name="divider_gray">#354457</color>
+    <color name="google_button_bg">#202C3B</color>
+    <color name="google_button_border">#405168</color>
+    <color name="card_border">#354457</color>
+    <color name="nav_inactive">#9AAABD</color>
+    <color name="offer_card_bg">#1D3154</color>
+    <color name="promo_chip_bg">#202C3B</color>
+    <color name="step_number_bg">#1D3154</color>
+    <color name="chip_unselected_bg">#202C3B</color>
+    <color name="chip_unselected_text">#C3CFDB</color>
+    <color name="progress_track_empty">#354457</color>
+    <color name="empty_state_icon_bg">#1D3154</color>
+    <color name="action_icon_bg">#253A61</color>
+    <color name="status_in_progress_bg">#1D3154</color>
+    <color name="status_processing_bg">#1D3154</color>
+    <color name="closed_bg">#202C3B</color>
+    <color name="closed_text">#9AAABD</color>
+    <color name="button_disabled_bg">#354457</color>
+    <color name="button_disabled_text">#8D9AAA</color>
+    <color name="splash_tagline_text">#D7E6FF</color>
+</resources>

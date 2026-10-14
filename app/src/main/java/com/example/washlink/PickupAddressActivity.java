@@ -12,6 +12,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.res.ColorStateList;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class PickupAddressActivity extends AppCompatActivity {
+public class PickupAddressActivity extends WashLinkActivity {
 
     private ImageView backButton;
     private FrameLayout bellLayout;
@@ -290,8 +291,10 @@ public class PickupAddressActivity extends AppCompatActivity {
 
     private void enableContinue() {
         continueCheckoutButton.setEnabled(true);
-        continueCheckoutButton.setTextColor(ContextCompat.getColor(this, R.color.white));
-        continueCheckoutButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.laundr_blue));
+        continueCheckoutButton.setTextColor(ContextCompat.getColor(this, R.color.on_accent));
+        continueCheckoutButton.setBackgroundTintList(ColorStateList.valueOf(
+                com.example.washlink.ui.ThemeManager.accent(this,
+                        com.example.washlink.ui.ThemeManager.ROLE_CUSTOMER)));
     }
 
     private void disableContinue() {

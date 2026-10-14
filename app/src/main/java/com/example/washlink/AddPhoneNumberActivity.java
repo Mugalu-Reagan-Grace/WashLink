@@ -14,7 +14,7 @@ import com.example.washlink.data.AuthGuard;
 import com.example.washlink.models.UserAccount;
 import com.google.android.material.button.MaterialButton;
 
-public class AddPhoneNumberActivity extends AppCompatActivity {
+public class AddPhoneNumberActivity extends WashLinkActivity {
 
     public static final String EXTRA_USER_NAME = "extra_user_name";
     public static final String EXTRA_USER_UID = "extra_user_uid";

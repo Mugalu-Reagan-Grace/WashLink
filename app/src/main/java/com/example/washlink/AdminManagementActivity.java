@@ -18,14 +18,15 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
-public class AdminManagementActivity extends AppCompatActivity {
+public class AdminManagementActivity extends WashLinkActivity {
     private static final String SECTION_USERS = "users";
     private static final String SECTION_PROVIDERS = "providers";
     private static final String SECTION_BOOKINGS = "bookings";
+    private static final String SECTION_OVERVIEW = "overview";
 
     private LinearLayout items;
     private TextView state;
-    private String section = SECTION_USERS;
+    private String section = SECTION_OVERVIEW;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,11 +37,13 @@ public class AdminManagementActivity extends AppCompatActivity {
 
         items = findViewById(R.id.admin_items);
         state = findViewById(R.id.tv_admin_state);
+        findViewById(R.id.btn_admin_overview).setOnClickListener(v -> loadSection(SECTION_OVERVIEW));
         findViewById(R.id.btn_admin_users).setOnClickListener(v -> loadSection(SECTION_USERS));
         findViewById(R.id.btn_admin_providers).setOnClickListener(v -> loadSection(SECTION_PROVIDERS));
         findViewById(R.id.btn_admin_bookings).setOnClickListener(v -> loadSection(SECTION_BOOKINGS));
         findViewById(R.id.btn_admin_refresh).setOnClickListener(v -> loadSection(section));
         findViewById(R.id.btn_admin_logout).setOnClickListener(v -> {
+            com.example.washlink.ui.ThemeManager.resetSignedOut(this);
             FirebaseAuth.getInstance().signOut();
             Intent intent = new Intent(this, SignInActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -55,9 +58,14 @@ public class AdminManagementActivity extends AppCompatActivity {
         items.removeAllViews();
         showState("Loading " + section + "...");
         Query query = FirebaseFirestore.getInstance().collection(section);
+        if (SECTION_OVERVIEW.equals(section)) {
+            loadOverview();
+            return;
+        }
         if (SECTION_BOOKINGS.equals(section)) {
             query = query.orderBy("createdAt", Query.Direction.DESCENDING).limit(100);
         }
+
         query.get()
                 .addOnSuccessListener(snapshot -> {
                     if (snapshot.isEmpty()) {
@@ -77,6 +85,56 @@ public class AdminManagementActivity extends AppCompatActivity {
                     state.setClickable(true);
                     state.setOnClickListener(v -> loadSection(section));
                 });
+    }
+
+    private void loadOverview() {
+        showState("Loading overview...");
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        firestore.collection(SECTION_USERS).limit(500).get()
+                .addOnSuccessListener(users -> firestore.collection(SECTION_PROVIDERS).limit(500).get()
+                        .addOnSuccessListener(providers -> firestore.collection(SECTION_BOOKINGS)
+                                .orderBy("createdAt", Query.Direction.DESCENDING).limit(300).get()
+                                .addOnSuccessListener(bookings -> {
+                                    int open = 0;
+                                    int pending = 0;
+                                    double collected = 0;
+                                    for (DocumentSnapshot provider : providers.getDocuments()) {
+                                        if (!Boolean.TRUE.equals(provider.get("isApproved"))) pending++;
+                                    }
+                                    for (DocumentSnapshot booking : bookings.getDocuments()) {
+                                        String status = text(booking.get("status"), "");
+                                        if (!"DELIVERED".equals(status) && !"CANCELLED".equals(status)
+                                                && !"REJECTED".equals(status)) open++;
+                                        if ("DELIVERED".equals(status)
+                                                && booking.get("total") instanceof Number) {
+                                            collected += ((Number) booking.get("total")).doubleValue();
+                                        }
+                                    }
+                                    addOverviewSummary(users.size(), providers.size(), open, pending,
+                                            collected);
+                                    state.setVisibility(View.GONE);
+                                })
+                                .addOnFailureListener(this::showLoadError))
+                        .addOnFailureListener(this::showLoadError))
+                .addOnFailureListener(this::showLoadError);
+    }
+
+    private void addOverviewSummary(int users, int providers, int open, int pending,
+                                    double collected) {
+        TextView summary = new TextView(this);
+        summary.setText("OPERATIONS OVERVIEW\n\n"
+                + "Total users        " + users + "\n"
+                + "Providers          " + providers + " (" + pending + " awaiting approval)\n"
+                + "Open bookings      " + open + "\n"
+                + "Collected revenue  "
+                + com.example.washlink.data.BookingPricing.format((int) collected)
+                + "\n\nRecent bookings are available in the Bookings section.");
+        summary.setTextColor(getColor(R.color.text_primary));
+        summary.setTextSize(16);
+        summary.setLineSpacing(4, 1.0f);
+        summary.setPadding(20, 20, 20, 20);
+        summary.setBackgroundResource(R.drawable.bg_card_bordered);
+        items.addView(summary);
     }
 
     private void addBookingSummary(java.util.List<DocumentSnapshot> documents) {
@@ -212,6 +270,12 @@ public class AdminManagementActivity extends AppCompatActivity {
         state.setVisibility(View.VISIBLE);
         state.setClickable(false);
         state.setOnClickListener(null);
+    }
+
+    private void showLoadError(Exception error) {
+        showState("Could not load overview. Tap to retry.");
+        state.setClickable(true);
+        state.setOnClickListener(v -> loadSection(SECTION_OVERVIEW));
     }
 
     private String text(Object value, String fallback) {

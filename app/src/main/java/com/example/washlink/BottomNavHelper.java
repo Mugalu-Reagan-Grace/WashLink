@@ -71,7 +71,7 @@ public final class BottomNavHelper {
         ImageView icon = findFirstImageView(group);
         TextView label = findFirstTextView(group);
 
-        int activeColor = ContextCompat.getColor(activity, R.color.white);
+        int activeColor = ContextCompat.getColor(activity, R.color.on_accent);
         int inactiveColor = ContextCompat.getColor(activity, R.color.splash_tagline_text);
 
         if (icon != null) {

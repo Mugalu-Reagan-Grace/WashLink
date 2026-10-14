@@ -35,7 +35,7 @@
         app:layout_constraintTop_toTopOf="@id/btn_back"
         app:layout_constraintBottom_toBottomOf="@id/btn_back"
         app:layout_constraintStart_toEndOf="@id/btn_back"
-        app:layout_constraintEnd_toStartOf="@id/iv_bell" />
+        app:layout_constraintEnd_toStartOf="@id/btn_open_map" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_open_map"
@@ -43,7 +43,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Map"
-        android:textColor="@color/laundr_blue"
+        android:textColor="@color/white"
+        android:minWidth="80dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
         app:layout_constraintTop_toTopOf="@id/btn_back"
         app:layout_constraintBottom_toBottomOf="@id/btn_back"
         app:layout_constraintEnd_toStartOf="@id/iv_bell" />

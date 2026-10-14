@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.ImageView;
 import android.widget.CheckBox;
 import android.widget.Toast;
+import androidx.appcompat.widget.SwitchCompat;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -24,6 +25,7 @@ import com.example.washlink.data.AuthGuard;
 import com.example.washlink.data.AuthRepository;
 import com.example.washlink.data.ProfilePhotoManager;
 import com.example.washlink.models.UserAccount;
+import com.example.washlink.ui.ThemeManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.UserProfileChangeRequest;
@@ -36,7 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ProviderProfileActivity extends AppCompatActivity {
+public class ProviderProfileActivity extends WashLinkActivity {
     private String providerId;
     private String ownerName = "";
     private String businessName = "";
@@ -87,6 +89,17 @@ public class ProviderProfileActivity extends AppCompatActivity {
                         Toast.makeText(ProviderProfileActivity.this, message, Toast.LENGTH_LONG).show();
                     }
                 }));
+        SwitchCompat darkModeSwitch = findViewById(R.id.switch_provider_dark_mode);
+        if (darkModeSwitch != null) {
+            darkModeSwitch.setChecked(ThemeManager.isDarkMode(this,
+                    ThemeManager.ROLE_PROVIDER));
+            darkModeSwitch.setOnCheckedChangeListener((button, checked) -> {
+                ThemeManager.changeTheme(this, ThemeManager.ROLE_PROVIDER,
+                        checked ? "dark" : "light");
+            });
+        }
+        findViewById(R.id.row_provider_theme).setOnClickListener(v ->
+                ThemeManager.showAppearancePicker(this, ThemeManager.ROLE_PROVIDER));
         findViewById(R.id.row_payment_settings).setOnClickListener(v -> loadPayoutSettings());
         if (getIntent().getBooleanExtra("open_payout_settings", false)) {
             findViewById(R.id.row_payment_settings).post(this::loadPayoutSettings);
@@ -97,6 +110,7 @@ public class ProviderProfileActivity extends AppCompatActivity {
         MaterialButton logoutButton = findViewById(R.id.btn_logout);
         if (logoutButton != null) {
             logoutButton.setOnClickListener(v -> {
+                ThemeManager.resetSignedOut(this);
                 FirebaseAuth.getInstance().signOut();
                 Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(ProviderProfileActivity.this, ProviderLoginActivity.class);

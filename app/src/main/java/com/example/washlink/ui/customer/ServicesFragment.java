@@ -3,6 +3,9 @@ package com.example.washlink.ui.customer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,6 +13,7 @@ import androidx.annotation.Nullable;
 import com.example.washlink.NearbyProvidersActivity;
 import com.example.washlink.NotificationsActivity;
 import com.example.washlink.R;
+import com.example.washlink.ui.ThemeManager;
 
 public class ServicesFragment extends CustomerTabFragment {
     @Override
@@ -21,6 +25,10 @@ public class ServicesFragment extends CustomerTabFragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        ThemeManager.apply(view, requireContext());
+        int accent = ThemeManager.accent(requireContext(), ThemeManager.ROLE_CUSTOMER);
+        tintBenefit(view.findViewById(R.id.tv_save_money), accent);
+        tintBenefit(view.findViewById(R.id.tv_save_time), accent);
         bindNavigation(view, MainActivity.TAB_SERVICES);
         view.findViewById(R.id.btn_back).setOnClickListener(v ->
                 ((MainActivity) requireActivity()).showTab(MainActivity.TAB_HOME));
@@ -30,6 +38,12 @@ public class ServicesFragment extends CustomerTabFragment {
                 openProviderList("Drop Off"));
         view.findViewById(R.id.card_pickup_delivery).setOnClickListener(v ->
                 openProviderList("Pickup & Delivery"));
+    }
+
+    private void tintBenefit(View view, int accent) {
+        if (view == null) return;
+        ((TextView) view).setTextColor(Color.WHITE);
+        view.setBackgroundTintList(ColorStateList.valueOf(accent));
     }
 
     private void openProviderList(String service) {

@@ -1,6 +1,7 @@
 package com.example.washlink.ui.customer;
 
 import android.content.Intent;
+import android.content.ActivityNotFoundException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
@@ -11,6 +12,8 @@ import android.widget.LinearLayout;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import androidx.appcompat.widget.SwitchCompat;
+import com.example.washlink.ui.ThemeManager;
 import android.widget.Toast;
 import android.widget.AutoCompleteTextView;
 import android.widget.ArrayAdapter;
@@ -39,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileFragment extends CustomerTabFragment {
+    private boolean addressDialogPending;
     private final AuthRepository authRepository = AuthRepository.getInstance();
     private UserAccount account;
     private String photoUri = "";
@@ -49,6 +53,9 @@ public class ProfileFragment extends CustomerTabFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (Places.isInitialized()) {
+            placesClient = Places.createClient(requireContext());
+        }
         imagePicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
             if (uri == null || account == null) return;
             if (avatar != null) avatar.setImageURI(uri);
@@ -59,9 +66,6 @@ public class ProfileFragment extends CustomerTabFragment {
                                 photoUri = downloadUrl;
                                 showSavedAvatar();
                             });
-                            if (Places.isInitialized()) {
-                                placesClient = Places.createClient(requireContext());
-                            }
                         }
                         @Override public void onError(String message) {
                             if (isAdded()) Toast.makeText(requireContext(), message,
@@ -97,7 +101,14 @@ public class ProfileFragment extends CustomerTabFragment {
             else showProfileDialog();
         });
 
-        view.findViewById(R.id.row_saved_addresses).setOnClickListener(v -> showAddressDialog());
+        view.findViewById(R.id.row_saved_addresses).setOnClickListener(v -> {
+            if (account == null) {
+                addressDialogPending = true;
+                loadProfile(view);
+            } else {
+                showAddressDialog();
+            }
+        });
         view.findViewById(R.id.row_favorite_providers).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(),
                         com.example.washlink.FavoriteProvidersActivity.class)));
@@ -131,13 +142,45 @@ public class ProfileFragment extends CustomerTabFragment {
         view.findViewById(R.id.row_profile_about).setOnClickListener(v ->
                 showInformationDialog(getString(R.string.profile_about),
                         "WashLink connects customers with laundry providers for pickup, delivery, and drop-off services.\n\nVersion 1.0.0"));
+        SwitchCompat darkModeSwitch = view.findViewById(R.id.switch_profile_dark_mode);
+        if (darkModeSwitch != null) {
+            darkModeSwitch.setChecked(ThemeManager.isDarkMode(requireContext(),
+                    ThemeManager.ROLE_CUSTOMER));
+            darkModeSwitch.setOnCheckedChangeListener((button, checked) -> {
+                ThemeManager.changeTheme(requireActivity(), ThemeManager.ROLE_CUSTOMER,
+                        checked ? "dark" : "light");
+            });
+        }
+        view.findViewById(R.id.row_profile_theme).setOnClickListener(v ->
+                ThemeManager.showAppearancePicker(requireActivity(), ThemeManager.ROLE_CUSTOMER));
+        view.findViewById(R.id.row_profile_accent).setOnClickListener(v -> showThemePicker());
         view.findViewById(R.id.btn_logout).setOnClickListener(v -> {
+            ThemeManager.resetSignedOut(requireContext());
             FirebaseAuth.getInstance().signOut();
             Intent intent = new Intent(requireContext(), SignInActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });
         loadProfile(view);
+    }
+
+    private void showThemePicker() {
+        String[] labels = {"WashLink Blue", "Violet", "Emerald", "Amber"};
+        String[] values = {"blue", "violet", "emerald", "amber"};
+        String current = ThemeManager.accentName(requireContext(), ThemeManager.ROLE_CUSTOMER);
+        int checked = 0;
+        for (int i = 0; i < values.length; i++) {
+            if (values[i].equals(current)) checked = i;
+        }
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Accent color")
+                .setSingleChoiceItems(labels, checked, (dialog, which) -> {
+                    ThemeManager.setAccent(requireContext(), ThemeManager.ROLE_CUSTOMER, values[which]);
+                    dialog.dismiss();
+                    requireActivity().recreate();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private void loadProfile(View view) {
@@ -157,6 +200,10 @@ public class ProfileFragment extends CustomerTabFragment {
                 if (name != null) name.setText(value(user.getName(), "Name not provided"));
                 if (email != null) email.setText(value(user.getEmail(), "Email not provided"));
                 if (phone != null) phone.setText(value(user.getPhone(), "Phone number not provided"));
+                if (addressDialogPending) {
+                    addressDialogPending = false;
+                    showAddressDialog();
+                }
                 if (savedAddress != null) {
                     savedAddress.setText(value(user.getAddress(), getString(R.string.profile_saved_addresses_desc)));
                 }
@@ -454,13 +501,24 @@ public class ProfileFragment extends CustomerTabFragment {
     }
 
     private void openSupportEmail(String subject) {
-        Intent intent = new Intent(Intent.ACTION_SENDTO);
-        intent.setData(Uri.parse("mailto:" + getString(R.string.profile_support_email)));
-        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        if (intent.resolveActivity(requireActivity().getPackageManager()) != null) {
-            startActivity(intent);
-        } else {
-            Toast.makeText(requireContext(), getString(R.string.profile_support_email), Toast.LENGTH_LONG).show();
+        String supportEmail = getString(R.string.profile_support_email);
+        Intent mailto = new Intent(Intent.ACTION_SENDTO,
+                Uri.parse("mailto:" + Uri.encode(supportEmail)));
+        mailto.putExtra(Intent.EXTRA_SUBJECT, subject);
+        try {
+            if (mailto.resolveActivity(requireActivity().getPackageManager()) != null) {
+                startActivity(mailto);
+                return;
+            }
+            Intent chooser = new Intent(Intent.ACTION_SEND);
+            chooser.setType("text/plain");
+            chooser.putExtra(Intent.EXTRA_EMAIL, new String[] {supportEmail});
+            chooser.putExtra(Intent.EXTRA_SUBJECT, subject);
+            startActivity(Intent.createChooser(chooser, "Send email with"));
+        } catch (ActivityNotFoundException error) {
+            Toast.makeText(requireContext(),
+                    "No email app is installed. Contact " + supportEmail,
+                    Toast.LENGTH_LONG).show();
         }
     }
 

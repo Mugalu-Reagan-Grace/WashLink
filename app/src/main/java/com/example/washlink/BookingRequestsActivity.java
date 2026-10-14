@@ -23,7 +23,7 @@ import com.example.washlink.data.ListenerRegistration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BookingRequestsActivity extends AppCompatActivity {
+public class BookingRequestsActivity extends WashLinkActivity {
 
     private RecyclerView rv;
     private BookingRequestsAdapter adapter;
@@ -83,7 +83,7 @@ public class BookingRequestsActivity extends AppCompatActivity {
             tab.setBackgroundResource(selected
                     ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
             tab.setTextColor(androidx.core.content.ContextCompat.getColor(this,
-                    selected ? R.color.white : R.color.chip_unselected_text));
+                    selected ? R.color.on_accent : R.color.chip_unselected_text));
             tab.setSelected(selected);
         }
     }

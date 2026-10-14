@@ -73,8 +73,6 @@
         </activity>
         <activity android:name=".OrderSummaryDropOffActivity">
         </activity>
-        <activity android:name=".DropOffPaymentActivity">
-        </activity>
         <activity android:name=".OrderConfirmedDropOffActivity">
         </activity>
         <activity android:name=".NearbyProvidersActivity" />

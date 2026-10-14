@@ -1,16 +1,35 @@
 package com.example.washlink.ui.customer;
 
 import android.content.Intent;
+import android.view.ContextThemeWrapper;
 import android.os.Bundle;
 import android.view.View;
+import android.graphics.Outline;
+import android.view.ViewOutlineProvider;
 import android.graphics.Typeface;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.CalendarView;
+import android.widget.LinearLayout;
+import android.widget.Button;
+import android.widget.Toast;
+import android.app.AlertDialog;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.ImageViewCompat;
+import android.content.res.ColorStateList;
+import com.example.washlink.ui.ThemeManager;
 
 import com.example.washlink.NearbyProvidersActivity;
 import com.example.washlink.ChatInboxActivity;
@@ -43,7 +62,27 @@ public class HomeFragment extends CustomerTabFragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        ThemeManager.apply(view, requireContext());
+        int accent = ThemeManager.accent(requireContext(), ThemeManager.ROLE_CUSTOMER);
+        View bookButton = view.findViewById(R.id.btn_book_service);
+        bookButton.setElevation(6 * getResources().getDisplayMetrics().density);
+        bookButton.setBackgroundTintList(ColorStateList.valueOf(
+                Color.rgb(Math.max(0, Color.red(accent) - 35),
+                        Math.max(0, Color.green(accent) - 35),
+                        Math.max(0, Color.blue(accent) - 35))));
+        ((TextView) bookButton).setTextColor(Color.WHITE);
+        tintHomeAction(view.findViewById(R.id.iv_calendar), accent);
         bindNavigation(view, MainActivity.TAB_HOME);
+        View avatar = view.findViewById(R.id.iv_avatar);
+        if (avatar != null) {
+            avatar.setClipToOutline(true);
+            avatar.setOutlineProvider(new ViewOutlineProvider() {
+                @Override public void getOutline(View target, Outline outline) {
+                    outline.setOval(0, 0, target.getWidth(), target.getHeight());
+                }
+
+            });
+        }
         loadCustomerHeader(view);
 
         View activeCard = view.findViewById(R.id.active_order_card);
@@ -66,6 +105,7 @@ public class HomeFragment extends CustomerTabFragment {
         view.findViewById(R.id.iv_bell).setOnClickListener(v -> openNotifications());
         view.findViewById(R.id.iv_chat_inbox).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), ChatInboxActivity.class)));
+        view.findViewById(R.id.iv_calendar).setOnClickListener(v -> showActivityCalendar());
         view.findViewById(R.id.row_order_history).setOnClickListener(v ->
                 ((MainActivity) requireActivity()).showTab(MainActivity.TAB_HISTORY));
         view.findViewById(R.id.row_profile_settings).setOnClickListener(v ->
@@ -75,7 +115,6 @@ public class HomeFragment extends CustomerTabFragment {
             details.setText("View details");
             details.setOnClickListener(v -> openActiveOrder());
         }
-
         View.OnClickListener openOrRetry = v -> {
             if (loadFailed) loadLatestBooking(orderTitle, orderId, orderStatus, etaValue, details);
             else openActiveOrder();
@@ -83,6 +122,109 @@ public class HomeFragment extends CustomerTabFragment {
         if (activeCard != null) activeCard.setOnClickListener(openOrRetry);
         if (details != null) details.setOnClickListener(openOrRetry);
         loadLatestBooking(orderTitle, orderId, orderStatus, etaValue, details);
+    }
+
+    private void tintHomeAction(View container, int accent) {
+        if (!(container instanceof android.view.ViewGroup)) return;
+        container.setBackgroundTintList(ColorStateList.valueOf(
+                Color.rgb(Math.min(255, Color.red(accent) + 215),
+                        Math.min(255, Color.green(accent) + 215),
+                        Math.min(255, Color.blue(accent) + 215))));
+        ImageView icon = ((android.view.ViewGroup) container).getChildAt(0) instanceof ImageView
+                ? (ImageView) ((android.view.ViewGroup) container).getChildAt(0) : null;
+        if (icon != null) ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(accent));
+    }
+
+    private void showActivityCalendar() {
+            if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+                Toast.makeText(requireContext(), "Sign in to view your activity calendar.",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            LinearLayout content = new LinearLayout(requireContext());
+            content.setOrientation(LinearLayout.VERTICAL);
+            content.setPadding(24, 0, 24, 0);
+            int accent = ThemeManager.accent(requireContext(), ThemeManager.ROLE_CUSTOMER);
+            int calendarStyle = R.style.Theme_WashLink_CalendarBlue;
+            String accentName = ThemeManager.accentName(requireContext(),
+                    ThemeManager.ROLE_CUSTOMER);
+            if ("amber".equals(accentName)) calendarStyle = R.style.Theme_WashLink_CalendarAmber;
+            else if ("emerald".equals(accentName)) calendarStyle = R.style.Theme_WashLink_CalendarEmerald;
+            else if ("violet".equals(accentName)) calendarStyle = R.style.Theme_WashLink_CalendarViolet;
+            CalendarView calendar = new CalendarView(
+                    new ContextThemeWrapper(requireContext(), calendarStyle));
+            calendar.setSelectedWeekBackgroundColor(accent);
+            calendar.setFocusedMonthDateColor(accent);
+            calendar.setUnfocusedMonthDateColor(ContextCompat.getColor(requireContext(),
+                    R.color.text_secondary));
+            calendar.setDate(System.currentTimeMillis(), false, true);
+            TextView activityLabel = new TextView(requireContext());
+            activityLabel.setPadding(8, 16, 8, 16);
+            activityLabel.setText("Loading your activity...");
+            content.addView(calendar);
+            content.addView(activityLabel);
+            AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                    .setTitle("Activity calendar")
+                    .setView(content)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show();
+            Button okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            if (okButton != null) {
+                okButton.setTextColor(accent);
+                okButton.setAllCaps(false);
+            }
+            final ListenerRegistration[] calendarRegistration = new ListenerRegistration[1];
+            dialog.setOnDismissListener(unused -> {
+                if (calendarRegistration[0] != null) calendarRegistration[0].remove();
+            });
+
+            List<Booking> bookings = new ArrayList<>();
+            SimpleDateFormat dayFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            calendar.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
+                Calendar selected = Calendar.getInstance();
+                selected.set(year, month, dayOfMonth);
+                String day = dayFormat.format(selected.getTime());
+                StringBuilder message = new StringBuilder();
+                for (Booking booking : bookings) {
+                    if (booking.getCreatedAt() > 0
+                            && day.equals(dayFormat.format(new Date(booking.getCreatedAt())))) {
+                        if (message.length() > 0) message.append("\n");
+                        message.append("Order ")
+                                .append(booking.getId() == null ? "" : "#" + booking.getId())
+                                .append(" - ")
+                                .append(booking.getServiceName() == null
+                                        ? "Laundry service" : booking.getServiceName());
+                    }
+                }
+                activityLabel.setText(message.length() == 0
+                        ? "No orders recorded on this day." : message.toString());
+            });
+            calendarRegistration[0] = BookingServiceFacade.getBookingService().addCustomerBookingsListener(
+                    FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                    new BookingService.CustomerBookingsListener() {
+                        @Override public void onBookingsChanged(List<Booking> updated) {
+                            bookings.clear();
+                            bookings.addAll(updated);
+                            Calendar now = Calendar.getInstance();
+                            calendar.setDate(now.getTimeInMillis(), false, true);
+                            String today = dayFormat.format(now.getTime());
+                            int count = 0;
+                            for (Booking booking : bookings) {
+                                if (booking.getCreatedAt() > 0
+                                        && today.equals(dayFormat.format(
+                                        new Date(booking.getCreatedAt())))) {
+                                    count++;
+                                }
+                            }
+                            activityLabel.setText(count == 0
+                                    ? "No orders recorded today."
+                                    : count + (count == 1
+                                    ? " order recorded today." : " orders recorded today."));
+                        }
+                        @Override public void onError(String message) {
+                            if (isAdded()) activityLabel.setText("Could not load activity history.");
+                        }
+                    });
     }
 
     private void loadCustomerHeader(View view) {

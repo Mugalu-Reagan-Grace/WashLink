@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class NotificationsActivity extends AppCompatActivity {
+public class NotificationsActivity extends WashLinkActivity {
     private final List<BookingNotification> notifications = new ArrayList<>();
     private ArrayAdapter<BookingNotification> adapter;
     private ListView listView;

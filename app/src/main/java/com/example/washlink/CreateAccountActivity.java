@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.washlink.data.AuthRepository;
+import com.example.washlink.ui.PasswordStrengthIndicator;
 import com.example.washlink.ui.customer.MainActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -38,7 +39,7 @@ import com.google.firebase.FirebaseTooManyRequestsException;
 
 import java.util.concurrent.TimeUnit;
 
-public class CreateAccountActivity extends AppCompatActivity {
+public class CreateAccountActivity extends WashLinkActivity {
 
     private static final String TAG = "CreateAccountActivity";
     private static final int RC_SIGN_IN = 9001;
@@ -80,6 +81,9 @@ public class CreateAccountActivity extends AppCompatActivity {
         phoneCodeEt = findViewById(R.id.et_phone_code);
         emailEt = findViewById(R.id.et_email_reg);
         passwordEt = findViewById(R.id.et_password_reg);
+        PasswordStrengthIndicator.bind(passwordEt,
+                findViewById(R.id.password_strength_feedback),
+                findViewById(R.id.password_strength_meter));
         confirmPasswordEt = findViewById(R.id.et_confirm_password_reg);
         termsCheckBox = findViewById(R.id.checkbox_terms);
         signUpButton = findViewById(R.id.btn_sign_up);

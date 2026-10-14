@@ -16,7 +16,7 @@ import com.example.washlink.models.Booking;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class OrderTrackingActivity extends AppCompatActivity {
+public class OrderTrackingActivity extends WashLinkActivity {
     private ListenerRegistration registration;
     private String providerPhone;
 

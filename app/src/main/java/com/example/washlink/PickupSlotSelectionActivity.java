@@ -9,6 +9,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,7 +23,7 @@ import com.google.android.material.button.MaterialButton;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class PickupSlotSelectionActivity extends AppCompatActivity {
+public class PickupSlotSelectionActivity extends WashLinkActivity {
 
     private ImageView backButton;
     private FrameLayout bellLayout;
@@ -132,13 +134,17 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
     }
 
     private void selectDate(int index) {
+        int accent = com.example.washlink.ui.ThemeManager.accent(this,
+                com.example.washlink.ui.ThemeManager.ROLE_CUSTOMER);
         for (int i = 0; i < dateChips.length; i++) {
             View chip = dateChips[i];
             chip.setBackgroundResource(i == index ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
+            chip.setBackgroundTintList(ColorStateList.valueOf(i == index ? accent
+                    : ContextCompat.getColor(this, R.color.chip_unselected_bg)));
             TextView day = (TextView) ((LinearLayout) chip).getChildAt(0);
             TextView date = (TextView) ((LinearLayout) chip).getChildAt(1);
-            int dayColor = ContextCompat.getColor(this, i == index ? R.color.white : R.color.chip_unselected_text);
-            int dateColor = ContextCompat.getColor(this, i == index ? R.color.white : R.color.text_primary);
+            int dayColor = ContextCompat.getColor(this, i == index ? R.color.on_accent : R.color.chip_unselected_text);
+            int dateColor = ContextCompat.getColor(this, i == index ? R.color.on_accent : R.color.text_primary);
             day.setTextColor(dayColor);
             date.setTextColor(dateColor);
         }
@@ -154,10 +160,14 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
 
     private void selectTime(int index) {
         if (!isTimeAvailable(index)) return;
+        int accent = com.example.washlink.ui.ThemeManager.accent(this,
+                com.example.washlink.ui.ThemeManager.ROLE_CUSTOMER);
         for (int i = 0; i < timeChips.length; i++) {
             TextView chip = timeChips[i];
             chip.setBackgroundResource(i == index ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
-            int textColor = ContextCompat.getColor(this, i == index ? R.color.white : R.color.chip_unselected_text);
+            chip.setBackgroundTintList(ColorStateList.valueOf(i == index ? accent
+                    : ContextCompat.getColor(this, R.color.chip_unselected_bg)));
+            int textColor = ContextCompat.getColor(this, i == index ? R.color.on_accent : R.color.chip_unselected_text);
             chip.setTextColor(textColor);
             chip.setTypeface(null, i == index ? Typeface.BOLD : Typeface.NORMAL);
         }
@@ -234,6 +244,8 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
         selectedTimeLabel = "";
         for (TextView chip : timeChips) {
             chip.setBackgroundResource(R.drawable.bg_chip_unselected);
+            chip.setBackgroundTintList(ColorStateList.valueOf(
+                    ContextCompat.getColor(this, R.color.chip_unselected_bg)));
             chip.setTextColor(ContextCompat.getColor(this, R.color.chip_unselected_text));
             chip.setTypeface(null, Typeface.NORMAL);
         }
@@ -249,10 +261,16 @@ public class PickupSlotSelectionActivity extends AppCompatActivity {
 
     private void selectContact(boolean call) {
         callSelected = call;
+        int accent = com.example.washlink.ui.ThemeManager.accent(this,
+                com.example.washlink.ui.ThemeManager.ROLE_CUSTOMER);
         callChip.setBackgroundResource(call ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
         textChip.setBackgroundResource(call ? R.drawable.bg_chip_unselected : R.drawable.bg_chip_selected);
-        callChip.setTextColor(ContextCompat.getColor(this, call ? R.color.white : R.color.chip_unselected_text));
-        textChip.setTextColor(ContextCompat.getColor(this, call ? R.color.chip_unselected_text : R.color.white));
+        callChip.setBackgroundTintList(ColorStateList.valueOf(call ? accent
+                : ContextCompat.getColor(this, R.color.chip_unselected_bg)));
+        textChip.setBackgroundTintList(ColorStateList.valueOf(call
+                ? ContextCompat.getColor(this, R.color.chip_unselected_bg) : accent));
+        callChip.setTextColor(ContextCompat.getColor(this, call ? R.color.on_accent : R.color.chip_unselected_text));
+        textChip.setTextColor(ContextCompat.getColor(this, call ? R.color.chip_unselected_text : R.color.on_accent));
     }
 
     private String getDateLabel(int index) {

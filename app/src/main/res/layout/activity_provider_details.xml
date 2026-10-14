@@ -258,8 +258,15 @@
                 android:text="@string/provider_call"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="11sp"
+                android:textSize="10sp"
+                android:minWidth="0dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
                 android:backgroundTint="#1FA855"
+                app:icon="@drawable/ic_phone"
+                app:iconTint="@color/white"
+                app:iconGravity="textStart"
+                app:iconPadding="6dp"
                 app:cornerRadius="12dp" />
 
             <com.google.android.material.button.MaterialButton
@@ -273,8 +280,15 @@
                 android:text="@string/provider_chat"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="11sp"
+                android:textSize="10sp"
+                android:minWidth="0dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
                 android:backgroundTint="#246BCE"
+                app:icon="@drawable/ic_chat_bubble"
+                app:iconTint="@color/white"
+                app:iconGravity="textStart"
+                app:iconPadding="6dp"
                 app:cornerRadius="12dp" />
 
             <com.google.android.material.button.MaterialButton
@@ -287,8 +301,15 @@
                 android:text="@string/provider_whatsapp"
                 android:textAllCaps="false"
                 android:textColor="#102A15"
-                android:textSize="11sp"
+                android:textSize="10sp"
+                android:minWidth="0dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
                 android:backgroundTint="#25D366"
+                app:icon="@drawable/ic_whatsapp"
+                app:iconTint="#102A15"
+                app:iconGravity="textStart"
+                app:iconPadding="6dp"
                 app:cornerRadius="12dp" />
         </LinearLayout>
 

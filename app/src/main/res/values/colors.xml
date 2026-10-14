@@ -3,7 +3,12 @@
     <color name="laundr_blue">#1652E6</color>
     <color name="laundr_blue_dark">#0F3FB8</color>
     <color name="white">#FFFFFF</color>
+    <color name="on_accent">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="cream_surface">#FBF6E9</color>
+    <color name="cream_raised">#F3EBD8</color>
+    <color name="cream_text_primary">#302B22</color>
+    <color name="cream_text_secondary">#5C564A</color>
     <color name="text_primary">#1A1A1A</color>
     <color name="text_secondary">#5F6368</color>
     <color name="text_secondary_accessible">#5F6368</color>

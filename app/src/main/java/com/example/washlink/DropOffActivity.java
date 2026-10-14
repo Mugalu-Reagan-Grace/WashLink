@@ -21,7 +21,7 @@ import com.google.android.material.button.MaterialButton;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class DropOffActivity extends AppCompatActivity {
+public class DropOffActivity extends WashLinkActivity {
 
     private ImageView backButton;
     private FrameLayout bellLayout;
@@ -111,8 +111,8 @@ public class DropOffActivity extends AppCompatActivity {
 
             TextView day = (TextView) chip.getChildAt(0);
             TextView date = (TextView) chip.getChildAt(1);
-            int dayColor = ContextCompat.getColor(this, selected ? R.color.white : R.color.chip_unselected_text);
-            int dateColor = ContextCompat.getColor(this, selected ? R.color.white : R.color.text_primary);
+            int dayColor = ContextCompat.getColor(this, selected ? R.color.on_accent : R.color.chip_unselected_text);
+            int dateColor = ContextCompat.getColor(this, selected ? R.color.on_accent : R.color.text_primary);
             day.setTextColor(dayColor);
             date.setTextColor(dateColor);
         }
@@ -133,7 +133,7 @@ public class DropOffActivity extends AppCompatActivity {
             TextView chip = timeChips[i];
             boolean selected = i == index;
             chip.setBackgroundResource(selected ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
-            int textColor = ContextCompat.getColor(this, selected ? R.color.white : R.color.chip_unselected_text);
+            int textColor = ContextCompat.getColor(this, selected ? R.color.on_accent : R.color.chip_unselected_text);
             chip.setTextColor(textColor);
             chip.setTypeface(null, selected ? Typeface.BOLD : Typeface.NORMAL);
         }

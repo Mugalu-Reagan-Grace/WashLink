@@ -13,6 +13,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  increment,
   limit,
   onSnapshot,
   orderBy,
@@ -64,6 +65,13 @@ const shortDate = (value) => {
       day: "numeric", month: "short", year: "numeric",
     })
     : "—";
+};
+const shortDateTime = (value) => {
+  const millis = timestampMillis(value);
+  return millis > 0 ? new Intl.DateTimeFormat("en-UG", {
+    weekday: "short", day: "numeric", year: "numeric",
+    hour: "numeric", minute: "2-digit",
+  }).format(new Date(millis)) : "Sending…";
 };
 
 function statusLabel(value) {
@@ -167,6 +175,12 @@ function Brand({ light = false }) {
 }
 
 function App() {
+  const [theme, setTheme] = useState(() => {
+    return "light";
+  });
+  const [accent, setAccent] = useState(() => {
+    return "blue";
+  });
   const [session, setSession] = useState(null);
   const [role, setRole] = useState("");
   const [authLoading, setAuthLoading] = useState(firebaseConfigured);
@@ -175,6 +189,16 @@ function App() {
   const [busy, setBusy] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [targetBookingId, setTargetBookingId] = useState("");
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    if (session) window.localStorage.setItem("washlink-saved-theme", theme);
+  }, [theme, session]);
+
+  useEffect(() => {
+    document.documentElement.dataset.accent = accent;
+    if (session) window.localStorage.setItem("washlink-saved-accent", accent);
+  }, [accent, session]);
 
   useEffect(() => {
     if (!auth) return undefined;
@@ -186,6 +210,8 @@ function App() {
       setRole("");
       setAuthLoading(Boolean(user));
       if (!user) {
+        setTheme("light");
+        setAccent("blue");
         setAuthLoading(false);
         return;
       }
@@ -208,6 +234,14 @@ function App() {
           return;
         }
         setRole(accountRole);
+        const savedTheme = window.localStorage.getItem("washlink-saved-theme")
+          || window.localStorage.getItem("washlink-theme");
+        const savedAccent = window.localStorage.getItem("washlink-saved-accent")
+          || window.localStorage.getItem("washlink-accent");
+        if (["dark", "light", "cream"].includes(savedTheme)) setTheme(savedTheme);
+        if (["blue", "violet", "emerald", "amber"].includes(savedAccent)) {
+          setAccent(savedAccent);
+        }
         setPage("overview");
         setAuthLoading(false);
       } catch (error) {
@@ -271,6 +305,25 @@ function App() {
           </button>
           <div className="mobile-brand">WashLink <span>Operations</span></div>
           <div className="topbar-spacer" />
+          <label className="theme-picker">
+            <span className="sr-only">Appearance</span>
+            <select value={theme} onChange={(event) => setTheme(event.target.value)}
+              aria-label="Choose appearance">
+              <option value="light">Light theme</option>
+              <option value="dark">Dark theme</option>
+              <option value="cream">Cream theme</option>
+            </select>
+          </label>
+          <label className="accent-picker">
+            <span className="sr-only">Accent color</span>
+            <select value={accent} onChange={(event) => setAccent(event.target.value)}
+              aria-label="Choose accent color">
+              <option value="blue">Blue</option>
+              <option value="violet">Violet</option>
+              <option value="emerald">Emerald</option>
+              <option value="amber">Amber</option>
+            </select>
+          </label>
           <span className="live-dot">Signed in</span>
           {role === "provider" && <ProviderNotifications uid={session.uid} setNotice={setNotice}
             setPage={setPage} setTargetBookingId={setTargetBookingId} />}
@@ -290,7 +343,7 @@ function App() {
           {page === "reports" && role === "provider" && <ProviderReports uid={session.uid} />}
           {page === "riders" && role === "provider" && <ProviderRiders uid={session.uid} setNotice={setNotice} />}
           {page === "services" && role === "provider" && <ProviderServices uid={session.uid} setNotice={setNotice} setBusy={setBusy} />}
-          {page === "profile" && role === "provider" && <ProviderProfile uid={session.uid} setNotice={setNotice} setBusy={setBusy} />}
+          {page === "profile" && role === "provider" && <ProviderProfile uid={session.uid} setNotice={setNotice} setBusy={setBusy} theme={theme} setTheme={setTheme} />}
           {page === "payouts" && role === "provider" && <ProviderPayouts uid={session.uid} setNotice={setNotice} setBusy={setBusy} />}
           {page === "messages" && role === "provider" && <ProviderMessages uid={session.uid} setNotice={setNotice} setBusy={setBusy} />}
         </div>
@@ -1028,7 +1081,7 @@ function ProviderServices({ uid, setNotice, setBusy }) {
   </>;
 }
 
-function ProviderProfile({ uid, setNotice, setBusy }) {
+function ProviderProfile({ uid, setNotice, setBusy, theme, setTheme }) {
   const provider = useProviderProfile(uid);
   const profile = provider.data || {};
   const [supportsPickupDelivery, setSupportsPickupDelivery] = useState(true);
@@ -1086,6 +1139,15 @@ function ProviderProfile({ uid, setNotice, setBusy }) {
       {provider.loading ? <Loading /> : provider.error ? <ErrorState message={provider.error} /> : <>
         {profile?.isApproved !== true && <div className="notice warn">Your profile is awaiting administrator approval. Order status changes and rider assignments will be available after approval.</div>}
         <div className="profile-summary"><div><span className="detail-label">Profile completeness</span><strong>{[profile.businessName, profile.phone, profile.address, profile.description, profile.operatingHours, services.length > 0].filter(Boolean).length} / 6 details</strong></div><div><span className="detail-label">Service catalog</span><strong>{availableCount} available · {services.length} total</strong></div><div><span className="detail-label">Customer bookings</span><strong>{profile.isOpen === false ? "Paused" : "Accepting bookings"}</strong></div></div>
+        <div className="appearance-setting">
+          <div><strong>Dark mode</strong><span>Use a darker appearance across the operations workspace.</span></div>
+          <label className="switch-control">
+            <input type="checkbox" checked={theme === "dark"}
+              onChange={(event) => setTheme(event.target.checked ? "dark" : "light")}
+              aria-label="Toggle dark mode" />
+            <span aria-hidden="true" />
+          </label>
+        </div>
         <form key={formKey} className="profile-form" onSubmit={save}>
           <label>Business name<input name="businessName" required defaultValue={profile.businessName || ""} /></label>
           <label>Owner name<input name="ownerName" defaultValue={profile.ownerName || ""} /></label>
@@ -1117,7 +1179,7 @@ function ProviderMessages({ uid, setNotice, setBusy }) {
   const [messages, setMessages] = useState({ data: [], loading: false, error: "" });
   useEffect(() => onSnapshot(query(
     collection(db, "chats"),
-    where("participantIds", "array-contains", uid),
+    where("providerId", "==", uid),
     orderBy("lastMessageAt", "desc"),
     limit(200),
   ), (snapshot) => {
@@ -1127,7 +1189,7 @@ function ProviderMessages({ uid, setNotice, setBusy }) {
       ? current : "");
   }, (error) => {
     setChats({ data: [], loading: false, error: error.code === "permission-denied"
-      ? "Firestore denied access to conversations. Confirm the web app targets the same Firebase project as Android and that the latest participant-only chat rules are deployed."
+      ? `Firestore denied access to conversations in washlink-main for provider UID ${uid}. Confirm each chat's providerId matches this exact UID and that the deployed chat rules allow provider reads.`
       : error.message || "Could not load conversations." });
     setSelectedId("");
   }),
@@ -1139,16 +1201,21 @@ function ProviderMessages({ uid, setNotice, setBusy }) {
       return undefined;
     }
     setMessages({ data: [], loading: true, error: "" });
-    return onSnapshot(query(collection(db, "chats", selectedId, "messages"),
-      orderBy("createdAt", "desc"), limit(500)),
+    return onSnapshot(query(collection(db, "chats", selectedId, "messages"), limit(500)),
     (snapshot) => setMessages({
-      data: snapshot.docs.map((entry) => ({ id: entry.id, ...entry.data() })).reverse(),
+      data: snapshot.docs.map((entry) => ({ id: entry.id, ...entry.data() }))
+        .sort((a, b) => timestampMillis(a.createdAt) - timestampMillis(b.createdAt)),
       loading: false,
       error: "",
     }), (error) => setMessages({ data: [], loading: false, error: error.code === "permission-denied"
-      ? "Firestore denied access to this chat's messages. Confirm participantIds includes your provider UID and the latest participant-only chat rules are deployed."
+      ? `Firestore denied access to this conversation's messages for provider UID ${uid}. Confirm the chat's providerId matches this UID and deployed rules allow participants to read messages.`
       : error.message || "Could not load messages." }));
   }, [selectedId, uid]);
+  useEffect(() => {
+    if (!selectedId) return;
+    updateDoc(doc(db, "chats", selectedId), { unreadProvider: 0 })
+      .catch((error) => setNotice(error.message || "Could not mark messages as read."));
+  }, [selectedId, setNotice]);
   const visibleChats = chats.data.filter((chat) => [
     chat.customerName, chat.customerPhone, chat.lastMessage,
   ].some((value) => matchesSearch(value, search)));
@@ -1173,6 +1240,7 @@ function ProviderMessages({ uid, setNotice, setBusy }) {
       lastMessage: text,
       lastMessageAt: serverTimestamp(),
       lastSenderId: uid,
+      unreadCustomer: increment(1),
     });
     setBusy(true);
     try {
@@ -1194,12 +1262,17 @@ function ProviderMessages({ uid, setNotice, setBusy }) {
             onClick={() => setSelectedId(chat.id)}>
             <strong>{chat.customerName || "Customer"}</strong>
             <span>{chat.lastMessage || "Conversation started"}</span>
+            <small>{shortDateTime(chat.lastMessageAt)}</small>
+            {Number(chat.unreadProvider || 0) > 0
+              && <b className="unread-count">{Number(chat.unreadProvider) > 99 ? "99+" : chat.unreadProvider}</b>}
           </button>)}</div>
           <div className="message-thread">
             {!selected ? <Empty text="Choose a conversation to view messages." /> : <>
               <div className="thread-heading"><strong>{selected.customerName || "Customer"}</strong><span>{selected.customerPhone || ""}</span></div>
               <div className="thread-messages">{messages.loading ? <Loading /> : messages.error ? <ErrorState message={messages.error} /> : messages.data.map((message) =>
-                <div key={message.id} className={message.senderId === uid ? "message-bubble mine" : "message-bubble"}>{message.text}</div>)}</div>
+                <div key={message.id} className={message.senderId === uid ? "message-bubble mine" : "message-bubble"}>
+                  <span>{message.text}</span><small>{shortDateTime(message.createdAt)}</small>
+                </div>)}</div>
               <form className="message-form" onSubmit={send}><input name="message" required maxLength="2000" placeholder="Write a reply…" /><button className="primary">Send</button></form>
             </>}
           </div>

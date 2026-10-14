@@ -19,7 +19,7 @@ import com.example.washlink.models.UserAccount;
 import java.util.Calendar;
 import java.util.List;
 
-public class ProviderReportsActivity extends AppCompatActivity {
+public class ProviderReportsActivity extends WashLinkActivity {
     private ListenerRegistration registration;
     private List<Booking> bookings;
     private int rangeDays = 30;
@@ -83,7 +83,7 @@ public class ProviderReportsActivity extends AppCompatActivity {
             filter.setBackgroundResource(selected
                     ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
             filter.setTextColor(ContextCompat.getColor(this,
-                    selected ? R.color.white : R.color.chip_unselected_text));
+                    selected ? R.color.on_accent : R.color.chip_unselected_text));
             filter.setSelected(selected);
         }
     }

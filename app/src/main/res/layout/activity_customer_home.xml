@@ -72,7 +72,7 @@
                 android:focusable="true"
                 android:padding="8dp"
                 app:layout_constraintBottom_toBottomOf="@id/iv_avatar"
-                app:layout_constraintEnd_toStartOf="@id/iv_bell"
+                app:layout_constraintEnd_toStartOf="@id/iv_calendar"
                 app:layout_constraintTop_toTopOf="@id/iv_avatar">
 
                 <ImageView
@@ -80,6 +80,27 @@
                     android:layout_height="match_parent"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_chat_bubble"
+                    app:tint="@color/laundr_blue" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/iv_calendar"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_offer_card"
+                android:clickable="true"
+                android:contentDescription="Calendar"
+                android:focusable="true"
+                android:padding="8dp"
+                app:layout_constraintBottom_toBottomOf="@id/iv_avatar"
+                app:layout_constraintEnd_toStartOf="@id/iv_bell"
+                app:layout_constraintTop_toTopOf="@id/iv_avatar">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_calendar"
                     app:tint="@color/laundr_blue" />
             </FrameLayout>
 

@@ -118,7 +118,7 @@ public class HistoryFragment extends CustomerTabFragment {
         if (!(view instanceof MaterialButton)) return;
         MaterialButton button = (MaterialButton) view;
         int fill = selected ? R.color.laundr_blue : R.color.white;
-        int text = selected ? R.color.white : R.color.chip_unselected_text;
+        int text = selected ? R.color.on_accent : R.color.chip_unselected_text;
         button.setBackgroundTintList(ColorStateList.valueOf(
                 ContextCompat.getColor(requireContext(), fill)));
         button.setTextColor(ContextCompat.getColor(requireContext(), text));

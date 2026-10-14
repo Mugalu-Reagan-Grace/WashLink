@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class FavoriteProvidersActivity extends AppCompatActivity {
+public class FavoriteProvidersActivity extends WashLinkActivity {
     private final List<FavoriteProvider> providers = new ArrayList<>();
     private RecyclerView recyclerView;
     private TextView stateView;

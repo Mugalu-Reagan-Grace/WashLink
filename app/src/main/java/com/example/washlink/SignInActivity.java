@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.washlink.data.AuthRepository;
 import com.example.washlink.models.UserAccount;
+import com.example.washlink.ui.ThemeManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -28,7 +29,7 @@ import com.example.washlink.ui.customer.MainActivity;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
-public class SignInActivity extends AppCompatActivity {
+public class SignInActivity extends WashLinkActivity {
 
     private static final String TAG = "SignInActivity";
     private static final int RC_SIGN_IN = 9001;
@@ -97,6 +98,8 @@ public class SignInActivity extends AppCompatActivity {
                                     Toast.LENGTH_LONG).show();
                             return;
                         }
+                        ThemeManager.setActiveRole(SignInActivity.this,
+                                ThemeManager.ROLE_CUSTOMER);
                         Log.d(TAG, "signInWithEmail:success");
                         updateUI(account);
                     }
@@ -143,6 +146,8 @@ public class SignInActivity extends AppCompatActivity {
                                         new AuthRepository.AuthCallback() {
                                             @Override
                                             public void onSuccess(UserAccount account) {
+                                                ThemeManager.setActiveRole(SignInActivity.this,
+                                                        ThemeManager.ROLE_CUSTOMER);
                                                 updateUI(account);
                                             }
 

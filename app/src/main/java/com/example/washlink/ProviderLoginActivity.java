@@ -9,12 +9,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.washlink.data.AuthRepository;
 import com.example.washlink.models.UserAccount;
+import com.example.washlink.ui.ThemeManager;
 import com.example.washlink.ui.customer.MainActivity;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class ProviderLoginActivity extends AppCompatActivity {
+public class ProviderLoginActivity extends WashLinkActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +50,9 @@ public class ProviderLoginActivity extends AppCompatActivity {
                 if (user == null) {
                     return;
                 }
+                ThemeManager.setActiveRole(ProviderLoginActivity.this,
+                        UserAccount.ROLE_PROVIDER.equals(user.getRole())
+                                ? ThemeManager.ROLE_PROVIDER : ThemeManager.ROLE_CUSTOMER);
                 Class<?> destination = UserAccount.ROLE_PROVIDER.equals(user.getRole())
                         ? ProviderDashboardActivity.class
                         : UserAccount.ROLE_ADMIN.equals(user.getRole())
@@ -80,6 +84,8 @@ public class ProviderLoginActivity extends AppCompatActivity {
                 new AuthRepository.AuthCallback() {
                     @Override
                     public void onSuccess(UserAccount user) {
+                        ThemeManager.setActiveRole(ProviderLoginActivity.this,
+                                ThemeManager.ROLE_PROVIDER);
                         Toast.makeText(ProviderLoginActivity.this, "Welcome back", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(ProviderLoginActivity.this, ProviderDashboardActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

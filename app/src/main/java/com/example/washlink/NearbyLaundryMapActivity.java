@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class NearbyLaundryMapActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class NearbyLaundryMapActivity extends WashLinkActivity implements OnMapReadyCallback {
     private static final int LOCATION_REQUEST = 410;
     private GoogleMap map;
     private FusedLocationProviderClient locationClient;

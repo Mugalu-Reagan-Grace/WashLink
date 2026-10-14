@@ -26,7 +26,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UpdateOrderStatusActivity extends AppCompatActivity {
+public class UpdateOrderStatusActivity extends WashLinkActivity {
 
     private ListenerRegistration bookingListener;
     private String bookingId;

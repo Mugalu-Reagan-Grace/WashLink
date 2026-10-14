@@ -22,7 +22,7 @@ import com.google.firebase.firestore.ListenerRegistration;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ProviderRidersActivity extends AppCompatActivity {
+public class ProviderRidersActivity extends WashLinkActivity {
     private FirebaseFirestore firestore;
     private String providerId;
     private LinearLayout rows;

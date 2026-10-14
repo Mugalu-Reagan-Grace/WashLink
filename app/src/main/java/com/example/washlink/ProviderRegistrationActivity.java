@@ -17,6 +17,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.washlink.data.AuthRepository;
+import com.example.washlink.ui.PasswordStrengthIndicator;
 import com.example.washlink.models.UserAccount;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -28,7 +29,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-public class ProviderRegistrationActivity extends AppCompatActivity {
+public class ProviderRegistrationActivity extends WashLinkActivity {
     private static final int LOCATION_REQUEST = 520;
     private FusedLocationProviderClient locationClient;
     private double businessLatitude;
@@ -38,6 +39,11 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_provider_registration);
         locationClient = LocationServices.getFusedLocationProviderClient(this);
+        TextInputEditText passwordInput = (TextInputEditText)
+                ((TextInputLayout) findViewById(R.id.til_password)).getEditText();
+        PasswordStrengthIndicator.bind(passwordInput,
+                findViewById(R.id.password_strength_feedback),
+                findViewById(R.id.password_strength_meter));
 
         redirectIfAlreadySignedIn();
 
@@ -93,7 +99,7 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
         String email = getTextFromInputLayout(R.id.til_business_email);
         String phone = getTextFromInputLayout(R.id.til_phone);
         String address = getTextFromInputLayout(R.id.til_address);
-        String password = getTextFromInputLayout(R.id.til_password);
+        String password = getRawTextFromInputLayout(R.id.til_password);
 
         if (businessName.isEmpty() || ownerName.isEmpty() || email.isEmpty() || phone.isEmpty() || address.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please fill in all business details", Toast.LENGTH_SHORT).show();
@@ -182,10 +188,14 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
     }
 
     private String getTextFromInputLayout(int layoutId) {
+        return getRawTextFromInputLayout(layoutId).trim();
+    }
+
+    private String getRawTextFromInputLayout(int layoutId) {
         TextInputLayout layout = findViewById(layoutId);
         if (layout == null) return "";
         TextInputEditText input = (TextInputEditText) layout.getEditText();
         if (input == null) return "";
-        return input.getText() == null ? "" : input.getText().toString().trim();
+        return input.getText() == null ? "" : input.getText().toString();
     }
 }

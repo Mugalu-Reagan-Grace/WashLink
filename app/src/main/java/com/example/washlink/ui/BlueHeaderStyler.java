@@ -12,9 +12,9 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 import java.util.WeakHashMap;
+import com.example.washlink.ui.ThemeManager;
 
 public final class BlueHeaderStyler {
-    private static final int BLUE = Color.rgb(22, 82, 230);
     private static final int DARK_BLUE = Color.rgb(15, 63, 184);
     private static final int LIGHT_HEADER_TEXT = 0xFFDCE6FF;
     private static final WeakHashMap<Activity, StylingState> STATES = new WeakHashMap<>();
@@ -25,9 +25,12 @@ public final class BlueHeaderStyler {
         ViewGroup content = activity.findViewById(android.R.id.content);
         if (content == null || content.getChildCount() == 0) return;
 
-        activity.getWindow().setStatusBarColor(DARK_BLUE);
+        boolean night = (activity.getResources().getConfiguration().uiMode
+                & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+                == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        activity.getWindow().setStatusBarColor(activity.getColor(com.example.washlink.R.color.white));
         new WindowInsetsControllerCompat(activity.getWindow(), activity.getWindow().getDecorView())
-                .setAppearanceLightStatusBars(false);
+                .setAppearanceLightStatusBars(!night);
 
         StylingState state = STATES.get(activity);
         if (state == null || state.content != content) {
@@ -43,6 +46,7 @@ public final class BlueHeaderStyler {
     private static void styleCurrentViews(Activity activity, StylingState state) {
         if (activity.isFinishing() || state.content.getChildCount() == 0) return;
         View screen = state.content.getChildAt(0);
+        ThemeManager.apply(screen, activity);
         View headerTitle = findHeaderTitle(activity, screen);
         View bottomNav = findView(activity, screen,
                 "bottom_nav_bar", "provider_chat_nav", "provider_chat_thread_nav");
@@ -82,30 +86,24 @@ public final class BlueHeaderStyler {
         View avatar = findView(activity, screen, "iv_avatar");
         if (avatar == null || scroll == null
                 || !(scroll.getParent() instanceof ConstraintLayout)) return;
+        activity.getWindow().setStatusBarColor(activity.getColor(
+                com.example.washlink.R.color.white));
+        new WindowInsetsControllerCompat(activity.getWindow(), activity.getWindow().getDecorView())
+                .setAppearanceLightStatusBars(true);
         ConstraintLayout homeRoot = (ConstraintLayout) scroll.getParent();
-        addHomeBlueBar(activity, homeRoot);
-        styleHeaderText((TextView) name, Color.WHITE);
+        styleHeaderText((TextView) name,
+                activity.getColor(com.example.washlink.R.color.text_primary));
         View address = findView(activity, screen, "tv_user_address");
-        if (address instanceof TextView) styleHeaderText((TextView) address, LIGHT_HEADER_TEXT);
-        styleHeaderIcon(findView(activity, screen, "iv_chat_inbox"));
-        styleHeaderIcon(findView(activity, screen, "iv_bell"));
-        View chat = findView(activity, screen, "iv_chat_inbox");
-        if (chat != null) chat.setBackgroundColor(Color.TRANSPARENT);
-        View bell = findView(activity, screen, "iv_bell");
-        if (bell != null) bell.setBackgroundColor(Color.TRANSPARENT);
+        if (address instanceof TextView) styleHeaderText((TextView) address,
+                activity.getColor(com.example.washlink.R.color.text_secondary));
+        styleHeaderIcon(findView(activity, screen, "iv_chat_inbox"),
+                ThemeManager.accent(activity));
+        styleHeaderIcon(findView(activity, screen, "iv_bell"),
+                ThemeManager.accent(activity));
     }
 
     private static void addHomeBlueBar(Activity activity, ConstraintLayout screen) {
-        if (screen.findViewWithTag("washlink_home_header_bar") != null) return;
-        View backdrop = new View(activity);
-        backdrop.setTag("washlink_home_header_bar");
-        backdrop.setBackgroundColor(BLUE);
-        ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(activity, 70));
-        params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
-        params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
-        params.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
-        screen.addView(backdrop, 0, params);
+        // The home identity row scrolls with the content; do not add a fixed blue backdrop.
     }
 
     private static void styleScreenHeader(Activity activity, View screen, View title) {
@@ -113,6 +111,7 @@ public final class BlueHeaderStyler {
         if (toolbar == null) return;
 
         if (toolbar instanceof ConstraintLayout) {
+            toolbar.setBackgroundColor(activity.getColor(com.example.washlink.R.color.white));
             View anchor = findView(activity, toolbar, "btn_back", "btn_provider_menu",
                     "btn_chat_back", "btn_chat_inbox_back", "btn_rider_back");
             if (anchor == null) anchor = title;
@@ -127,7 +126,7 @@ public final class BlueHeaderStyler {
             addBlueBackdrop(activity, (ConstraintLayout) toolbar.getParent(), anchor,
                     "washlink_screen_header_bar");
             toolbar.setBackgroundColor(Color.TRANSPARENT);
-            styleHeaderTree(toolbar);
+            styleHeaderTree(toolbar, activity);
         } else if (toolbar.getParent() instanceof LinearLayout) {
             ViewGroup.MarginLayoutParams params =
                     (ViewGroup.MarginLayoutParams) toolbar.getLayoutParams();
@@ -137,11 +136,11 @@ public final class BlueHeaderStyler {
             toolbar.setLayoutParams(params);
             toolbar.setPadding(toolbar.getPaddingLeft() + left, toolbar.getPaddingTop(),
                     toolbar.getPaddingRight() + right, toolbar.getPaddingBottom());
-            toolbar.setBackgroundColor(BLUE);
-            styleHeaderTree(toolbar);
+            toolbar.setBackgroundColor(activity.getColor(com.example.washlink.R.color.white));
+            styleHeaderTree(toolbar, activity);
         } else {
-            toolbar.setBackgroundColor(BLUE);
-            styleHeaderTree(toolbar);
+            toolbar.setBackgroundColor(activity.getColor(com.example.washlink.R.color.white));
+            styleHeaderTree(toolbar, activity);
         }
     }
 
@@ -167,7 +166,7 @@ public final class BlueHeaderStyler {
         if (parent.findViewWithTag(tag) != null || bottomAnchor.getId() == View.NO_ID) return;
         View backdrop = new View(activity);
         backdrop.setTag(tag);
-        backdrop.setBackgroundColor(BLUE);
+        backdrop.setBackgroundColor(activity.getColor(com.example.washlink.R.color.white));
         ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(0, 0);
         params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
         params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
@@ -187,56 +186,73 @@ public final class BlueHeaderStyler {
                     && ((String) child.getTag()).startsWith("washlink_")) continue;
             String name = resourceName(activity, child);
             if (child == title || isTitle(name)) {
-                if (child instanceof TextView) styleHeaderText((TextView) child, Color.WHITE);
+                if (child instanceof TextView) styleHeaderText((TextView) child,
+                        activity.getColor(com.example.washlink.R.color.text_primary));
             } else if (isHeaderIconName(name)) {
-                styleHeaderIcon(child);
+                styleHeaderIcon(child, ThemeManager.accent(activity));
             }
         }
-        if (anchor instanceof ImageView) ((ImageView) anchor).setColorFilter(Color.WHITE);
+        if (anchor instanceof ImageView) {
+            ((ImageView) anchor).setColorFilter(
+                    ThemeManager.accent(activity));
+        }
     }
 
-    private static void styleHeaderTree(View view) {
+    private static void styleHeaderTree(View view, Activity activity) {
         if (view instanceof TextView) {
-            styleHeaderText((TextView) view, Color.WHITE);
+            styleHeaderText((TextView) view,
+                    activity.getColor(com.example.washlink.R.color.text_primary));
         } else if (view instanceof ImageView) {
-            ((ImageView) view).setColorFilter(Color.WHITE);
+            ((ImageView) view).setColorFilter(
+                    ThemeManager.accent(activity));
         }
         if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
             for (int i = 0; i < group.getChildCount(); i++) {
-                styleHeaderTree(group.getChildAt(i));
+                styleHeaderTree(group.getChildAt(i), activity);
             }
         }
     }
 
-    private static void styleHeaderIcon(View view) {
+    private static void styleHeaderIcon(View view, int color) {
         if (view instanceof ImageView) {
-            ((ImageView) view).setColorFilter(Color.WHITE);
+            ((ImageView) view).setColorFilter(color);
         } else if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
             for (int i = 0; i < group.getChildCount(); i++) {
-                styleHeaderIcon(group.getChildAt(i));
+                styleHeaderIcon(group.getChildAt(i), color);
             }
         }
     }
 
     private static void styleBottomNavigation(View navigation) {
-        navigation.setBackgroundColor(BLUE);
-        styleNavigationTree(navigation);
+        // Keep navigation neutral; the layout owns active/inactive accent states.
+        navigation.setBackgroundColor(navigation.getContext().getColor(
+                com.example.washlink.R.color.white));
+        styleAccentText(navigation);
     }
 
-    private static void styleNavigationTree(View view) {
-        if (view instanceof ImageView) {
-            ((ImageView) view).setColorFilter(Color.WHITE);
-        } else if (view instanceof TextView) {
-            ((TextView) view).setTextColor(Color.WHITE);
+    private static void styleAccentText(View view) {
+        if (view instanceof TextView) {
+            TextView text = (TextView) view;
+            if (isAccentColor(text.getCurrentTextColor(), view.getContext())) {
+                text.setTextColor(ThemeManager.accent(view.getContext()));
+            }
         }
         if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
             for (int i = 0; i < group.getChildCount(); i++) {
-                styleNavigationTree(group.getChildAt(i));
+                styleAccentText(group.getChildAt(i));
             }
         }
+    }
+
+    private static boolean isAccentColor(int color, android.content.Context context) {
+        return color == context.getColor(com.example.washlink.R.color.laundr_blue)
+                || color == Color.rgb(22, 82, 230)
+                || color == Color.rgb(124, 58, 237)
+                || color == Color.rgb(5, 150, 105)
+                || color == Color.rgb(217, 119, 6);
     }
 
     private static void styleHeaderText(TextView view, int color) {

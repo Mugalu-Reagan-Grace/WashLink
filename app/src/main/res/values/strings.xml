@@ -47,6 +47,18 @@
     <string name="email_address">Email Address</string>
     <string name="enter_text">Enter text</string>
     <string name="password">Password</string>
+    <string name="password_strength_start">Password strength will appear as you type.</string>
+    <string name="password_strength_format">Password strength: %1$s.</string>
+    <string name="password_strength_suggestions">Add: %1$s.</string>
+    <string name="password_strength_weak">Weak</string>
+    <string name="password_strength_fair">Fair</string>
+    <string name="password_strength_good">Good</string>
+    <string name="password_strength_strong">Strong</string>
+    <string name="password_rule_length">8 or more characters</string>
+    <string name="password_rule_lowercase">a lowercase letter</string>
+    <string name="password_rule_uppercase">an uppercase letter</string>
+    <string name="password_rule_number">a number</string>
+    <string name="password_rule_symbol">a symbol</string>
     <string name="email_hint">you@example.com</string>
     <string name="business_email_hint">business@example.com</string>
     <string name="remember_me">Remember me</string>
@@ -366,7 +378,7 @@
     <string name="profile_terms_desc">Rules for using WashLink</string>
     <string name="profile_about">About WashLink</string>
     <string name="profile_about_desc">Version 1.0.0</string>
-    <string name="profile_support_email">washlink.support@gmail.com</string>
+    <string name="profile_support_email">washlinkapp.support@gmail.com</string>
     <string name="logout">Logout</string>
 
     <!-- Order History -->

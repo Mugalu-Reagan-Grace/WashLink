@@ -18,6 +18,7 @@ import com.example.washlink.data.PushTokenManager;
 import com.example.washlink.models.Booking;
 import com.example.washlink.models.OrderStatus;
 import com.example.washlink.models.UserAccount;
+import com.example.washlink.ui.ThemeManager;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Calendar;
@@ -25,7 +26,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class ProviderDashboardActivity extends AppCompatActivity {
+public class ProviderDashboardActivity extends WashLinkActivity {
     private ListenerRegistration bookingsRegistration;
     private com.google.firebase.firestore.ListenerRegistration profileRegistration;
     private String providerId;
@@ -33,6 +34,7 @@ public class ProviderDashboardActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeManager.setActiveRole(this, ThemeManager.ROLE_PROVIDER);
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_provider_dashboard);

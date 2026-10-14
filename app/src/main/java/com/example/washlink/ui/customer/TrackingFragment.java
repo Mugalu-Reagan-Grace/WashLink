@@ -39,6 +39,7 @@ public class TrackingFragment extends CustomerTabFragment {
         TextView orderId = view.findViewById(R.id.tv_order_id);
         TextView status = view.findViewById(R.id.tv_order_status);
         View timeline = view.findViewById(R.id.timeline);
+        if (timeline != null) timeline.setVisibility(View.GONE);
         View call = view.findViewById(R.id.btn_call_provider);
         View cancel = view.findViewById(R.id.btn_cancel_booking);
         if (cancel != null) cancel.setVisibility(View.GONE);

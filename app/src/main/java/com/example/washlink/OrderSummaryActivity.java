@@ -13,7 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.example.washlink.data.BookingPricing;
 
-public class OrderSummaryActivity extends AppCompatActivity {
+public class OrderSummaryActivity extends WashLinkActivity {
+    private boolean dropOff;
 
     private ImageView backButton;
     private FrameLayout bellLayout;
@@ -27,7 +28,9 @@ public class OrderSummaryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_customer_order_summary);
+        dropOff = getIntent().getBooleanExtra("drop_off", false);
+        setContentView(dropOff ? R.layout.activity_customer_order_summary_dropoff
+                : R.layout.activity_customer_order_summary);
         com.example.washlink.data.AuthGuard.requireRole(this,
                 com.example.washlink.models.UserAccount.ROLE_CUSTOMER, SignInActivity.class);
 
@@ -42,7 +45,9 @@ public class OrderSummaryActivity extends AppCompatActivity {
         itemsValueText = findViewById(R.id.tv_items_value_inline);
 
         String serviceName = getIntent() != null ? getIntent().getStringExtra("selected_service") : null;
-        String address = getIntent() != null ? getIntent().getStringExtra("selected_address") : null;
+        String address = getIntent() != null ? (dropOff
+                ? getIntent().getStringExtra("provider_address")
+                : getIntent().getStringExtra("selected_address")) : null;
         String date = getIntent() != null ? getIntent().getStringExtra("selected_date") : null;
         String time = getIntent() != null ? getIntent().getStringExtra("selected_time") : null;
         String contact = getIntent() != null ? getIntent().getStringExtra("selected_contact") : null;
@@ -77,18 +82,17 @@ public class OrderSummaryActivity extends AppCompatActivity {
         String laundryService = getIntent().getStringExtra("selected_laundry_service");
         serviceTypeValueText.setText(laundryService == null ? selectedService : laundryService);
         dateTimeValueText.setText(selectedDate + " • " + selectedTime + " • " + selectedContact);
-        addressValueText.setText(selectedAddress);
+        if (addressValueText != null) addressValueText.setText(selectedAddress);
         itemsValueText.setText(String.valueOf(selectedItemCount));
-        ((TextView) findViewById(R.id.tv_summary_laundry_amount))
-                .setText(BookingPricing.format(quote.laundry));
-        ((TextView) findViewById(R.id.tv_summary_pickup_fee))
-                .setText(BookingPricing.format(quote.pickup + quote.delivery));
-        ((TextView) findViewById(R.id.tv_summary_subtotal_amount))
-                .setText(BookingPricing.format(quote.laundry + quote.pickup + quote.delivery));
-        ((TextView) findViewById(R.id.tv_summary_service_fee))
-                .setText(BookingPricing.format(quote.serviceFee));
-        ((TextView) findViewById(R.id.tv_summary_total_value))
-                .setText(BookingPricing.format(quote.total));
+        setText(R.id.tv_summary_laundry_amount, quote.laundry);
+        setText(R.id.tv_summary_pickup_fee, quote.pickup + quote.delivery);
+        setText(R.id.tv_summary_subtotal_amount, quote.laundry + quote.pickup + quote.delivery);
+        setText(R.id.tv_summary_service_fee, quote.serviceFee);
+        setText(R.id.tv_summary_total_value, quote.total);
+        setText(R.id.tv_base_service_value, quote.laundry);
+        setText(R.id.tv_subtotal_value, quote.laundry);
+        setText(R.id.tv_tax_value, quote.serviceFee);
+        setText(R.id.tv_total_value, quote.total);
 
         backButton.setOnClickListener(v -> finish());
         changeServiceButton.setOnClickListener(v -> returnToProviderServices());
@@ -102,7 +106,8 @@ public class OrderSummaryActivity extends AppCompatActivity {
             Intent intent = new Intent(OrderSummaryActivity.this, PaymentActivity.class);
             intent.putExtras(getIntent());
             intent.putExtra("selected_service", selectedService);
-            intent.putExtra("selected_address", selectedAddress);
+            intent.putExtra(dropOff ? "provider_address" : "selected_address", selectedAddress);
+            intent.putExtra("drop_off", dropOff);
             intent.putExtra("selected_date", selectedDate);
             intent.putExtra("selected_time", selectedTime);
             intent.putExtra("selected_contact", selectedContact);
@@ -111,6 +116,11 @@ public class OrderSummaryActivity extends AppCompatActivity {
             intent.putExtra("quote_total", quote.total);
             startActivity(intent);
         });
+    }
+
+    private void setText(int id, int amount) {
+        TextView view = findViewById(id);
+        if (view != null) view.setText(BookingPricing.format(amount));
     }
 
     private void returnToProviderServices() {

@@ -28,6 +28,17 @@
 
     <style name="Theme.WashLink" parent="Base.Theme.WashLink" />
 
+    <style name="Theme.WashLink.Cream" parent="Theme.WashLink">
+        <item name="android:colorBackground">@color/cream_surface</item>
+        <item name="colorSurface">@color/cream_surface</item>
+        <item name="colorOnSurface">@color/cream_text_primary</item>
+        <item name="android:textColorPrimary">@color/cream_text_primary</item>
+        <item name="android:textColorSecondary">@color/cream_text_secondary</item>
+        <item name="android:statusBarColor">@color/cream_raised</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="colorControlHighlight">#332C4B67</item>
+    </style>
+
     <style name="Widget.WashLink.TextView" parent="@android:style/Widget.TextView">
         <item name="android:fontFamily">@font/poppins_medium</item>
         <item name="fontFamily">@font/poppins_medium</item>
@@ -68,5 +79,29 @@
 
     <!-- Backward-compatible alias if older code references the lowercase version -->
     <style name="Theme.Washlink" parent="Theme.WashLink" />
+
+    <style name="Theme.WashLink_CalendarBlue" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/laundr_blue</item>
+        <item name="colorSecondary">@color/laundr_blue</item>
+        <item name="android:colorAccent">@color/laundr_blue</item>
+    </style>
+
+    <style name="Theme.WashLink_CalendarAmber" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#D97706</item>
+        <item name="colorSecondary">#D97706</item>
+        <item name="android:colorAccent">#D97706</item>
+    </style>
+
+    <style name="Theme.WashLink_CalendarEmerald" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#059669</item>
+        <item name="colorSecondary">#059669</item>
+        <item name="android:colorAccent">#059669</item>
+    </style>
+
+    <style name="Theme.WashLink_CalendarViolet" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#7C3AED</item>
+        <item name="colorSecondary">#7C3AED</item>
+        <item name="android:colorAccent">#7C3AED</item>
+    </style>
 
 </resources>

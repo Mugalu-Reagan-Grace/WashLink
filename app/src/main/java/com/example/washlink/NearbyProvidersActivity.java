@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.content.res.ColorStateList;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +21,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.button.MaterialButton;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -32,7 +34,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class NearbyProvidersActivity extends AppCompatActivity {
+public class NearbyProvidersActivity extends WashLinkActivity {
     private static final int LOCATION_REQUEST = 411;
     private final List<Provider> allProviders = new ArrayList<>();
     private ProviderAdapter adapter;
@@ -68,6 +70,10 @@ public class NearbyProvidersActivity extends AppCompatActivity {
             mapIntent.putExtra("selected_service", selectedService);
             startActivity(mapIntent);
         });
+        MaterialButton mapButton = findViewById(R.id.btn_open_map);
+        mapButton.setBackgroundTintList(ColorStateList.valueOf(
+                com.example.washlink.ui.ThemeManager.accent(this,
+                        com.example.washlink.ui.ThemeManager.ROLE_CUSTOMER)));
 
         View backButton = findViewById(R.id.btn_back);
         if (backButton != null) {
@@ -88,6 +94,12 @@ public class NearbyProvidersActivity extends AppCompatActivity {
         TextView lowestPriceFilter = findViewById(R.id.chip_filter_lowest_price);
 
         View[] filters = new View[]{allFilter, nearestFilter, topRatedFilter, lowestPriceFilter};
+        int customerAccent = com.example.washlink.ui.ThemeManager.accent(this,
+                com.example.washlink.ui.ThemeManager.ROLE_CUSTOMER);
+        if (allFilter != null) {
+            allFilter.setBackgroundTintList(ColorStateList.valueOf(customerAccent));
+            allFilter.setTextColor(ContextCompat.getColor(this, R.color.on_accent));
+        }
         String[] filterValues = {"all", "nearest", "top", "price"};
         for (int i = 0; i < filters.length; i++) {
             View item = filters[i];
@@ -98,14 +110,19 @@ public class NearbyProvidersActivity extends AppCompatActivity {
                     for (View chip : filters) {
                         if (chip != null) {
                             chip.setBackgroundResource(R.drawable.bg_chip_unselected);
+                            chip.setBackgroundTintList(ColorStateList.valueOf(
+                                    ContextCompat.getColor(this, R.color.chip_unselected_bg)));
                             if (chip instanceof TextView) {
                                 ((TextView) chip).setTextColor(ContextCompat.getColor(this, R.color.chip_unselected_text));
                             }
                         }
                     }
                     v.setBackgroundResource(R.drawable.bg_chip_selected);
+                    v.setBackgroundTintList(ColorStateList.valueOf(
+                            com.example.washlink.ui.ThemeManager.accent(this,
+                                    com.example.washlink.ui.ThemeManager.ROLE_CUSTOMER)));
                     if (v instanceof TextView) {
-                        ((TextView) v).setTextColor(ContextCompat.getColor(this, R.color.white));
+                        ((TextView) v).setTextColor(ContextCompat.getColor(this, R.color.on_accent));
                     }
                     applyFilter();
                     if ("nearest".equals(value)) requestNearestLocation();

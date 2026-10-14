@@ -10,7 +10,7 @@ import com.example.washlink.ui.customer.MainActivity;
 import com.google.android.material.button.MaterialButton;
 import android.widget.TextView;
 
-public class SuccessActivity extends AppCompatActivity {
+public class SuccessActivity extends WashLinkActivity {
 
     public static final String EXTRA_USER_NAME = "extra_user_name";
     private MaterialButton bookWashButton;
