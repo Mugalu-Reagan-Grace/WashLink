@@ -126,6 +126,10 @@ public class ProviderNavBarHelper {
 
         addDrawerItem(activity, dialog, panel, "Overview", ProviderDashboardActivity.class);
         addDrawerItem(activity, dialog, panel, "Orders", BookingRequestsActivity.class);
+        addDrawerItem(activity, dialog, panel, "Customers", ProviderCustomersActivity.class);
+        addDrawerItem(activity, dialog, panel, "Inventory", ProviderInventoryActivity.class);
+        addDrawerItem(activity, dialog, panel, "In-person POS & invoices", ProviderPosActivity.class);
+        addDrawerItem(activity, dialog, panel, "Staff roster", ProviderStaffActivity.class);
         addDrawerItem(activity, dialog, panel, "Services", ManageServicesActivity.class);
         addDrawerItem(activity, dialog, panel, "Reports", ProviderReportsActivity.class);
         addDrawerItem(activity, dialog, panel, "Riders", ProviderRidersActivity.class);

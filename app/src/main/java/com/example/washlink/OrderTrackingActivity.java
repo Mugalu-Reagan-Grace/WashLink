@@ -19,6 +19,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class OrderTrackingActivity extends WashLinkActivity {
     private ListenerRegistration registration;
     private String providerPhone;
+    private View trackingContent;
+    private View trackingStatePanel;
+    private View trackingProgress;
+    private TextView trackingState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +39,10 @@ public class OrderTrackingActivity extends WashLinkActivity {
 
         TextView orderId = findViewById(R.id.tv_order_id);
         TextView status = findViewById(R.id.tv_order_status);
+        trackingContent = findViewById(R.id.tracking_content);
+        trackingStatePanel = findViewById(R.id.tracking_state_panel);
+        trackingProgress = findViewById(R.id.tracking_state_progress);
+        trackingState = findViewById(R.id.tv_tracking_state);
         MaterialButton call = findViewById(R.id.btn_call_provider);
         View cancel = findViewById(R.id.btn_cancel_booking);
         if (cancel != null) cancel.setVisibility(android.view.View.GONE);
@@ -42,7 +50,7 @@ public class OrderTrackingActivity extends WashLinkActivity {
             call.setEnabled(false);
             call.setOnClickListener(v -> {
                 if (providerPhone == null || providerPhone.trim().isEmpty()) {
-                    android.widget.Toast.makeText(this, "Provider contact is unavailable.",
+                    android.widget.Toast.makeText(this, R.string.tracking_contact_unavailable,
                             android.widget.Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -54,8 +62,9 @@ public class OrderTrackingActivity extends WashLinkActivity {
         String bookingId = getIntent().getStringExtra("booking_id");
 
         if (bookingId == null || bookingId.isEmpty()) {
-            if (orderId != null) orderId.setText("No order selected");
-            if (status != null) status.setText("No active booking");
+            showTrackingState(R.string.tracking_no_order_selected, false);
+            if (orderId != null) orderId.setText(R.string.tracking_no_order_selected);
+            if (status != null) status.setText(R.string.tracking_status_empty);
             if (call != null) call.setVisibility(android.view.View.GONE);
             return;
         }
@@ -67,8 +76,9 @@ public class OrderTrackingActivity extends WashLinkActivity {
                              MaterialButton call, View cancel) {
         if (registration != null) registration.remove();
         providerPhone = null;
+        showTrackingState(R.string.tracking_loading, false);
         if (status != null) {
-            status.setText("Loading order updates...");
+            status.setText(R.string.tracking_loading);
             status.setOnClickListener(null);
         }
         if (call != null) {
@@ -82,9 +92,12 @@ public class OrderTrackingActivity extends WashLinkActivity {
                     public void onBookingLoaded(Booking booking) {
                         if (isFinishing() || isDestroyed()) return;
                         if (booking == null) {
-                            if (status != null) status.setText("Unavailable");
+                            if (status != null) status.setText(R.string.tracking_status_error);
+                            showTrackingState(R.string.tracking_order_unavailable, true,
+                                    () -> loadBooking(bookingId, orderId, status, call, cancel));
                             return;
                         }
+                        showTrackingContent();
                         OrderTrackingRenderer.render(OrderTrackingActivity.this,
                                 findViewById(android.R.id.content), booking);
                         if (cancel != null) BookingCancellationHelper.bind(
@@ -95,19 +108,47 @@ public class OrderTrackingActivity extends WashLinkActivity {
                     @Override
                     public void onError(String message) {
                         if (isFinishing() || isDestroyed()) return;
-                        if (orderId != null) orderId.setText("Could not load this order");
-                        if (status != null) {
-                            status.setText("Tap to retry loading order updates");
-                            status.setOnClickListener(v ->
-                                    loadBooking(bookingId, orderId, status, call, cancel));
-                        }
+                        if (orderId != null) orderId.setText(R.string.tracking_load_error);
+                        if (status != null) status.setText(R.string.tracking_status_error);
+                        showTrackingState(R.string.tracking_load_error_retry, true,
+                                () -> loadBooking(bookingId, orderId, status, call, cancel));
                     }
+
                 });
+    }
+
+    private void showTrackingState(int message, boolean retry) {
+        showTrackingState(message, retry, null);
+    }
+
+    private void showTrackingState(int message, boolean retry, Runnable retryAction) {
+        if (trackingContent == null || trackingState == null) return;
+        trackingContent.setVisibility(View.GONE);
+        trackingStatePanel.setVisibility(View.VISIBLE);
+        trackingState.setText(message);
+        trackingProgress.setVisibility(message == R.string.tracking_loading
+                ? View.VISIBLE : View.GONE);
+        trackingState.setClickable(retry);
+        trackingState.setFocusable(retry);
+        trackingState.setOnClickListener(retry ? v -> {
+            if (retryAction != null) retryAction.run();
+        } : null);
+    }
+
+    private void showTrackingContent() {
+        if (trackingContent != null) trackingContent.setVisibility(View.VISIBLE);
+        if (trackingStatePanel != null) trackingStatePanel.setVisibility(View.GONE);
+        if (trackingState != null) {
+            trackingState.setClickable(false);
+            trackingState.setFocusable(false);
+            trackingState.setOnClickListener(null);
+        }
     }
 
     private void loadProviderContact(Booking booking, MaterialButton call) {
         if (booking.getProviderId() == null || booking.getProviderId().trim().isEmpty()) {
-            setContactUnavailable(call, booking, "Provider details unavailable");
+            setContactUnavailable(call, booking,
+                    R.string.tracking_provider_details_unavailable, false);
             return;
         }
         FirebaseFirestore.getInstance().collection("providers").document(booking.getProviderId()).get()
@@ -129,19 +170,21 @@ public class OrderTrackingActivity extends WashLinkActivity {
                             });
                         }
                     } else {
-                        setContactUnavailable(call, booking, "Provider contact unavailable");
+                        setContactUnavailable(call, booking,
+                                R.string.tracking_provider_contact_unavailable, false);
                     }
                 })
                 .addOnFailureListener(error ->
-                        setContactUnavailable(call, booking, "Contact unavailable. Tap to retry"));
+                        setContactUnavailable(call, booking, R.string.tracking_contact_retry, true));
     }
 
-    private void setContactUnavailable(MaterialButton call, Booking booking, String message) {
+    private void setContactUnavailable(MaterialButton call, Booking booking,
+                                       int message, boolean retry) {
         if (call == null || isFinishing() || isDestroyed()) return;
         call.setText(message);
         call.setVisibility(android.view.View.VISIBLE);
-        call.setEnabled(message.contains("retry"));
-        call.setOnClickListener(v -> loadProviderContact(booking, call));
+        call.setEnabled(retry);
+        call.setOnClickListener(retry ? v -> loadProviderContact(booking, call) : null);
     }
 
     @Override

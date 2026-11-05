@@ -3,11 +3,11 @@
     android:id="@+id/bottom_nav_bar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
-    android:elevation="8dp"
+    android:background="@color/color_surface"
+    android:elevation="@dimen/layout_8dp"
     android:orientation="horizontal"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
+    android:paddingTop="@dimen/layout_10dp"
+    android:paddingBottom="@dimen/layout_10dp"
     android:baselineAligned="false">
 
     <!-- Home -->
@@ -20,22 +20,22 @@
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
-        android:minHeight="48dp"
+        android:minHeight="@dimen/layout_48dp"
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="@dimen/layout_22dp"
+            android:layout_height="@dimen/layout_22dp"
             android:contentDescription="@string/nav_home"
             android:src="@drawable/ic_nav_home" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="@dimen/layout_3dp"
             android:text="@string/nav_home"
             android:textColor="@color/laundr_blue"
-            android:textSize="11sp" />
+            android:textSize="@dimen/layout_11sp" />
     </LinearLayout>
 
     <!-- Services -->
@@ -48,22 +48,22 @@
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
-        android:minHeight="48dp"
+        android:minHeight="@dimen/layout_48dp"
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="@dimen/layout_22dp"
+            android:layout_height="@dimen/layout_22dp"
             android:contentDescription="@string/nav_services"
             android:src="@drawable/ic_nav_services" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="@dimen/layout_3dp"
             android:text="@string/nav_services"
             android:textColor="@color/nav_inactive"
-            android:textSize="11sp" />
+            android:textSize="@dimen/layout_11sp" />
     </LinearLayout>
 
     <!-- Tracking -->
@@ -76,22 +76,22 @@
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
-        android:minHeight="48dp"
+        android:minHeight="@dimen/layout_48dp"
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="@dimen/layout_22dp"
+            android:layout_height="@dimen/layout_22dp"
             android:contentDescription="@string/nav_tracking"
             android:src="@drawable/ic_nav_tracking" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="@dimen/layout_3dp"
             android:text="@string/nav_tracking"
             android:textColor="@color/nav_inactive"
-            android:textSize="11sp" />
+            android:textSize="@dimen/layout_11sp" />
     </LinearLayout>
 
     <!-- History -->
@@ -104,22 +104,22 @@
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
-        android:minHeight="48dp"
+        android:minHeight="@dimen/layout_48dp"
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="@dimen/layout_22dp"
+            android:layout_height="@dimen/layout_22dp"
             android:contentDescription="@string/nav_history"
             android:src="@drawable/ic_nav_history" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="@dimen/layout_3dp"
             android:text="@string/nav_history"
             android:textColor="@color/nav_inactive"
-            android:textSize="11sp" />
+            android:textSize="@dimen/layout_11sp" />
     </LinearLayout>
 
     <!-- Profile -->
@@ -132,22 +132,22 @@
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
-        android:minHeight="48dp"
+        android:minHeight="@dimen/layout_48dp"
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="@dimen/layout_22dp"
+            android:layout_height="@dimen/layout_22dp"
             android:contentDescription="@string/nav_profile"
             android:src="@drawable/ic_nav_profile" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="@dimen/layout_3dp"
             android:text="@string/nav_profile"
             android:textColor="@color/nav_inactive"
-            android:textSize="11sp" />
+            android:textSize="@dimen/layout_11sp" />
     </LinearLayout>
 
 </LinearLayout>

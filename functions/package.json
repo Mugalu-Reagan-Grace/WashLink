@@ -6,7 +6,8 @@
     "node": "20"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "seed:demo": "node seed-demo.js"
   },
   "dependencies": {
     "firebase-admin": "^13.0.2",

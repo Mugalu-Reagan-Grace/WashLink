@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="14dp"
+    android:layout_marginBottom="@dimen/layout_14dp"
     android:background="@drawable/bg_card_bordered"
-    android:padding="14dp"
+    android:padding="@dimen/layout_14dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
 
     <ImageView
         android:id="@+id/iv_provider_thumb"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="@dimen/layout_64dp"
+        android:layout_height="@dimen/layout_64dp"
         android:background="@drawable/bg_offer_card"
-        android:padding="18dp"
+        android:padding="@dimen/layout_18dp"
         android:src="@drawable/ic_provider_business"
         android:contentDescription="@null"
         app:tint="@color/laundr_blue"
@@ -26,11 +27,11 @@
         android:id="@+id/tv_provider_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="8dp"
-        android:text="CleanWave Laundry"
+        android:layout_marginStart="@dimen/layout_12dp"
+        android:layout_marginEnd="@dimen/layout_8dp"
+        android:text="@string/provider_business_name_fallback"
         android:textColor="@color/text_primary"
-        android:textSize="15sp"
+        android:textSize="@dimen/layout_15sp"
         android:textStyle="bold"
         android:maxLines="1"
         android:ellipsize="end"
@@ -42,8 +43,8 @@
         android:id="@+id/row_rating"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginStart="@dimen/layout_12dp"
+        android:layout_marginTop="@dimen/layout_4dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         app:layout_constraintTop_toBottomOf="@id/tv_provider_name"
@@ -52,8 +53,8 @@
 
         <ImageView
             android:id="@+id/iv_provider_rating_star"
-            android:layout_width="13dp"
-            android:layout_height="13dp"
+            android:layout_width="@dimen/layout_13dp"
+            android:layout_height="@dimen/layout_13dp"
             android:src="@drawable/ic_star_filled"
             android:contentDescription="@null" />
 
@@ -61,28 +62,28 @@
             android:id="@+id/tv_rating_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:text="4.8"
+            android:layout_marginStart="@dimen/layout_4dp"
+            tools:text="@string/preview_provider_rating"
             android:textColor="@color/text_primary"
-            android:textSize="12sp"
+            android:textSize="@dimen/layout_12sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tv_review_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
+            android:layout_marginStart="@dimen/layout_4dp"
             android:text="@string/provider_no_reviews"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp" />
+            android:textSize="@dimen/layout_12sp" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/row_distance"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginStart="@dimen/layout_12dp"
+        android:layout_marginTop="@dimen/layout_4dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         app:layout_constraintTop_toBottomOf="@id/row_rating"
@@ -90,8 +91,8 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
-            android:layout_width="13dp"
-            android:layout_height="13dp"
+            android:layout_width="@dimen/layout_13dp"
+            android:layout_height="@dimen/layout_13dp"
             android:src="@drawable/ic_pin_secondary"
             android:contentDescription="@null" />
 
@@ -99,10 +100,10 @@
             android:id="@+id/tv_distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:text="0.8 km away"
+            android:layout_marginStart="@dimen/layout_4dp"
+            tools:text="@string/preview_provider_distance"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp" />
+            android:textSize="@dimen/layout_12sp" />
     </LinearLayout>
 
     <TextView
@@ -110,13 +111,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_open_now_pill"
-        android:paddingStart="10dp"
-        android:paddingTop="4dp"
-        android:paddingEnd="10dp"
-        android:paddingBottom="4dp"
+        android:paddingStart="@dimen/layout_10dp"
+        android:paddingTop="@dimen/layout_4dp"
+        android:paddingEnd="@dimen/layout_10dp"
+        android:paddingBottom="@dimen/layout_4dp"
         android:text="@string/open_now"
-        android:textColor="#2E7D32"
-        android:textSize="10sp"
+        android:textColor="@color/open_now_text"
+        android:textSize="@dimen/layout_10sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/iv_provider_thumb" />
@@ -125,18 +126,18 @@
         android:id="@+id/row_tags"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="@dimen/layout_12dp"
         android:background="@drawable/bg_chip_unselected"
         android:drawableStart="@drawable/ic_nav_services"
-        android:drawablePadding="6dp"
+        android:drawablePadding="@dimen/layout_6dp"
         android:gravity="center_vertical"
-        android:paddingStart="10dp"
-        android:paddingTop="5dp"
-        android:paddingEnd="10dp"
-        android:paddingBottom="5dp"
+        android:paddingStart="@dimen/layout_10dp"
+        android:paddingTop="@dimen/layout_5dp"
+        android:paddingEnd="@dimen/layout_10dp"
+        android:paddingBottom="@dimen/layout_5dp"
         android:text="@string/provider_service_count_unknown"
         android:textColor="@color/chip_unselected_text"
-        android:textSize="11sp"
+        android:textSize="@dimen/layout_11sp"
         app:layout_constraintTop_toBottomOf="@id/iv_provider_thumb"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -145,10 +146,10 @@
         android:id="@+id/tv_price"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="@dimen/layout_12dp"
         android:text="@string/provider_contact_for_quote"
         android:textColor="@color/laundr_blue"
-        android:textSize="14sp"
+        android:textSize="@dimen/layout_14sp"
         android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/row_tags"
         app:layout_constraintStart_toStartOf="parent"

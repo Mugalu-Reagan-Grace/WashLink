@@ -11,10 +11,10 @@ import java.util.function.Consumer;
 
 /**
  * Thin Android client for the authenticated Firebase callable payment API.
- * Flutterwave credentials and transaction verification stay on the server.
+ * Payment credentials and transaction verification stay on the server.
  */
-public final class FlutterwavePaymentClient {
-    private FlutterwavePaymentClient() {}
+public final class PaymentClient {
+    private PaymentClient() {}
 
     public static void createBooking(Booking booking, String paymentMethod,
                                      Consumer<String> onCreated, Consumer<String> onError) {
@@ -55,13 +55,13 @@ public final class FlutterwavePaymentClient {
                 .addOnFailureListener(error -> onError.accept(errorMessage(error)));
     }
 
-    public static void initialize(String bookingId, String paymentMethod,
-                                  Consumer<String> onCheckoutUrl, Consumer<String> onError) {
+    public static void initializePesapal(String bookingId, String paymentMethod,
+                                         Consumer<String> onCheckoutUrl, Consumer<String> onError) {
         Map<String, Object> data = new HashMap<>();
         data.put("bookingId", bookingId);
         data.put("paymentMethod", paymentMethod);
         FirebaseFunctions.getInstance("us-central1")
-                .getHttpsCallable("initializeFlutterwaveCheckout")
+                .getHttpsCallable("initializePesapalCheckout")
                 .call(data)
                 .addOnSuccessListener(result -> {
                     Object value = result.getData();
@@ -77,53 +77,51 @@ public final class FlutterwavePaymentClient {
                 .addOnFailureListener(error -> onError.accept(errorMessage(error)));
     }
 
-    public static void registerCashOnDelivery(String bookingId,
-                                              Runnable onReady, Consumer<String> onError) {
+    public static void verifyPesapal(String bookingId, String trackingId,
+                                     Consumer<String> onResult, Consumer<String> onError) {
         Map<String, Object> data = new HashMap<>();
         data.put("bookingId", bookingId);
-        data.put("paymentMethod", "cash");
+        data.put("orderTrackingId", trackingId);
         FirebaseFunctions.getInstance("us-central1")
-                .getHttpsCallable("initializeFlutterwaveCheckout")
+                .getHttpsCallable("verifyPesapalPayment")
                 .call(data)
-                .addOnSuccessListener(result -> {
-                    Object value = result.getData();
-                    if (value instanceof Map<?, ?>
-                            && Boolean.TRUE.equals(((Map<?, ?>) value).get("cashOnDelivery"))) {
-                        onReady.run();
-                    } else {
-                        onError.accept("Could not confirm cash on delivery for this booking.");
-                    }
-                })
+                .addOnSuccessListener(result -> handlePaymentStatus(
+                        result.getData(), onResult, onError))
                 .addOnFailureListener(error -> onError.accept(errorMessage(error)));
     }
 
-    public static void verify(String bookingId, String transactionId,
-                              Consumer<String> onResult, Consumer<String> onError) {
+    public static void verifyFlutterwave(String bookingId, String transactionId,
+                                         Consumer<String> onResult, Consumer<String> onError) {
         Map<String, Object> data = new HashMap<>();
         data.put("bookingId", bookingId);
         data.put("transactionId", transactionId);
         FirebaseFunctions.getInstance("us-central1")
                 .getHttpsCallable("verifyFlutterwavePayment")
                 .call(data)
-                .addOnSuccessListener(result -> {
-                    Object value = result.getData();
-                    if (value instanceof Map<?, ?>) {
-                        Object status = ((Map<?, ?>) value).get("paymentStatus");
-                        if (status instanceof String) {
-                            onResult.accept((String) status);
-                            return;
-                        }
-                    }
-                    onError.accept("Payment verification returned an invalid response.");
-                })
+                .addOnSuccessListener(result -> handlePaymentStatus(
+                        result.getData(), onResult, onError))
                 .addOnFailureListener(error -> onError.accept(errorMessage(error)));
+    }
+
+    private static void handlePaymentStatus(Object value,
+                                            Consumer<String> onResult,
+                                            Consumer<String> onError) {
+        if (value instanceof Map<?, ?>) {
+            Object status = ((Map<?, ?>) value).get("paymentStatus");
+            if (status instanceof String) {
+                onResult.accept((String) status);
+                return;
+            }
+        }
+        onError.accept("Payment verification returned an invalid response.");
     }
 
     private static String errorMessage(Exception error) {
         if (error instanceof FirebaseFunctionsException
                 && ((FirebaseFunctionsException) error).getCode()
                 == FirebaseFunctionsException.Code.NOT_FOUND) {
-            return "Booking service is not deployed. Please enable Firebase billing and deploy the Functions backend.";
+            return "Bookings are unavailable because the Firebase booking service is not deployed. "
+                    + "Enable billing and deploy Functions, or connect this demo app to the local Firebase emulators.";
         }
         String message = error.getLocalizedMessage();
         return message == null || message.trim().isEmpty()

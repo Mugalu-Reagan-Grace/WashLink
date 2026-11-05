@@ -3,11 +3,24 @@
     alias(libs.plugins.google.gms.google.services)
 }
 
+val useFirebaseEmulators = providers.gradleProperty("useFirebaseEmulators")
+    .orElse("false").get().toBoolean()
+val firebaseEmulatorHost = providers.gradleProperty("firebaseEmulatorHost")
+    .orElse("10.0.2.2").get()
+require(Regex("^[A-Za-z0-9.-]+$").matches(firebaseEmulatorHost)) {
+    "firebaseEmulatorHost must be a hostname or IP address without a port."
+}
+
 android {
     namespace = "com.example.washlink"
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         manifestPlaceholders["MAPS_API_KEY"] =
             providers.gradleProperty("MAPS_API_KEY").orElse("").get()
+        buildConfigField("boolean", "USE_FIREBASE_EMULATORS", useFirebaseEmulators.toString())
+        buildConfigField("String", "FIREBASE_EMULATOR_HOST", "\"$firebaseEmulatorHost\"")
     }
     compileSdk {
         version = release(36) {
@@ -27,6 +40,7 @@ android {
 
     buildTypes {
         release {
+            buildConfigField("boolean", "USE_FIREBASE_EMULATORS", "false")
             optimization {
                 enable = false
             }

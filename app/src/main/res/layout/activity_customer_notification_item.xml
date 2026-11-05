@@ -3,9 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="@dimen/touch_target_min"
     android:background="@drawable/bg_card_bordered"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="@dimen/layout_16dp"
     tools:showIn="@layout/activity_customer_notifications">
 
     <TextView
@@ -13,8 +14,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/text_primary"
-        android:textSize="14sp"
-        android:lineSpacingExtra="3dp"
-        tools:text="Pickup confirmed&#10;Your driver will collect your laundry at the scheduled time." />
+        android:textSize="@dimen/layout_14sp"
+        android:lineSpacingExtra="@dimen/layout_3dp"
+        tools:text="@string/preview_notification" />
 
 </LinearLayout>

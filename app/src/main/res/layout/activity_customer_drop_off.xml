@@ -4,18 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/color_background"
     tools:context=".DropOffActivity">
 
     <!-- Header -->
     <ImageView
         android:id="@+id/btn_back"
         style="@style/WashLinkBackButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:padding="12dp"
+        android:contentDescription="@string/back"
+        android:layout_width="@dimen/layout_48dp"
+        android:layout_height="@dimen/layout_48dp"
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginTop="@dimen/layout_20dp"
+        android:padding="@dimen/layout_12dp"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintTop_toTopOf="parent"
@@ -25,11 +26,11 @@
         android:id="@+id/tv_header_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
+        android:layout_marginStart="@dimen/layout_12dp"
+        android:layout_marginEnd="@dimen/layout_12dp"
         android:text="@string/drop_off_screen_title"
         android:textColor="@color/text_primary"
-        android:textSize="17sp"
+        android:textSize="@dimen/layout_17sp"
         android:textStyle="bold"
         android:gravity="center"
         app:layout_constraintTop_toTopOf="@id/btn_back"
@@ -39,10 +40,10 @@
 
     <FrameLayout
         android:id="@+id/iv_bell"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="20dp"
-        android:padding="12dp"
+        android:layout_width="@dimen/layout_48dp"
+        android:layout_height="@dimen/layout_48dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:padding="@dimen/layout_12dp"
         app:layout_constraintTop_toTopOf="@id/btn_back"
         app:layout_constraintBottom_toBottomOf="@id/btn_back"
         app:layout_constraintEnd_toEndOf="parent">
@@ -55,8 +56,8 @@
             app:tint="@color/laundr_blue" />
 
         <View
-            android:layout_width="7dp"
-            android:layout_height="7dp"
+            android:layout_width="@dimen/layout_7dp"
+            android:layout_height="@dimen/layout_7dp"
             android:layout_gravity="top|end"
             android:background="@drawable/dot_notification" />
     </FrameLayout>
@@ -66,16 +67,16 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:paddingBottom="16dp"
+        android:paddingBottom="@dimen/layout_16dp"
         app:layout_constraintTop_toBottomOf="@id/btn_back"
         app:layout_constraintBottom_toTopOf="@id/bottom_bar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="20dp">
+            android:paddingStart="@dimen/layout_20dp"
+            android:paddingEnd="@dimen/layout_20dp"
+            android:paddingTop="@dimen/layout_20dp">
 
             <TextView
                 android:id="@+id/tv_title"
@@ -83,7 +84,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/when_expect_you"
                 android:textColor="@color/text_primary"
-                android:textSize="20sp"
+                android:textSize="@dimen/layout_20sp"
                 android:textStyle="bold"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -92,10 +93,10 @@
                 android:id="@+id/tv_subtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/layout_4dp"
                 android:text="@string/select_preferred_date_time"
                 android:textColor="@color/text_primary"
-                android:textSize="13sp"
+                android:textSize="@dimen/layout_13sp"
                 app:layout_constraintTop_toBottomOf="@id/tv_title"
                 app:layout_constraintStart_toStartOf="parent" />
 
@@ -103,12 +104,12 @@
                 android:id="@+id/tv_fee_note"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="@dimen/layout_10dp"
                 android:background="@drawable/bg_offer_card"
-                android:padding="10dp"
+                android:padding="@dimen/layout_10dp"
                 android:text="@string/dropoff_fee_note"
                 android:textColor="@color/laundr_blue"
-                android:textSize="12sp"
+                android:textSize="@dimen/layout_12sp"
                 app:layout_constraintTop_toBottomOf="@id/tv_subtitle"
                 app:layout_constraintStart_toStartOf="parent" />
 
@@ -117,10 +118,10 @@
                 android:id="@+id/label_dropoff_date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="@dimen/layout_20dp"
                 android:text="@string/pickup_date"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp"
+                android:textSize="@dimen/layout_14sp"
                 android:textStyle="bold"
                 app:layout_constraintTop_toBottomOf="@id/tv_fee_note"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -129,7 +130,7 @@
                 android:id="@+id/row_dates"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="@dimen/layout_10dp"
                 android:baselineAligned="false"
                 android:orientation="horizontal"
                 android:weightSum="4"
@@ -140,11 +141,12 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginEnd="6dp"
+                    android:layout_marginEnd="@dimen/layout_6dp"
+                    android:minHeight="@dimen/layout_48dp"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:paddingTop="@dimen/layout_10dp"
+                    android:paddingBottom="@dimen/layout_10dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:clickable="true"
                     android:focusable="true">
@@ -154,15 +156,15 @@
                         android:layout_height="wrap_content"
                         android:text="@string/today"
                         android:textColor="@color/text_primary"
-                        android:textSize="11sp" />
+                        android:textSize="@dimen/layout_11sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/layout_2dp"
                         android:text="@string/day_06"
                         android:textColor="@color/text_primary"
-                        android:textSize="15sp"
+                        android:textSize="@dimen/layout_15sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -171,11 +173,12 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginEnd="6dp"
+                    android:layout_marginEnd="@dimen/layout_6dp"
+                    android:minHeight="@dimen/layout_48dp"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:paddingTop="@dimen/layout_10dp"
+                    android:paddingBottom="@dimen/layout_10dp"
                     android:background="@drawable/bg_chip_selected"
                     android:clickable="true"
                     android:focusable="true">
@@ -185,15 +188,15 @@
                         android:layout_height="wrap_content"
                         android:text="@string/tue"
                         android:textColor="@color/white"
-                        android:textSize="11sp" />
+                        android:textSize="@dimen/layout_11sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/layout_2dp"
                         android:text="@string/day_07"
                         android:textColor="@color/white"
-                        android:textSize="15sp"
+                        android:textSize="@dimen/layout_15sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -202,11 +205,12 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginEnd="6dp"
+                    android:layout_marginEnd="@dimen/layout_6dp"
+                    android:minHeight="@dimen/layout_48dp"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:paddingTop="@dimen/layout_10dp"
+                    android:paddingBottom="@dimen/layout_10dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:clickable="true"
                     android:focusable="true">
@@ -216,15 +220,15 @@
                         android:layout_height="wrap_content"
                         android:text="@string/wed"
                         android:textColor="@color/text_primary"
-                        android:textSize="11sp" />
+                        android:textSize="@dimen/layout_11sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/layout_2dp"
                         android:text="@string/day_08"
                         android:textColor="@color/text_primary"
-                        android:textSize="15sp"
+                        android:textSize="@dimen/layout_15sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -233,10 +237,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:minHeight="@dimen/layout_48dp"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:paddingTop="@dimen/layout_10dp"
+                    android:paddingBottom="@dimen/layout_10dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:clickable="true"
                     android:focusable="true">
@@ -246,15 +251,15 @@
                         android:layout_height="wrap_content"
                         android:text="@string/thu"
                         android:textColor="@color/text_primary"
-                        android:textSize="11sp" />
+                        android:textSize="@dimen/layout_11sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/layout_2dp"
                         android:text="@string/day_09"
                         android:textColor="@color/text_primary"
-                        android:textSize="15sp"
+                        android:textSize="@dimen/layout_15sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -265,10 +270,10 @@
                 android:id="@+id/label_select_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="@dimen/layout_20dp"
                 android:text="@string/select_time"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp"
+                android:textSize="@dimen/layout_14sp"
                 android:textStyle="bold"
                 app:layout_constraintTop_toBottomOf="@id/row_dates"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -278,7 +283,7 @@
                 android:id="@+id/grid_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="@dimen/layout_10dp"
                 android:columnCount="3"
                 android:rowCount="3"
                 app:layout_constraintTop_toBottomOf="@id/label_select_time">
@@ -288,36 +293,36 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
-                    android:layout_marginEnd="6dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginEnd="@dimen/layout_6dp"
+                    android:layout_marginBottom="@dimen/layout_8dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:minHeight="48dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:minHeight="@dimen/layout_48dp"
+                    android:paddingTop="@dimen/layout_10dp"
+                    android:paddingBottom="@dimen/layout_10dp"
                     android:text="@string/time_900"
                     android:textColor="@color/text_primary"
-                    android:textSize="12sp" />
+                    android:textSize="@dimen/layout_12sp" />
 
                 <TextView
                     android:id="@+id/chip_time_1000"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
-                    android:layout_marginEnd="6dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginEnd="@dimen/layout_6dp"
+                    android:layout_marginBottom="@dimen/layout_8dp"
                     android:background="@drawable/bg_chip_selected"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:minHeight="48dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:minHeight="@dimen/layout_48dp"
+                    android:paddingTop="@dimen/layout_10dp"
+                    android:paddingBottom="@dimen/layout_10dp"
                     android:text="@string/time_1000"
                     android:textColor="@color/white"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/layout_12sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -325,104 +330,104 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="@dimen/layout_8dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:minHeight="48dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:minHeight="@dimen/layout_48dp"
+                    android:paddingTop="@dimen/layout_10dp"
+                    android:paddingBottom="@dimen/layout_10dp"
                     android:text="@string/time_1100"
                     android:textColor="@color/text_primary"
-                    android:textSize="12sp" />
+                    android:textSize="@dimen/layout_12sp" />
 
                 <TextView
                     android:id="@+id/chip_time_1200"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
-                    android:layout_marginEnd="6dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginEnd="@dimen/layout_6dp"
+                    android:layout_marginBottom="@dimen/layout_8dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:minHeight="48dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:minHeight="@dimen/layout_48dp"
+                    android:paddingTop="@dimen/layout_10dp"
+                    android:paddingBottom="@dimen/layout_10dp"
                     android:text="@string/time_1200"
                     android:textColor="@color/text_primary"
-                    android:textSize="12sp" />
+                    android:textSize="@dimen/layout_12sp" />
 
                 <TextView
                     android:id="@+id/chip_time_100"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
-                    android:layout_marginEnd="6dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginEnd="@dimen/layout_6dp"
+                    android:layout_marginBottom="@dimen/layout_8dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:minHeight="48dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:minHeight="@dimen/layout_48dp"
+                    android:paddingTop="@dimen/layout_10dp"
+                    android:paddingBottom="@dimen/layout_10dp"
                     android:text="@string/time_100"
                     android:textColor="@color/text_primary"
-                    android:textSize="12sp" />
+                    android:textSize="@dimen/layout_12sp" />
 
                 <TextView
                     android:id="@+id/chip_time_200"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="@dimen/layout_8dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:minHeight="48dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:minHeight="@dimen/layout_48dp"
+                    android:paddingTop="@dimen/layout_10dp"
+                    android:paddingBottom="@dimen/layout_10dp"
                     android:text="@string/time_200"
                     android:textColor="@color/text_primary"
-                    android:textSize="12sp" />
+                    android:textSize="@dimen/layout_12sp" />
 
                 <TextView
                     android:id="@+id/chip_time_300"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
-                    android:layout_marginEnd="6dp"
+                    android:layout_marginEnd="@dimen/layout_6dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:minHeight="48dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:minHeight="@dimen/layout_48dp"
+                    android:paddingTop="@dimen/layout_10dp"
+                    android:paddingBottom="@dimen/layout_10dp"
                     android:text="@string/time_300"
                     android:textColor="@color/text_primary"
-                    android:textSize="12sp" />
+                    android:textSize="@dimen/layout_12sp" />
 
                 <TextView
                     android:id="@+id/chip_time_400"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
-                    android:layout_marginEnd="6dp"
+                    android:layout_marginEnd="@dimen/layout_6dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:minHeight="48dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:minHeight="@dimen/layout_48dp"
+                    android:paddingTop="@dimen/layout_10dp"
+                    android:paddingBottom="@dimen/layout_10dp"
                     android:text="@string/time_400"
                     android:textColor="@color/text_primary"
-                    android:textSize="12sp" />
+                    android:textSize="@dimen/layout_12sp" />
 
                 <TextView
                     android:id="@+id/chip_time_500"
@@ -433,12 +438,12 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:minHeight="48dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:minHeight="@dimen/layout_48dp"
+                    android:paddingTop="@dimen/layout_10dp"
+                    android:paddingBottom="@dimen/layout_10dp"
                     android:text="@string/time_500"
                     android:textColor="@color/text_primary"
-                    android:textSize="12sp" />
+                    android:textSize="@dimen/layout_12sp" />
 
             </GridLayout>
 
@@ -452,23 +457,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        android:elevation="8dp"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="16dp"
+        android:elevation="@dimen/layout_8dp"
+        android:paddingStart="@dimen/layout_20dp"
+        android:paddingEnd="@dimen/layout_20dp"
+        android:paddingTop="@dimen/layout_12dp"
+        android:paddingBottom="@dimen/layout_16dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_confirm_dropoff"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="@dimen/layout_52dp"
             android:text="@string/confirm_drop_off"
             android:textAllCaps="false"
-            android:textSize="15sp"
+            android:textSize="@dimen/layout_15sp"
             android:textColor="@color/white"
             android:backgroundTint="@color/laundr_blue"
-            app:cornerRadius="12dp"
+            app:cornerRadius="@dimen/radius_button"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

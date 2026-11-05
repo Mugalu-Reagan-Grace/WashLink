@@ -1,7 +1,11 @@
 package com.example.washlink.models;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class UserAccount {
     public static final String ROLE_CUSTOMER = "customer";
@@ -20,7 +24,7 @@ public class UserAccount {
     private boolean isSuspended;
 
     public UserAccount() {
-        this.createdAt = java.time.Instant.now().toString();
+        this.createdAt = currentTimestamp();
     }
 
     public UserAccount(String uid, String name, String email, String phone, String role) {
@@ -29,7 +33,13 @@ public class UserAccount {
         this.email = email;
         this.phone = phone;
         this.role = role;
-        this.createdAt = java.time.Instant.now().toString();
+        this.createdAt = currentTimestamp();
+    }
+
+    private static String currentTimestamp() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return format.format(new Date());
     }
 
     public String getUid() {

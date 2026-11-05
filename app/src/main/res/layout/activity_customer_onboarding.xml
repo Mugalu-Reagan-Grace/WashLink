@@ -35,11 +35,11 @@
 
             <FrameLayout
                 android:id="@+id/onboarding_thought_bubble"
-                android:layout_width="112dp"
-                android:layout_height="112dp"
+                android:layout_width="@dimen/layout_112dp"
+                android:layout_height="@dimen/layout_112dp"
                 android:background="@drawable/bg_onboarding_thought_bubble"
-                android:elevation="8dp"
-                android:padding="12dp"
+                android:elevation="@dimen/layout_8dp"
+                android:padding="@dimen/layout_12dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.86"
@@ -52,17 +52,17 @@
                     android:layout_height="match_parent"
                     android:background="@drawable/bg_onboarding_logo_tile"
                     android:contentDescription="@null"
-                    android:padding="3dp"
+                    android:padding="@dimen/layout_3dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/logo_main_washlink"
                     app:tint="@color/white" />
             </FrameLayout>
 
             <View
-                android:layout_width="14dp"
-                android:layout_height="14dp"
+                android:layout_width="@dimen/layout_14dp"
+                android:layout_height="@dimen/layout_14dp"
                 android:background="@drawable/bg_onboarding_thought_dot"
-                android:elevation="5dp"
+                android:elevation="@dimen/layout_5dp"
                 app:layout_constraintEnd_toStartOf="@id/onboarding_thought_bubble"
                 app:layout_constraintHorizontal_bias="0.85"
                 app:layout_constraintStart_toStartOf="parent"
@@ -70,10 +70,10 @@
                 app:layout_constraintVertical_bias="0.25" />
 
             <View
-                android:layout_width="9dp"
-                android:layout_height="9dp"
+                android:layout_width="@dimen/layout_9dp"
+                android:layout_height="@dimen/layout_9dp"
                 android:background="@drawable/bg_onboarding_thought_dot"
-                android:elevation="5dp"
+                android:elevation="@dimen/layout_5dp"
                 app:layout_constraintEnd_toStartOf="@id/onboarding_thought_bubble"
                 app:layout_constraintHorizontal_bias="0.94"
                 app:layout_constraintStart_toStartOf="parent"
@@ -127,10 +127,10 @@
         android:layout_height="wrap_content"
         android:background="@drawable/bg_top_rounded_white"
         android:orientation="vertical"
-        android:paddingStart="24dp"
-        android:paddingTop="24dp"
-        android:paddingEnd="24dp"
-        android:paddingBottom="16dp"
+        android:paddingStart="@dimen/layout_24dp"
+        android:paddingTop="@dimen/layout_24dp"
+        android:paddingEnd="@dimen/layout_24dp"
+        android:paddingBottom="@dimen/layout_16dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
@@ -140,112 +140,115 @@
             android:gravity="center"
             android:text="@string/onboarding_title"
             android:textColor="@color/text_primary"
-            android:textSize="22sp"
+            android:textSize="@dimen/layout_22sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tv_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/layout_8dp"
             android:gravity="center"
-            android:lineSpacingExtra="3dp"
+            android:lineSpacingExtra="@dimen/layout_3dp"
             android:text="@string/onboarding_subtitle"
             android:textColor="@color/text_secondary"
-            android:textSize="16sp" />
+            android:textSize="@dimen/layout_16sp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_get_started"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:layout_marginTop="16dp"
+            android:layout_height="@dimen/layout_54dp"
+            android:minHeight="@dimen/touch_target_min"
+            android:layout_marginTop="@dimen/layout_16dp"
             android:backgroundTint="@color/laundr_blue"
             android:text="@string/onboarding_customer_signup"
             android:textAllCaps="false"
             android:textColor="@color/white"
-            android:textSize="16sp"
+            android:textSize="@dimen/layout_16sp"
             android:visibility="gone"
-            app:cornerRadius="12dp" />
+            app:cornerRadius="@dimen/radius_button" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_provider_signup"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="@dimen/layout_54dp"
+            android:minHeight="@dimen/touch_target_min"
+            android:layout_marginTop="@dimen/layout_10dp"
             android:text="@string/onboarding_provider_signup"
             android:textAllCaps="false"
             android:textColor="@color/text_primary"
-            android:textSize="16sp"
+            android:textSize="@dimen/layout_16sp"
             android:visibility="gone"
-            app:cornerRadius="12dp"
+            app:cornerRadius="@dimen/radius_button"
             app:strokeColor="@color/divider_gray" />
 
         <TextView
             android:id="@+id/btn_sign_in"
             android:layout_width="match_parent"
-            android:layout_height="44dp"
+            android:layout_height="@dimen/touch_target_min"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
             android:text="@string/onboarding_customer_signin"
             android:textColor="@color/laundr_blue"
-            android:textSize="14sp"
+            android:textSize="@dimen/layout_14sp"
             android:textStyle="bold"
             android:visibility="gone" />
 
         <TextView
             android:id="@+id/btn_provider_sign_in"
             android:layout_width="match_parent"
-            android:layout_height="44dp"
+            android:layout_height="@dimen/touch_target_min"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
             android:text="@string/onboarding_provider_signin"
             android:textColor="@color/text_secondary"
-            android:textSize="14sp"
+            android:textSize="@dimen/layout_14sp"
             android:visibility="gone" />
 
         <FrameLayout
             android:id="@+id/page_indicator"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="12dp">
+            android:layout_height="@dimen/layout_48dp"
+            android:layout_marginTop="@dimen/layout_12dp">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:minWidth="@dimen/touch_target_min"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:orientation="horizontal">
 
                 <View
                     android:id="@+id/indicator_one"
-                    android:layout_width="22dp"
-                    android:layout_height="8dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_width="@dimen/layout_22dp"
+                    android:layout_height="@dimen/layout_8dp"
+                    android:layout_marginEnd="@dimen/layout_7dp"
                     android:background="@drawable/dot_active_indicator" />
 
                 <View
                     android:id="@+id/indicator_two"
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_width="@dimen/layout_8dp"
+                    android:layout_height="@dimen/layout_8dp"
+                    android:layout_marginEnd="@dimen/layout_7dp"
                     android:background="@drawable/dot_inactive_indicator" />
 
                 <View
                     android:id="@+id/indicator_three"
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_width="@dimen/layout_8dp"
+                    android:layout_height="@dimen/layout_8dp"
+                    android:layout_marginEnd="@dimen/layout_7dp"
                     android:background="@drawable/dot_inactive_indicator" />
 
                 <View
                     android:id="@+id/indicator_four"
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
+                    android:layout_width="@dimen/layout_8dp"
+                    android:layout_height="@dimen/layout_8dp"
                     android:background="@drawable/dot_inactive_indicator" />
             </LinearLayout>
 
@@ -258,11 +261,11 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:paddingStart="12dp"
-                android:paddingEnd="4dp"
+                android:paddingStart="@dimen/layout_12dp"
+                android:paddingEnd="@dimen/layout_4dp"
                 android:text="@string/onboarding_skip"
                 android:textColor="@color/laundr_blue"
-                android:textSize="14sp" />
+                android:textSize="@dimen/layout_14sp" />
         </FrameLayout>
     </LinearLayout>
 

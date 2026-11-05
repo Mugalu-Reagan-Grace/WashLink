@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/layout_12dp"
+    android:background="@drawable/bg_card_bordered"
+    android:padding="@dimen/layout_14dp">
+
+    <TextView
+        android:id="@+id/tv_provider_customer_initial"
+        android:layout_width="@dimen/layout_44dp"
+        android:layout_height="@dimen/layout_44dp"
+        android:background="@drawable/bg_offer_card"
+        android:gravity="center"
+        android:textColor="@color/laundr_blue"
+        android:textSize="@dimen/layout_17sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_provider_customer_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_12dp"
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/layout_14sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tv_provider_customer_initial"
+        app:layout_constraintTop_toTopOf="@id/tv_provider_customer_initial" />
+
+    <TextView
+        android:id="@+id/tv_provider_customer_phone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/layout_3dp"
+        android:textColor="@color/text_secondary"
+        android:textSize="@dimen/layout_12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/tv_provider_customer_name"
+        app:layout_constraintTop_toBottomOf="@id/tv_provider_customer_name" />
+
+    <TextView
+        android:id="@+id/tv_provider_customer_bookings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/layout_12dp"
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/layout_12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_provider_customer_initial" />
+
+    <TextView
+        android:id="@+id/tv_provider_customer_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/layout_4dp"
+        android:textColor="@color/text_secondary"
+        android:textSize="@dimen/layout_12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_provider_customer_bookings" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_provider_customer_history"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_target_min"
+        android:layout_marginTop="@dimen/layout_10dp"
+        android:text="@string/provider_workspace_booking_history"
+        android:textAllCaps="false"
+        android:textSize="@dimen/layout_12sp"
+        app:cornerRadius="@dimen/layout_10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_provider_customer_phone" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,13 +3,14 @@ package com.example.washlink;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.washlink.data.AuthGuard;
 import com.example.washlink.models.UserAccount;
 import com.google.android.material.button.MaterialButton;
@@ -17,15 +18,34 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.Timestamp;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AdminManagementActivity extends WashLinkActivity {
     private static final String SECTION_USERS = "users";
     private static final String SECTION_PROVIDERS = "providers";
     private static final String SECTION_BOOKINGS = "bookings";
     private static final String SECTION_OVERVIEW = "overview";
+    private static final String SECTION_REPORTS = "reports";
 
     private LinearLayout items;
     private TextView state;
+    private View reportFilters;
+    private View reportStatusGroup;
+    private Spinner reportPeriod;
+    private Spinner reportStatus;
+    private List<DocumentSnapshot> reportBookings;
+    private Map<String, DocumentSnapshot> reportProviders;
+    private List<DocumentSnapshot> overviewBookings;
+    private int overviewUsers;
+    private int overviewProviderCount;
+    private int overviewPendingProviders;
     private String section = SECTION_OVERVIEW;
 
     @Override
@@ -37,11 +57,17 @@ public class AdminManagementActivity extends WashLinkActivity {
 
         items = findViewById(R.id.admin_items);
         state = findViewById(R.id.tv_admin_state);
+        reportFilters = findViewById(R.id.admin_report_filters);
+        reportStatusGroup = findViewById(R.id.admin_report_status_group);
+        reportPeriod = findViewById(R.id.admin_report_period);
+        reportStatus = findViewById(R.id.admin_report_status);
         findViewById(R.id.btn_admin_overview).setOnClickListener(v -> loadSection(SECTION_OVERVIEW));
         findViewById(R.id.btn_admin_users).setOnClickListener(v -> loadSection(SECTION_USERS));
         findViewById(R.id.btn_admin_providers).setOnClickListener(v -> loadSection(SECTION_PROVIDERS));
         findViewById(R.id.btn_admin_bookings).setOnClickListener(v -> loadSection(SECTION_BOOKINGS));
+        findViewById(R.id.btn_admin_reports).setOnClickListener(v -> loadSection(SECTION_REPORTS));
         findViewById(R.id.btn_admin_refresh).setOnClickListener(v -> loadSection(section));
+        setupReportFilters();
         findViewById(R.id.btn_admin_logout).setOnClickListener(v -> {
             com.example.washlink.ui.ThemeManager.resetSignedOut(this);
             FirebaseAuth.getInstance().signOut();
@@ -56,7 +82,15 @@ public class AdminManagementActivity extends WashLinkActivity {
     private void loadSection(String requestedSection) {
         section = requestedSection;
         items.removeAllViews();
+        boolean showingReport = SECTION_REPORTS.equals(section);
+        boolean showingOverview = SECTION_OVERVIEW.equals(section);
+        reportFilters.setVisibility(showingReport || showingOverview ? View.VISIBLE : View.GONE);
+        reportStatusGroup.setVisibility(showingReport ? View.VISIBLE : View.GONE);
         showState("Loading " + section + "...");
+        if (SECTION_REPORTS.equals(section)) {
+            loadAdminReport();
+            return;
+        }
         Query query = FirebaseFirestore.getInstance().collection(section);
         if (SECTION_OVERVIEW.equals(section)) {
             loadOverview();
@@ -87,54 +121,401 @@ public class AdminManagementActivity extends WashLinkActivity {
                 });
     }
 
+    private void setupReportFilters() {
+        String[] periods = {"Last 7 days", "Last 30 days", "Last 90 days", "Loaded history (up to 1,000)"};
+        String[] statuses = {"All statuses", "Booked", "Accepted", "Picked Up", "Washing",
+                "Drying", "Ready", "Out for Delivery", "Delivered", "Rejected", "Cancelled"};
+        ArrayAdapter<String> periodAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, periods);
+        periodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        reportPeriod.setAdapter(periodAdapter);
+        reportPeriod.setSelection(1);
+
+        ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, statuses);
+        statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        reportStatus.setAdapter(statusAdapter);
+
+        AdapterView.OnItemSelectedListener filterListener = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (SECTION_REPORTS.equals(section) && reportBookings != null && reportProviders != null) {
+                    renderAdminReport();
+                } else if (SECTION_OVERVIEW.equals(section) && overviewBookings != null) {
+                    renderAdminOverview();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) { }
+        };
+        reportPeriod.setOnItemSelectedListener(filterListener);
+        reportStatus.setOnItemSelectedListener(filterListener);
+    }
+
+    private void loadAdminReport() {
+        reportBookings = null;
+        reportProviders = null;
+        showState("Loading platform report...");
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        firestore.collection(SECTION_BOOKINGS)
+                .orderBy("createdAt", Query.Direction.DESCENDING).limit(1000).get()
+                .addOnSuccessListener(bookings -> firestore.collection(SECTION_PROVIDERS).limit(500).get()
+                        .addOnSuccessListener(providers -> {
+                            if (!SECTION_REPORTS.equals(section)) return;
+                            reportBookings = bookings.getDocuments();
+                            reportProviders = new HashMap<>();
+                            for (DocumentSnapshot provider : providers.getDocuments()) {
+                                reportProviders.put(provider.getId(), provider);
+                            }
+                            renderAdminReport();
+                        })
+                        .addOnFailureListener(error -> showReportLoadError(error)))
+                .addOnFailureListener(error -> showReportLoadError(error));
+    }
+
+    private void showReportLoadError(Exception error) {
+        reportBookings = null;
+        reportProviders = null;
+        showState("Could not load platform report. Tap to retry.");
+        state.setClickable(true);
+        state.setOnClickListener(v -> loadAdminReport());
+        android.util.Log.e("AdminManagement", "Could not load platform report", error);
+    }
+
+    private void renderAdminReport() {
+        if (reportBookings == null || reportProviders == null) return;
+        items.removeAllViews();
+        long now = System.currentTimeMillis();
+        int rangeDays = reportPeriod.getSelectedItemPosition() == 0 ? 7
+                : reportPeriod.getSelectedItemPosition() == 1 ? 30
+                : reportPeriod.getSelectedItemPosition() == 2 ? 90 : 0;
+        long rangeStart = rangeDays == 0 ? 0 : now - rangeDays * 24L * 60L * 60L * 1000L;
+        String selectedStatus = statusFromPosition(reportStatus.getSelectedItemPosition());
+        List<DocumentSnapshot> matchingBookings = new ArrayList<>();
+        for (DocumentSnapshot booking : reportBookings) {
+            long createdAt = timestampMillis(booking.get("createdAt"));
+            String status = text(booking.get("status"), "UNKNOWN").toUpperCase();
+            if (createdAt <= now && createdAt >= rangeStart
+                    && ("ALL".equals(selectedStatus) || selectedStatus.equals(status))) {
+                matchingBookings.add(booking);
+            }
+        }
+
+        int completed = 0;
+        double verifiedCash = 0;
+        double verifiedOnline = 0;
+        int pending = 0;
+        int inProgress = 0;
+        int closed = 0;
+        Map<String, ProviderReportRow> providerRows = new HashMap<>();
+        for (DocumentSnapshot booking : matchingBookings) {
+            String status = text(booking.get("status"), "UNKNOWN").toUpperCase();
+            boolean delivered = "DELIVERED".equals(status);
+            if (delivered) completed++;
+            if ("BOOKED".equals(status)) pending++;
+            else if (isInProgress(status)) inProgress++;
+            else if ("CANCELLED".equals(status) || "REJECTED".equals(status)) closed++;
+
+            double verifiedRevenue = verifiedRevenue(booking);
+            if (delivered && "cash".equalsIgnoreCase(text(booking.get("paymentProvider"), ""))) {
+                verifiedCash += verifiedRevenue;
+            } else if (delivered && verifiedRevenue > 0) {
+                verifiedOnline += verifiedRevenue;
+            }
+
+            String providerId = text(booking.get("providerId"), "unknown");
+            ProviderReportRow row = providerRows.get(providerId);
+            if (row == null) {
+                DocumentSnapshot provider = reportProviders.get(providerId);
+                String businessName = provider == null ? text(booking.get("providerName"), "Unknown provider")
+                        : text(provider.get("businessName"), text(booking.get("providerName"), "Unknown provider"));
+                row = new ProviderReportRow(providerId, businessName);
+                providerRows.put(providerId, row);
+            }
+            row.bookings++;
+            if (delivered) row.completed++;
+            if ("BOOKED".equals(status)) row.pending++;
+            row.revenue += verifiedRevenue;
+        }
+
+        TextView context = reportText("Showing " + matchingBookings.size()
+                + " bookings from the latest 1,000 loaded records.");
+        context.setTextColor(getColor(R.color.text_secondary));
+        items.addView(context);
+        addReportCard("Platform summary",
+                "Verified revenue: " + money(verifiedCash + verifiedOnline)
+                        + "\nBookings: " + matchingBookings.size()
+                        + "\nCompleted: " + completed
+                        + "\nAverage order: " + money(matchingBookings.isEmpty() ? 0
+                        : averageOrderTotal(matchingBookings)));
+        addReportCard("Verified payment collections",
+                "Cash collected: " + money(verifiedCash)
+                        + "\nVerified online: " + money(verifiedOnline)
+                        + "\nTotal verified revenue: " + money(verifiedCash + verifiedOnline)
+                        + "\nOnline collections use provider subtotal; service fees are excluded.");
+        addReportCard("Booking outcomes",
+                "Waiting for provider: " + pending
+                        + "\nIn progress: " + inProgress
+                        + "\nDelivered: " + completed
+                        + "\nCancelled / rejected: " + closed);
+
+        List<ProviderReportRow> sortedProviders = new ArrayList<>(providerRows.values());
+        Collections.sort(sortedProviders, (first, second) -> {
+            int revenueOrder = Double.compare(second.revenue, first.revenue);
+            return revenueOrder != 0 ? revenueOrder : Integer.compare(second.bookings, first.bookings);
+        });
+        addReportHeader("Provider performance");
+        if (sortedProviders.isEmpty()) {
+            addReportCard("No provider bookings", "No provider bookings match this report.");
+        } else {
+            int limit = Math.min(sortedProviders.size(), 20);
+            for (int i = 0; i < limit; i++) {
+                ProviderReportRow row = sortedProviders.get(i);
+                addReportCard(row.name, row.bookings + " bookings · " + row.completed
+                        + " completed · " + row.pending + " waiting response\nVerified revenue: "
+                        + money(row.revenue));
+            }
+        }
+
+        addReportHeader("Booking details");
+        if (matchingBookings.isEmpty()) {
+            addReportCard("No matching bookings", "Try another date range or status.");
+        } else {
+            int limit = Math.min(matchingBookings.size(), 50);
+            for (int i = 0; i < limit; i++) addReportBooking(matchingBookings.get(i));
+            if (matchingBookings.size() > limit) {
+                addReportCard("Showing 50 of " + matchingBookings.size(),
+                        "The report summary includes all matching bookings.");
+            }
+        }
+        state.setVisibility(View.GONE);
+    }
+
+    private String statusFromPosition(int position) {
+        if (position <= 0) return "ALL";
+        return new String[]{"BOOKED", "ACCEPTED", "PICKED_UP", "WASHING", "DRYING",
+                "READY", "OUT_FOR_DELIVERY", "DELIVERED", "REJECTED", "CANCELLED"}[position - 1];
+    }
+
+    private long timestampMillis(Object value) {
+        if (value instanceof Timestamp) return ((Timestamp) value).toDate().getTime();
+        if (value instanceof Date) return ((Date) value).getTime();
+        if (value instanceof Number) return ((Number) value).longValue();
+        return 0;
+    }
+
+    private boolean isInProgress(String status) {
+        return "ACCEPTED".equals(status) || "PICKED_UP".equals(status) || "WASHING".equals(status)
+                || "DRYING".equals(status) || "READY".equals(status)
+                || "OUT_FOR_DELIVERY".equals(status);
+    }
+
+    private double verifiedRevenue(DocumentSnapshot booking) {
+        if (!"DELIVERED".equalsIgnoreCase(text(booking.get("status"), ""))) return 0;
+        String provider = text(booking.get("paymentProvider"), "");
+        String payment = text(booking.get("paymentStatus"), "");
+        Object amount = "cash".equalsIgnoreCase(provider) ? booking.get("total")
+                : ("flutterwave".equalsIgnoreCase(provider)
+                || "pesapal".equalsIgnoreCase(provider)) && "PAID".equalsIgnoreCase(payment)
+                ? booking.get("subtotal") : null;
+        return amount instanceof Number ? ((Number) amount).doubleValue() : 0;
+    }
+
+    private double averageOrderTotal(List<DocumentSnapshot> bookings) {
+        double total = 0;
+        for (DocumentSnapshot booking : bookings) {
+            Object amount = booking.get("total");
+            if (amount instanceof Number) total += ((Number) amount).doubleValue();
+        }
+        return total / bookings.size();
+    }
+
+    private String money(double amount) {
+        return com.example.washlink.data.BookingPricing.format((int) Math.round(amount));
+    }
+
+    private TextView reportText(String value) {
+        TextView text = new TextView(this);
+        text.setText(value);
+        text.setTextColor(getColor(R.color.text_primary));
+        text.setTextSize(15);
+        text.setLineSpacing(4, 1.0f);
+        return text;
+    }
+
+    private void addReportHeader(String title) {
+        TextView header = reportText(title);
+        header.setTextSize(18);
+        header.setTypeface(null, android.graphics.Typeface.BOLD);
+        header.setPadding(4, 16, 4, 8);
+        items.addView(header);
+    }
+
+    private void addReportCard(String title, String details) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(16, 14, 16, 14);
+        card.setBackgroundResource(R.drawable.bg_card_bordered);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.bottomMargin = 10;
+        card.setLayoutParams(params);
+        TextView titleView = reportText(title);
+        titleView.setTypeface(null, android.graphics.Typeface.BOLD);
+        TextView detailView = reportText(details);
+        detailView.setTextColor(getColor(R.color.text_secondary));
+        LinearLayout.LayoutParams detailParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        detailParams.topMargin = 6;
+        card.addView(titleView);
+        card.addView(detailView, detailParams);
+        items.addView(card);
+    }
+
+    private void addReportBooking(DocumentSnapshot booking) {
+        String status = text(booking.get("status"), "UNKNOWN").replace('_', ' ');
+        String paymentStatus = text(booking.get("paymentStatus"), "PENDING");
+        addReportCard("Order #" + booking.getId(),
+                text(booking.get("customerName"), "Unknown customer")
+                        + " · " + text(booking.get("providerName"), "Unknown provider")
+                        + "\n" + status + " · " + paymentStatus
+                        + " · " + money(booking.get("total") instanceof Number
+                        ? ((Number) booking.get("total")).doubleValue() : 0)
+                        + "\nVerified revenue: " + money(verifiedRevenue(booking)));
+    }
+
+    private static final class ProviderReportRow {
+        final String id;
+        final String name;
+        int bookings;
+        int completed;
+        int pending;
+        double revenue;
+
+        ProviderReportRow(String id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+    }
+
     private void loadOverview() {
+        overviewBookings = null;
         showState("Loading overview...");
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         firestore.collection(SECTION_USERS).limit(500).get()
                 .addOnSuccessListener(users -> firestore.collection(SECTION_PROVIDERS).limit(500).get()
                         .addOnSuccessListener(providers -> firestore.collection(SECTION_BOOKINGS)
-                                .orderBy("createdAt", Query.Direction.DESCENDING).limit(300).get()
-                                .addOnSuccessListener(bookings -> {
-                                    int open = 0;
-                                    int pending = 0;
-                                    double collected = 0;
-                                    for (DocumentSnapshot provider : providers.getDocuments()) {
-                                        if (!Boolean.TRUE.equals(provider.get("isApproved"))) pending++;
-                                    }
-                                    for (DocumentSnapshot booking : bookings.getDocuments()) {
-                                        String status = text(booking.get("status"), "");
-                                        if (!"DELIVERED".equals(status) && !"CANCELLED".equals(status)
-                                                && !"REJECTED".equals(status)) open++;
-                                        if ("DELIVERED".equals(status)
-                                                && booking.get("total") instanceof Number) {
-                                            collected += ((Number) booking.get("total")).doubleValue();
-                                        }
-                                    }
-                                    addOverviewSummary(users.size(), providers.size(), open, pending,
-                                            collected);
-                                    state.setVisibility(View.GONE);
+                                .orderBy("createdAt", Query.Direction.DESCENDING).limit(1000).get()
+                                                .addOnSuccessListener(bookings -> {
+                                                    if (!SECTION_OVERVIEW.equals(section)) return;
+                                                    overviewUsers = users.size();
+                                                    overviewProviderCount = providers.size();
+                                                    overviewPendingProviders = 0;
+                                                    for (DocumentSnapshot provider : providers.getDocuments()) {
+                                                        if (!Boolean.TRUE.equals(provider.get("isApproved"))) overviewPendingProviders++;
+                                                    }
+                                                    overviewBookings = bookings.getDocuments();
+                                                    renderAdminOverview();
                                 })
                                 .addOnFailureListener(this::showLoadError))
                         .addOnFailureListener(this::showLoadError))
                 .addOnFailureListener(this::showLoadError);
     }
 
-    private void addOverviewSummary(int users, int providers, int open, int pending,
-                                    double collected) {
-        TextView summary = new TextView(this);
-        summary.setText("OPERATIONS OVERVIEW\n\n"
-                + "Total users        " + users + "\n"
-                + "Providers          " + providers + " (" + pending + " awaiting approval)\n"
-                + "Open bookings      " + open + "\n"
-                + "Collected revenue  "
-                + com.example.washlink.data.BookingPricing.format((int) collected)
-                + "\n\nRecent bookings are available in the Bookings section.");
-        summary.setTextColor(getColor(R.color.text_primary));
-        summary.setTextSize(16);
-        summary.setLineSpacing(4, 1.0f);
-        summary.setPadding(20, 20, 20, 20);
-        summary.setBackgroundResource(R.drawable.bg_card_bordered);
-        items.addView(summary);
+    private void renderAdminOverview() {
+        if (overviewBookings == null) return;
+        items.removeAllViews();
+        int rangePosition = reportPeriod.getSelectedItemPosition();
+        int rangeDays = rangePosition == 0 ? 7 : rangePosition == 1 ? 30
+                : rangePosition == 2 ? 90 : 0;
+        long now = System.currentTimeMillis();
+        long rangeStart = rangeDays == 0 ? 0 : now - rangeDays * 24L * 60L * 60L * 1000L;
+        List<DocumentSnapshot> periodBookings = new ArrayList<>();
+        for (DocumentSnapshot booking : overviewBookings) {
+            long createdAt = timestampMillis(booking.get("createdAt"));
+            if (createdAt <= now && createdAt >= rangeStart) periodBookings.add(booking);
+        }
+
+        int open = 0;
+        int completed = 0;
+        double collected = 0;
+        Map<String, Integer> statusCounts = new HashMap<>();
+        Map<String, Integer> customerCounts = new HashMap<>();
+        Map<String, Integer> providerCounts = new HashMap<>();
+        Map<String, String> customerNames = new HashMap<>();
+        Map<String, String> providerNames = new HashMap<>();
+        for (DocumentSnapshot booking : periodBookings) {
+            String status = text(booking.get("status"), "UNKNOWN").toUpperCase();
+            statusCounts.put(status, statusCounts.containsKey(status) ? statusCounts.get(status) + 1 : 1);
+            if (!"DELIVERED".equals(status) && !"CANCELLED".equals(status)
+                    && !"REJECTED".equals(status)) open++;
+            if ("DELIVERED".equals(status)) completed++;
+            collected += verifiedRevenue(booking);
+            addPersonCount(customerCounts, customerNames, booking, "customerId", "customerName");
+            addPersonCount(providerCounts, providerNames, booking, "providerId", "providerName");
+        }
+
+        addOverviewMetric("Collected revenue",
+                money(collected) + " · Verified revenue");
+        addOverviewMetric("Total orders", periodBookings.size()
+                + " bookings in the selected period");
+        addOverviewMetric("In progress", open + " open orders");
+        addOverviewMetric("Completed orders", completed + " delivered · "
+                + customerCounts.size() + " customers · " + providerCounts.size() + " providers");
+        addOverviewMetric("Marketplace accounts", overviewUsers + " users · " + overviewProviderCount
+                + " providers · " + overviewPendingProviders + " awaiting approval");
+
+        addReportHeader("Order status");
+        if (statusCounts.isEmpty()) {
+            addReportCard("No orders in this period", "Choose another reporting period or refresh.");
+        } else {
+            List<Map.Entry<String, Integer>> statuses = new ArrayList<>(statusCounts.entrySet());
+            Collections.sort(statuses, (first, second) -> Integer.compare(second.getValue(), first.getValue()));
+            for (int i = 0; i < Math.min(statuses.size(), 5); i++) {
+                Map.Entry<String, Integer> entry = statuses.get(i);
+                addReportCard(entry.getKey().replace('_', ' '), entry.getValue() + " orders");
+            }
+        }
+
+        addReportHeader("Top customers");
+        addTopPeople(customerCounts, customerNames, "No customers have booked in this period.");
+        addReportHeader("Top providers");
+        addTopPeople(providerCounts, providerNames, "No providers have received bookings in this period.");
+        addReportHeader("Recent orders");
+        if (overviewBookings.isEmpty()) {
+            addReportCard("No bookings yet", "New customer orders will appear here.");
+        } else {
+            for (int i = 0; i < Math.min(overviewBookings.size(), 8); i++) {
+                addReportBooking(overviewBookings.get(i));
+            }
+        }
+        state.setVisibility(View.GONE);
+    }
+
+    private void addOverviewMetric(String title, String details) {
+        addReportCard(title, details);
+    }
+
+    private void addPersonCount(Map<String, Integer> counts, Map<String, String> names,
+                                DocumentSnapshot booking, String idField, String nameField) {
+        String id = text(booking.get(idField), "");
+        if (id.isEmpty()) return;
+        counts.put(id, counts.containsKey(id) ? counts.get(id) + 1 : 1);
+        if (!names.containsKey(id)) names.put(id, text(booking.get(nameField), "Unknown"));
+    }
+
+    private void addTopPeople(Map<String, Integer> counts, Map<String, String> names, String emptyText) {
+        if (counts.isEmpty()) {
+            addReportCard("No activity", emptyText);
+            return;
+        }
+        List<String> ids = new ArrayList<>(counts.keySet());
+        Collections.sort(ids, (first, second) -> Integer.compare(counts.get(second), counts.get(first)));
+        for (int i = 0; i < Math.min(ids.size(), 5); i++) {
+            String id = ids.get(i);
+            addReportCard(names.get(id), counts.get(id) + " bookings");
+        }
     }
 
     private void addBookingSummary(java.util.List<DocumentSnapshot> documents) {
@@ -150,7 +531,8 @@ public class AdminManagementActivity extends WashLinkActivity {
                 String provider = text(document.get("paymentProvider"), "");
                 String payment = text(document.get("paymentStatus"), "");
                 Object amount = "cash".equalsIgnoreCase(provider) ? document.get("total")
-                        : "flutterwave".equalsIgnoreCase(provider) && "PAID".equalsIgnoreCase(payment)
+                        : ("flutterwave".equalsIgnoreCase(provider)
+                        || "pesapal".equalsIgnoreCase(provider)) && "PAID".equalsIgnoreCase(payment)
                         ? document.get("subtotal") : null;
                 if (amount instanceof Number) collectedRevenue += ((Number) amount).doubleValue();
             }

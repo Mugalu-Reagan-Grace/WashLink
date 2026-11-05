@@ -18,6 +18,7 @@ import com.example.washlink.R;
 public abstract class CustomerTabFragment extends Fragment {
     protected void bindNavigation(@Nullable View root, String activeTab) {
         if (root == null || getActivity() == null) return;
+        ThemeManager.apply(root, requireContext());
         bind(root, R.id.nav_home, MainActivity.TAB_HOME);
         bind(root, R.id.nav_services, MainActivity.TAB_SERVICES);
         bind(root, R.id.nav_tracking, MainActivity.TAB_TRACKING);

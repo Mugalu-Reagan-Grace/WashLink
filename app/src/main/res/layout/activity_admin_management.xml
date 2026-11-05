@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:fitsSystemWindows="true"
+    android:background="@color/color_background"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="@dimen/layout_20dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Operations overview"
+        android:text="@string/admin_overview_title"
         android:textColor="@color/text_primary"
-        android:textSize="24sp"
+        android:textSize="@dimen/layout_24sp"
         android:textStyle="bold" />
 
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="@dimen/layout_12dp"
         android:scrollbars="none">
 
     <LinearLayout
@@ -27,38 +29,69 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_admin_overview"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Overview" />
+            android:layout_height="@dimen/layout_48dp"
+            android:minHeight="@dimen/touch_target_min"
+            android:text="@string/admin_filter_overview"
+            android:textAllCaps="false"
+            app:cornerRadius="@dimen/radius_button"
+            app:strokeColor="@color/divider_gray" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_admin_bookings"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Bookings" />
+            android:layout_height="@dimen/layout_48dp"
+            android:minHeight="@dimen/touch_target_min"
+            android:text="@string/admin_filter_bookings"
+            android:textAllCaps="false"
+            app:cornerRadius="@dimen/radius_button"
+            app:strokeColor="@color/divider_gray" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_admin_providers"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Providers" />
+            android:layout_height="@dimen/layout_48dp"
+            android:minHeight="@dimen/touch_target_min"
+            android:text="@string/admin_filter_providers"
+            android:textAllCaps="false"
+            app:cornerRadius="@dimen/radius_button"
+            app:strokeColor="@color/divider_gray" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_admin_users"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Users" />
+            android:layout_height="@dimen/layout_48dp"
+            android:minHeight="@dimen/touch_target_min"
+            android:text="@string/admin_filter_users"
+            android:textAllCaps="false"
+            app:cornerRadius="@dimen/radius_button"
+            app:strokeColor="@color/divider_gray" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_admin_reports"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/layout_48dp"
+            android:minHeight="@dimen/touch_target_min"
+            android:text="@string/admin_filter_reports"
+            android:textAllCaps="false"
+            app:cornerRadius="@dimen/radius_button"
+            app:strokeColor="@color/divider_gray" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_admin_refresh"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Refresh" />
+            android:layout_height="@dimen/layout_48dp"
+            android:minHeight="@dimen/touch_target_min"
+            android:text="@string/admin_filter_refresh"
+            android:textAllCaps="false"
+            app:cornerRadius="@dimen/radius_button"
+            app:strokeColor="@color/divider_gray" />
     </LinearLayout>
     </HorizontalScrollView>
 
@@ -66,26 +99,74 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Monitor users, providers, bookings, and marketplace activity."
+        android:layout_marginTop="@dimen/layout_4dp"
+        android:text="@string/admin_overview_subtitle"
         android:textColor="@color/text_secondary"
-        android:textSize="13sp" />
+        android:textSize="@dimen/layout_13sp" />
 
     <LinearLayout
+        android:id="@+id/admin_report_filters"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal">
+        android:layout_marginTop="@dimen/layout_12dp"
+        android:orientation="horizontal"
+        android:baselineAligned="false"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/admin_report_period_group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginEnd="@dimen/layout_4dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/admin_report_period"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/layout_13sp" />
+
+            <Spinner
+                android:id="@+id/admin_report_period"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/layout_48dp"
+                android:contentDescription="@string/admin_report_period" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/admin_report_status_group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="@dimen/layout_4dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/admin_report_status"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/layout_13sp" />
+
+            <Spinner
+                android:id="@+id/admin_report_status"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/layout_48dp"
+                android:contentDescription="@string/admin_report_status" />
+        </LinearLayout>
     </LinearLayout>
 
     <TextView
         android:id="@+id/tv_admin_state"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="@dimen/layout_12dp"
         android:gravity="center"
-        android:padding="16dp"
-        android:text="Loading accounts..."
+        android:minHeight="@dimen/layout_96dp"
+        android:padding="@dimen/layout_24dp"
+        android:text="@string/admin_loading"
         android:textColor="@color/text_secondary"
         android:visibility="gone" />
 
@@ -94,7 +175,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:contentDescription="@string/admin_items_description">
 
         <LinearLayout
             android:id="@+id/admin_items"
@@ -105,9 +187,11 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_admin_logout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Sign out"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/layout_48dp"
+        android:layout_gravity="end"
+        android:minHeight="@dimen/touch_target_min"
+        android:text="@string/admin_sign_out"
         android:textAllCaps="false" />
 
 </LinearLayout>

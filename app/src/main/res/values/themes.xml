@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Base.Theme.WashLink" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/laundr_blue</item>
-        <item name="colorPrimaryVariant">@color/laundr_blue_dark</item>
+    <style name="Base.Theme.WashLink" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryVariant">@color/color_primary_variant</item>
         <item name="colorOnPrimary">@color/white</item>
 
-        <item name="colorSecondary">@color/laundr_blue</item>
-        <item name="colorSecondaryVariant">@color/laundr_blue_dark</item>
+        <item name="colorSecondary">@color/color_secondary</item>
+        <item name="colorSecondaryVariant">@color/color_secondary_variant</item>
         <item name="colorOnSecondary">@color/white</item>
 
-        <item name="android:colorBackground">@color/white</item>
-        <item name="colorSurface">@color/white</item>
-        <item name="colorOnSurface">@color/text_primary</item>
-        <item name="android:textColorPrimary">@color/text_primary</item>
-        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:colorBackground">@color/color_background</item>
+        <item name="colorSurface">@color/color_surface</item>
+        <item name="colorOnSurface">@color/color_text_primary</item>
+        <item name="android:textColorPrimary">@color/color_text_primary</item>
+        <item name="android:textColorSecondary">@color/color_text_secondary</item>
 
         <item name="android:fontFamily">@font/poppins</item>
         <item name="fontFamily">@font/poppins</item>
         <item name="android:textViewStyle">@style/Widget.WashLink.TextView</item>
         <item name="buttonStyle">@style/Widget.WashLink.Button</item>
 
-        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:statusBarColor">@color/color_background</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="colorControlHighlight">@color/laundr_blue</item>
+        <item name="colorControlHighlight">@color/color_primary</item>
     </style>
 
     <style name="Theme.WashLink" parent="Base.Theme.WashLink" />
@@ -36,7 +36,42 @@
         <item name="android:textColorSecondary">@color/cream_text_secondary</item>
         <item name="android:statusBarColor">@color/cream_raised</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="colorControlHighlight">#332C4B67</item>
+        <item name="colorControlHighlight">@color/color_ripple_cream</item>
+    </style>
+
+    <style name="TextAppearance.WashLink.Headline" parent="@android:style/TextAppearance">
+        <item name="android:fontFamily">@font/poppins_semibold</item>
+        <item name="fontFamily">@font/poppins_semibold</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+    </style>
+
+    <style name="TextAppearance.WashLink.Title" parent="@android:style/TextAppearance">
+        <item name="android:fontFamily">@font/poppins_semibold</item>
+        <item name="fontFamily">@font/poppins_semibold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+    </style>
+
+    <style name="TextAppearance.WashLink.Body" parent="@android:style/TextAppearance">
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="fontFamily">@font/poppins</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+    </style>
+
+    <style name="TextAppearance.WashLink.Caption" parent="@android:style/TextAppearance">
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="fontFamily">@font/poppins</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
+    </style>
+
+    <style name="TextAppearance.WashLink.Button" parent="@android:style/TextAppearance">
+        <item name="android:fontFamily">@font/poppins_semibold</item>
+        <item name="fontFamily">@font/poppins_semibold</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textAllCaps">false</item>
     </style>
 
     <style name="Widget.WashLink.TextView" parent="@android:style/Widget.TextView">
@@ -45,9 +80,11 @@
         <item name="android:textStyle">normal</item>
     </style>
 
-    <style name="Widget.WashLink.Button" parent="Widget.Material3.Button">
+    <style name="Widget.WashLink.Button" parent="Widget.MaterialComponents.Button">
         <item name="android:fontFamily">@font/poppins_semibold</item>
         <item name="fontFamily">@font/poppins_semibold</item>
+        <item name="cornerRadius">24dp</item>
+        <item name="android:minHeight">48dp</item>
     </style>
 
     <style name="WashLinkBackButton">
@@ -68,40 +105,64 @@
     </style>
 
     <style name="WashLinkInputText">
+        <item name="android:fontFamily">@font/poppins_medium</item>
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textColorHint">@color/hint_gray</item>
     </style>
 
-    <style name="Widget.WashLink.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+    <style name="Widget.WashLink.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="android:fontFamily">@font/poppins_medium</item>
         <item name="fontFamily">@font/poppins_medium</item>
+        <item name="boxBackgroundColor">@color/color_surface</item>
+        <item name="boxStrokeColor">@color/color_primary</item>
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
+        <item name="hintEnabled">false</item>
+    </style>
+
+    <style name="Widget.WashLink.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">3dp</item>
+    </style>
+
+    <style name="Widget.WashLink.Chip" parent="Widget.MaterialComponents.Chip.Entry">
+        <item name="android:fontFamily">@font/poppins_medium</item>
+        <item name="fontFamily">@font/poppins_medium</item>
+        <item name="chipCornerRadius">16dp</item>
+    </style>
+
+    <style name="Widget.WashLink.Toolbar" parent="Widget.MaterialComponents.Toolbar">
+        <item name="android:fontFamily">@font/poppins_semibold</item>
+        <item name="fontFamily">@font/poppins_semibold</item>
     </style>
 
     <!-- Backward-compatible alias if older code references the lowercase version -->
     <style name="Theme.Washlink" parent="Theme.WashLink" />
 
-    <style name="Theme.WashLink_CalendarBlue" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/laundr_blue</item>
-        <item name="colorSecondary">@color/laundr_blue</item>
-        <item name="android:colorAccent">@color/laundr_blue</item>
+    <style name="Theme.WashLink_CalendarBlue" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorSecondary">@color/color_secondary</item>
+        <item name="android:colorAccent">@color/color_primary</item>
     </style>
 
-    <style name="Theme.WashLink_CalendarAmber" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">#D97706</item>
-        <item name="colorSecondary">#D97706</item>
-        <item name="android:colorAccent">#D97706</item>
+    <style name="Theme.WashLink_CalendarAmber" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/color_calendar_amber</item>
+        <item name="colorSecondary">@color/color_calendar_amber</item>
+        <item name="android:colorAccent">@color/color_calendar_amber</item>
     </style>
 
-    <style name="Theme.WashLink_CalendarEmerald" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">#059669</item>
-        <item name="colorSecondary">#059669</item>
-        <item name="android:colorAccent">#059669</item>
+    <style name="Theme.WashLink_CalendarEmerald" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/color_calendar_emerald</item>
+        <item name="colorSecondary">@color/color_calendar_emerald</item>
+        <item name="android:colorAccent">@color/color_calendar_emerald</item>
     </style>
 
-    <style name="Theme.WashLink_CalendarViolet" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">#7C3AED</item>
-        <item name="colorSecondary">#7C3AED</item>
-        <item name="android:colorAccent">#7C3AED</item>
+    <style name="Theme.WashLink_CalendarViolet" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/color_calendar_violet</item>
+        <item name="colorSecondary">@color/color_calendar_violet</item>
+        <item name="android:colorAccent">@color/color_calendar_violet</item>
     </style>
 
 </resources>

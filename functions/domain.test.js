@@ -7,6 +7,7 @@ const {
   hasActiveRole,
   isApprovedProvider,
   isVerifiedFlutterwavePayment,
+  isVerifiedPesapalPayment,
   isValidStatusTransition,
   canCancelBooking,
   canReviewBooking,
@@ -121,9 +122,30 @@ test("only accepts a successful, matching UGX Flutterwave transaction", () => {
   assert.equal(isVerifiedFlutterwavePayment({ ...transaction, currency: "USD" }, transaction.tx_ref, 46350), false);
 });
 
+test("only accepts a completed, matching UGX Pesapal transaction", () => {
+  const transaction = {
+    status_code: 1,
+    payment_status_description: "Completed",
+    merchant_reference: "wl_0123456789abcdef0123456789abcdef",
+    currency: "UGX",
+    amount: "46350.00",
+  };
+  assert.equal(isVerifiedPesapalPayment(transaction, transaction.merchant_reference, 46350), true);
+  assert.equal(isVerifiedPesapalPayment({ ...transaction, amount: "46349" },
+    transaction.merchant_reference, 46350), false);
+  assert.equal(isVerifiedPesapalPayment({ ...transaction, currency: "KES" },
+    transaction.merchant_reference, 46350), false);
+  assert.equal(isVerifiedPesapalPayment({ ...transaction, merchant_reference: "other" },
+    transaction.merchant_reference, 46350), false);
+  assert.equal(isVerifiedPesapalPayment({ ...transaction, status_code: 2 },
+    transaction.merchant_reference, 46350), false);
+});
+
 test("allows only sequential provider status transitions and blocks unpaid online acceptance", () => {
   assert.equal(isValidStatusTransition("BOOKED", "ACCEPTED", "cash", "PENDING"), true);
   assert.equal(isValidStatusTransition("BOOKED", "ACCEPTED", "flutterwave", "PAID"), true);
+  assert.equal(isValidStatusTransition("BOOKED", "ACCEPTED", "pesapal", "PAID"), true);
+  assert.equal(isValidStatusTransition("BOOKED", "ACCEPTED", "pesapal", "PENDING"), false);
   assert.equal(isValidStatusTransition("BOOKED", "ACCEPTED", "flutterwave", "PENDING"), false);
   assert.equal(isValidStatusTransition("BOOKED", "WASHING", "cash", "PENDING"), false);
   assert.equal(isValidStatusTransition("DELIVERED", "ACCEPTED", "cash", "PENDING"), false);

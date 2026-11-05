@@ -2,22 +2,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface"
+    android:background="@color/color_background"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="@dimen/layout_64dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:paddingStart="@dimen/layout_16dp"
+        android:paddingEnd="@dimen/layout_16dp">
 
         <ImageView
             android:id="@+id/btn_provider_menu"
-            android:layout_width="36dp"
-            android:layout_height="48dp"
-            android:padding="6dp"
+            android:layout_width="@dimen/layout_36dp"
+            android:layout_height="@dimen/layout_48dp"
+            android:padding="@dimen/layout_6dp"
             android:src="@drawable/ic_menu_lines"
             android:contentDescription="@string/provider_nav_more"
             android:clickable="true"
@@ -26,16 +26,17 @@
         <ImageView
             android:id="@+id/btn_chat_back"
             style="@style/WashLinkBackButton"
-            android:layout_marginStart="4dp" />
+        android:contentDescription="@string/back"
+            android:layout_marginStart="@dimen/layout_4dp" />
 
         <TextView
             android:id="@+id/tv_chat_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="@dimen/layout_12dp"
             android:layout_weight="1"
             android:textColor="@color/text_primary"
-            android:textSize="18sp"
+            android:textSize="@dimen/layout_18sp"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -45,7 +46,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:padding="8dp"
+        android:minHeight="@dimen/touch_target_min"
+        android:padding="@dimen/layout_8dp"
         android:textColor="@color/text_secondary"
         android:visibility="gone" />
 
@@ -61,40 +63,40 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp" />
+            android:padding="@dimen/layout_16dp" />
     </ScrollView>
 
     <LinearLayout
         android:id="@+id/chat_input_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
-        android:elevation="8dp"
+        android:background="@color/color_surface"
+        android:elevation="@dimen/layout_8dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="12dp">
+        android:padding="@dimen/layout_12dp">
 
         <EditText
             android:id="@+id/et_chat_message"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/layout_48dp"
             android:layout_weight="1"
             android:background="@drawable/bg_card_bordered"
             android:hint="@string/chat_message_hint"
             android:inputType="textCapSentences|textMultiLine"
             android:maxLength="2000"
             android:maxLines="4"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
+            android:paddingStart="@dimen/layout_12dp"
+            android:paddingEnd="@dimen/layout_12dp"
             android:textColor="@color/text_primary"
-            android:textSize="14sp" />
+            android:textSize="@dimen/layout_14sp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_chat_send"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
-            android:minWidth="72dp"
+            android:layout_height="@dimen/layout_48dp"
+            android:layout_marginStart="@dimen/layout_8dp"
+            android:minWidth="@dimen/layout_72dp"
             android:text="@string/chat_send"
             android:textAllCaps="false" />
     </LinearLayout>
@@ -103,5 +105,5 @@
         android:id="@+id/provider_chat_thread_nav"
         layout="@layout/activity_provider_nav_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp" />
+        android:layout_height="@dimen/layout_56dp" />
 </LinearLayout>

@@ -92,6 +92,16 @@ function isVerifiedFlutterwavePayment(transaction, expectedReference, expectedAm
     && Math.abs(transaction.amount - expectedAmount) < 0.001;
 }
 
+function isVerifiedPesapalPayment(transaction, expectedReference, expectedAmount) {
+  return transaction
+    && Number(transaction.status_code) === 1
+    && String(transaction.payment_status_description).toUpperCase() === "COMPLETED"
+    && transaction.merchant_reference === expectedReference
+    && transaction.currency === "UGX"
+    && Number.isFinite(Number(transaction.amount))
+    && Math.abs(Number(transaction.amount) - expectedAmount) < 0.001;
+}
+
 function isValidStatusTransition(currentStatus, nextStatus, paymentProvider, paymentStatus) {
   const transitions = {
     BOOKED: ["ACCEPTED", "REJECTED"],
@@ -105,7 +115,7 @@ function isValidStatusTransition(currentStatus, nextStatus, paymentProvider, pay
   if (!transitions[currentStatus]?.includes(nextStatus)) return false;
   return nextStatus !== "ACCEPTED"
     || paymentProvider === "cash"
-    || (paymentProvider === "flutterwave" && paymentStatus === "PAID");
+    || (["flutterwave", "pesapal"].includes(paymentProvider) && paymentStatus === "PAID");
 }
 
 function canCancelBooking(booking) {
@@ -195,6 +205,7 @@ module.exports = {
   isApprovedProvider,
   quoteBooking,
   isVerifiedFlutterwavePayment,
+  isVerifiedPesapalPayment,
   isValidStatusTransition,
   canCancelBooking,
   canReviewBooking,

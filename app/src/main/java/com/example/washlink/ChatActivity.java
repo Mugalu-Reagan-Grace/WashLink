@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -221,7 +222,7 @@ public class ChatActivity extends WashLinkActivity {
         LinearLayout line = new LinearLayout(this);
         line.setOrientation(LinearLayout.VERTICAL);
         line.setGravity(mine ? Gravity.END : Gravity.START);
-        line.setPadding(0, 5, 0, 5);
+        line.setPadding(0, dp(5), 0, dp(5));
         messages.addView(line, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -229,55 +230,74 @@ public class ChatActivity extends WashLinkActivity {
         LinearLayout messageColumn = new LinearLayout(this);
         messageColumn.setOrientation(LinearLayout.VERTICAL);
         messageColumn.setGravity(mine ? Gravity.END : Gravity.START);
-        messageColumn.setPadding(mine ? 32 : 0, 0, mine ? 0 : 32, 0);
+        messageColumn.setPadding(mine ? dp(12) : 0, 0, mine ? 0 : dp(12), 0);
+        FrameLayout bubbleFrame = new FrameLayout(this);
+        bubbleFrame.setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.chat_bubble_min_width));
+        bubbleFrame.setElevation(dp(1));
+        float radius = dp(18);
+        float corner = dp(5);
+        GradientDrawable bubbleBackground = new GradientDrawable();
+        bubbleBackground.setColor(messageBubbleColor(mine));
+        bubbleBackground.setCornerRadii(mine
+                ? new float[] {radius, radius, radius, radius, corner, corner, radius, radius}
+                : new float[] {radius, radius, radius, radius, radius, radius, corner, corner});
+        bubbleFrame.setBackground(bubbleBackground);
+
         TextView bubble = new TextView(this);
         bubble.setText(text);
-        bubble.setTextSize(14);
-        bubble.setLineSpacing(0, 1.08f);
-        bubble.setGravity(Gravity.CENTER_VERTICAL);
-        bubble.setTextColor(mine ? getColor(R.color.on_accent) : messageTextColor());
-        if (mine) {
-            GradientDrawable sentBackground = new GradientDrawable();
-            sentBackground.setColor(ThemeManager.accent(this, role));
-            float radius = 18 * getResources().getDisplayMetrics().density;
-            sentBackground.setCornerRadii(new float[] {
-                    radius, radius, radius, radius, 5 * getResources().getDisplayMetrics().density,
-                    5 * getResources().getDisplayMetrics().density, radius, radius
-            });
-            bubble.setBackground(sentBackground);
-        } else {
-            GradientDrawable receivedBackground = new GradientDrawable();
-            receivedBackground.setColor(messageSurfaceColor());
-            float radius = 18 * getResources().getDisplayMetrics().density;
-            receivedBackground.setCornerRadii(new float[] {
-                    radius, radius, radius, radius, 5 * getResources().getDisplayMetrics().density,
-                    5 * getResources().getDisplayMetrics().density, radius, radius
-            });
-            bubble.setBackground(receivedBackground);
-        }
-        bubble.setPadding(16, 11, 16, 11);
-        bubble.setMaxWidth(getResources().getDimensionPixelSize(R.dimen.chat_bubble_max_width));
-        bubble.setElevation(1.5f * getResources().getDisplayMetrics().density);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        messageColumn.addView(bubble, params);
+        bubble.setTextSize(16);
+        bubble.setLineSpacing(1, 1.12f);
+        bubble.setGravity(Gravity.START | Gravity.TOP);
+        bubble.setTextColor(messageBubbleTextColor());
+        bubble.setPadding(dp(12), dp(8), dp(12), dp(24));
+        bubble.setMaxWidth(getResources().getDimensionPixelSize(R.dimen.chat_bubble_max_width)
+                - dp(24));
+        bubbleFrame.addView(bubble, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT));
+
         TextView timestamp = new TextView(this);
         Date createdAt = messageDate(document);
         timestamp.setText(createdAt == null ? "Sending..." : formatTimestamp(createdAt));
-        timestamp.setTextSize(10);
-        timestamp.setPadding(4, 3, 4, 0);
-        timestamp.setTextColor(timestampTextColor());
-        timestamp.setGravity(mine ? Gravity.END : Gravity.START);
-        messageColumn.addView(timestamp, new LinearLayout.LayoutParams(
+        timestamp.setTextSize(11);
+        timestamp.setTextColor(messageBubbleTimestampColor());
+        FrameLayout.LayoutParams timestampParams = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM | Gravity.END);
+        timestampParams.setMargins(0, 0, dp(10), dp(5));
+        bubbleFrame.addView(timestamp, timestampParams);
+        messageColumn.addView(bubbleFrame, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         line.addView(messageColumn, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
     }
 
+    private int dp(float value) {
+        return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
+    }
+
+    private int messageBubbleColor(boolean mine) {
+        if (ThemeManager.isDarkMode(this, role)) {
+            return mine ? Color.rgb(0, 92, 75) : Color.rgb(32, 44, 51);
+        }
+        if ("cream".equals(ThemeManager.themeMode(this, role))) {
+            return mine ? Color.rgb(220, 239, 216) : Color.rgb(255, 253, 248);
+        }
+        return mine ? Color.rgb(217, 253, 211) : Color.WHITE;
+    }
+
+    private int messageBubbleTextColor() {
+        return ThemeManager.isDarkMode(this, role)
+                ? Color.rgb(233, 237, 239) : Color.rgb(17, 27, 33);
+    }
+
+    private int messageBubbleTimestampColor() {
+        return ThemeManager.isDarkMode(this, role)
+                ? Color.rgb(134, 150, 160) : Color.rgb(102, 120, 129);
+    }
+
     private String formatTimestamp(Date date) {
-        return new java.text.SimpleDateFormat("EEE dd yyyy, h:mm a",
-                Locale.getDefault()).format(date);
+        return new java.text.SimpleDateFormat("h:mm a", Locale.getDefault()).format(date);
     }
 
     private void markConversationRead(com.google.firebase.firestore.DocumentReference chatRef) {

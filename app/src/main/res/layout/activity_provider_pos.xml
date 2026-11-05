@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/layout_16dp"
+        android:paddingTop="@dimen/layout_10dp"
+        android:paddingEnd="@dimen/layout_16dp">
+
+        <ImageView
+            android:id="@+id/btn_provider_menu"
+            android:layout_width="@dimen/touch_target_min"
+            android:layout_height="@dimen/touch_target_min"
+            android:contentDescription="@string/provider_nav_more"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="@dimen/layout_6dp"
+            android:src="@drawable/ic_menu_lines" />
+
+        <ImageView
+            android:id="@+id/btn_provider_pos_back"
+            style="@style/WashLinkBackButton"
+        android:contentDescription="@string/back"
+            android:layout_marginStart="@dimen/layout_4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/layout_8dp"
+            android:text="@string/provider_workspace_pos_title"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/layout_20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/layout_20dp"
+            android:paddingTop="@dimen/layout_8dp"
+            android:paddingEnd="@dimen/layout_20dp"
+            android:paddingBottom="@dimen/layout_20dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/provider_workspace_pos_description"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/layout_13sp" />
+
+            <TextView
+                android:id="@+id/tv_pos_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="@dimen/layout_12dp"
+                android:textColor="@color/pending_text"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/layout_12dp"
+                android:text="@string/provider_workspace_available_service"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/sp_pos_service"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/layout_52dp"
+                android:background="@drawable/bg_card_bordered"
+                android:contentDescription="@string/provider_workspace_available_service"
+                android:paddingStart="@dimen/layout_10dp"
+                android:paddingEnd="@dimen/layout_10dp" />
+
+            <TextView
+                android:id="@+id/tv_pos_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/layout_4dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/layout_12sp" />
+
+            <EditText
+                android:id="@+id/et_pos_customer_name"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/layout_52dp"
+                android:layout_marginTop="@dimen/layout_8dp"
+                android:background="@drawable/bg_card_bordered"
+                android:hint="@string/provider_workspace_customer_name"
+                android:inputType="textPersonName"
+                android:paddingStart="@dimen/layout_12dp"
+                android:paddingEnd="@dimen/layout_12dp"
+                android:singleLine="true"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary" />
+
+            <EditText
+                android:id="@+id/et_pos_customer_phone"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/layout_52dp"
+                android:layout_marginTop="@dimen/layout_8dp"
+                android:background="@drawable/bg_card_bordered"
+                android:hint="@string/provider_workspace_customer_phone_optional"
+                android:inputType="phone"
+                android:paddingStart="@dimen/layout_12dp"
+                android:paddingEnd="@dimen/layout_12dp"
+                android:singleLine="true"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary" />
+
+            <EditText
+                android:id="@+id/et_pos_quantity"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/layout_52dp"
+                android:layout_marginTop="@dimen/layout_8dp"
+                android:background="@drawable/bg_card_bordered"
+                android:hint="@string/provider_workspace_quantity_kg"
+                android:inputType="numberDecimal"
+                android:paddingStart="@dimen/layout_12dp"
+                android:paddingEnd="@dimen/layout_12dp"
+                android:singleLine="true"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary" />
+
+            <Spinner
+                android:id="@+id/sp_pos_payment"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/layout_52dp"
+                android:layout_marginTop="@dimen/layout_8dp"
+                android:background="@drawable/bg_card_bordered"
+                android:contentDescription="@string/provider_workspace_payment_method"
+                android:paddingStart="@dimen/layout_10dp"
+                android:paddingEnd="@dimen/layout_10dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_pos_create_invoice"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/layout_52dp"
+                android:layout_marginTop="@dimen/layout_12dp"
+                android:text="@string/provider_workspace_record_sale_invoice" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/layout_20dp"
+                android:text="@string/provider_workspace_immutable_invoices"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/layout_18sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/pos_invoice_rows"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/layout_8dp"
+                android:orientation="vertical" />
+        </LinearLayout>
+    </ScrollView>
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/layout_56dp"
+        layout="@layout/activity_provider_nav_bar" />
+</LinearLayout>

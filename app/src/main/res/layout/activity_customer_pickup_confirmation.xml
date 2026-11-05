@@ -4,18 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/color_background"
     tools:context=".PickupConfirmationActivity">
 
     <!-- Header -->
     <ImageView
         android:id="@+id/btn_back"
         style="@style/WashLinkBackButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:padding="12dp"
+        android:contentDescription="@string/back"
+        android:layout_width="@dimen/layout_48dp"
+        android:layout_height="@dimen/layout_48dp"
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginTop="@dimen/layout_20dp"
+        android:padding="@dimen/layout_12dp"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintTop_toTopOf="parent"
@@ -25,11 +26,11 @@
         android:id="@+id/tv_header_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
+        android:layout_marginStart="@dimen/layout_12dp"
+        android:layout_marginEnd="@dimen/layout_12dp"
         android:text="@string/pickup_confirmation_title"
         android:textColor="@color/text_primary"
-        android:textSize="17sp"
+        android:textSize="@dimen/layout_17sp"
         android:textStyle="bold"
         android:gravity="center"
         app:layout_constraintTop_toTopOf="@id/btn_back"
@@ -39,10 +40,10 @@
 
     <FrameLayout
         android:id="@+id/iv_bell"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="20dp"
-        android:padding="12dp"
+        android:layout_width="@dimen/layout_48dp"
+        android:layout_height="@dimen/layout_48dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:padding="@dimen/layout_12dp"
         app:layout_constraintTop_toTopOf="@id/btn_back"
         app:layout_constraintBottom_toBottomOf="@id/btn_back"
         app:layout_constraintEnd_toEndOf="parent">
@@ -55,8 +56,8 @@
             android:contentDescription="@null" />
 
         <View
-            android:layout_width="7dp"
-            android:layout_height="7dp"
+            android:layout_width="@dimen/layout_7dp"
+            android:layout_height="@dimen/layout_7dp"
             android:layout_gravity="top|end"
             android:background="@drawable/dot_notification" />
     </FrameLayout>
@@ -66,16 +67,16 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:paddingBottom="16dp"
+        android:paddingBottom="@dimen/layout_16dp"
         app:layout_constraintTop_toBottomOf="@id/btn_back"
         app:layout_constraintBottom_toTopOf="@id/bottom_bar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="20dp">
+            android:paddingStart="@dimen/layout_20dp"
+            android:paddingEnd="@dimen/layout_20dp"
+            android:paddingTop="@dimen/layout_20dp">
 
             <!-- Pickup Logistics card -->
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -83,7 +84,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_card_bordered"
-                android:padding="16dp"
+                android:padding="@dimen/layout_16dp"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
@@ -94,7 +95,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/pickup_logistics"
                     android:textColor="@color/text_primary"
-                    android:textSize="15sp"
+                    android:textSize="@dimen/layout_15sp"
                     android:textStyle="bold"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -106,7 +107,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/edit"
                     android:textColor="@color/laundr_blue"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/layout_13sp"
                     android:textStyle="bold"
                     app:layout_constraintTop_toTopOf="@id/tv_logistics_label"
                     app:layout_constraintEnd_toEndOf="parent" />
@@ -115,10 +116,10 @@
                     android:id="@+id/tv_datetime_value"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="@dimen/layout_10dp"
                     android:text="@string/pickup_datetime_value"
                     android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/layout_13sp"
                     app:layout_constraintTop_toBottomOf="@id/tv_logistics_label"
                     app:layout_constraintStart_toStartOf="parent" />
 
@@ -126,10 +127,10 @@
                     android:id="@+id/tv_address_value"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="@dimen/layout_6dp"
                     android:text="@string/home_address_value"
                     android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/layout_13sp"
                     app:layout_constraintTop_toBottomOf="@id/tv_datetime_value"
                     app:layout_constraintStart_toStartOf="parent" />
 
@@ -140,10 +141,10 @@
                 android:id="@+id/label_items"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="@dimen/layout_20dp"
                 android:text="@string/number_of_items"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp"
+                android:textSize="@dimen/layout_14sp"
                 android:textStyle="bold"
                 app:layout_constraintTop_toBottomOf="@id/card_logistics"
                 app:layout_constraintStart_toStartOf="parent"
@@ -154,7 +155,7 @@
                 android:id="@+id/stepper_items"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="@dimen/layout_14dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:background="@drawable/bg_card_bordered"
@@ -163,35 +164,35 @@
 
                 <ImageView
                     android:id="@+id/btn_minus"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:padding="10dp"
+                    android:layout_width="@dimen/layout_48dp"
+                    android:layout_height="@dimen/layout_48dp"
+                    android:padding="@dimen/layout_12dp"
                     android:src="@drawable/ic_minus"
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@null" />
+                    android:contentDescription="@string/decrease_items" />
 
                 <TextView
                     android:id="@+id/tv_item_count"
-                    android:layout_width="32dp"
+                    android:layout_width="@dimen/layout_32dp"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/default_item_count"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/layout_14sp"
                     android:textStyle="bold" />
 
                 <ImageView
                     android:id="@+id/btn_plus"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:padding="10dp"
+                    android:layout_width="@dimen/layout_48dp"
+                    android:layout_height="@dimen/layout_48dp"
+                    android:padding="@dimen/layout_12dp"
                     android:src="@drawable/ic_plus"
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@null" />
+                    android:contentDescription="@string/increase_items" />
 
             </LinearLayout>
 
@@ -200,10 +201,10 @@
                 android:id="@+id/label_weight"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="@dimen/layout_20dp"
                 android:text="@string/estimated_weight"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp"
+                android:textSize="@dimen/layout_14sp"
                 android:textStyle="bold"
                 app:layout_constraintTop_toBottomOf="@id/stepper_items"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -211,12 +212,13 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/dropdown_weight"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:layout_marginTop="8dp"
+                android:layout_height="@dimen/layout_52dp"
+                android:layout_marginTop="@dimen/layout_8dp"
                 android:background="@drawable/bg_top_rounded_white"
                 android:backgroundTint="@color/input_bg"
                 android:clickable="true"
                 android:focusable="true"
+                android:contentDescription="@string/estimated_weight"
                 app:layout_constraintTop_toBottomOf="@id/label_weight"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
@@ -225,18 +227,18 @@
                     android:id="@+id/tv_weight_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:text="5 kg"
+                    android:layout_marginStart="@dimen/layout_14dp"
+                    android:text="@string/booking_weight_default"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/layout_14sp"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
 
                 <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_marginEnd="14dp"
+                    android:layout_width="@dimen/layout_18dp"
+                    android:layout_height="@dimen/layout_18dp"
+                    android:layout_marginEnd="@dimen/layout_14dp"
                     android:src="@drawable/ic_chevron_right"
                     android:rotation="90"
                     android:contentDescription="@null"
@@ -251,27 +253,27 @@
                 android:id="@+id/label_instructions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="@dimen/layout_20dp"
                 android:text="@string/special_instructions"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp"
+                android:textSize="@dimen/layout_14sp"
                 android:textStyle="bold"
                 app:layout_constraintTop_toBottomOf="@id/dropdown_weight"
                 app:layout_constraintStart_toStartOf="parent" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_instructions"
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+                style="@style/Widget.WashLink.TextInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/layout_8dp"
                 app:boxBackgroundColor="@color/input_bg"
-                app:boxCornerRadiusTopStart="10dp"
-                app:boxCornerRadiusTopEnd="10dp"
-                app:boxCornerRadiusBottomStart="10dp"
-                app:boxCornerRadiusBottomEnd="10dp"
-                app:boxStrokeWidth="0dp"
-                app:boxStrokeWidthFocused="0dp"
+                app:boxCornerRadiusTopStart="@dimen/layout_10dp"
+                app:boxCornerRadiusTopEnd="@dimen/layout_10dp"
+                app:boxCornerRadiusBottomStart="@dimen/layout_10dp"
+                app:boxCornerRadiusBottomEnd="@dimen/layout_10dp"
+                app:boxStrokeWidth="@dimen/layout_1dp"
+                app:boxStrokeWidthFocused="@dimen/layout_2dp"
                 app:hintEnabled="false"
                 app:layout_constraintTop_toBottomOf="@id/label_instructions"
                 app:layout_constraintStart_toStartOf="parent">
@@ -279,11 +281,11 @@
                 <com.google.android.material.textfield.TextInputEditText
                     style="@style/WashLinkInputText"
                     android:layout_width="match_parent"
-                    android:layout_height="80dp"
+                    android:layout_height="@dimen/layout_80dp"
                     android:gravity="top"
                     android:hint="@string/special_instructions_hint"
                     android:inputType="textMultiLine"
-                    android:textSize="14sp" />
+                    android:textSize="@dimen/layout_14sp" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -291,12 +293,12 @@
                 android:id="@+id/tv_fee_note"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/layout_16dp"
                 android:background="@drawable/bg_offer_card"
-                android:padding="10dp"
+                android:padding="@dimen/layout_10dp"
                 android:text="@string/pickup_delivery_fee_note"
                 android:textColor="@color/laundr_blue"
-                android:textSize="12sp"
+                android:textSize="@dimen/layout_12sp"
                 app:layout_constraintTop_toBottomOf="@id/til_instructions"
                 app:layout_constraintStart_toStartOf="parent" />
 
@@ -305,10 +307,10 @@
                 android:id="@+id/label_contact_pref"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/layout_16dp"
                 android:text="@string/contact_preference"
                 android:textColor="@color/text_primary"
-                android:textSize="13sp"
+                android:textSize="@dimen/layout_13sp"
                 app:layout_constraintTop_toBottomOf="@id/tv_fee_note"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/row_contact_pref_compact"
@@ -318,7 +320,7 @@
                 android:id="@+id/row_contact_pref_compact"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/layout_16dp"
                 android:orientation="horizontal"
                 app:layout_constraintTop_toBottomOf="@id/tv_fee_note"
                 app:layout_constraintEnd_toEndOf="parent">
@@ -327,29 +329,31 @@
                     android:id="@+id/chip_call_compact"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp"
+                    android:minHeight="@dimen/layout_48dp"
+                    android:layout_marginEnd="@dimen/layout_8dp"
+                    android:paddingStart="@dimen/layout_16dp"
+                    android:paddingEnd="@dimen/layout_16dp"
+                    android:paddingTop="@dimen/layout_8dp"
+                    android:paddingBottom="@dimen/layout_8dp"
                     android:background="@drawable/bg_chip_selected"
                     android:text="@string/contact_call"
                     android:textColor="@color/white"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/layout_12sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/chip_text_compact"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp"
+                    android:minHeight="@dimen/layout_48dp"
+                    android:paddingStart="@dimen/layout_16dp"
+                    android:paddingEnd="@dimen/layout_16dp"
+                    android:paddingTop="@dimen/layout_8dp"
+                    android:paddingBottom="@dimen/layout_8dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:text="@string/contact_text"
                     android:textColor="@color/chip_unselected_text"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/layout_12sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -359,7 +363,7 @@
                 android:id="@+id/row_pickup_fee"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="@dimen/layout_14dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 app:layout_constraintTop_toBottomOf="@id/row_contact_pref_compact">
@@ -370,14 +374,14 @@
                     android:layout_weight="1"
                     android:text="@string/pick_up_fee"
                     android:textColor="@color/text_primary"
-                    android:textSize="13sp" />
+                    android:textSize="@dimen/layout_13sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/pickup_delivery_fee_amount"
                     android:textColor="@color/text_primary"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/layout_13sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -393,23 +397,23 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@color/white"
-        android:elevation="8dp"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="16dp"
+        android:elevation="@dimen/layout_8dp"
+        android:paddingStart="@dimen/layout_20dp"
+        android:paddingEnd="@dimen/layout_20dp"
+        android:paddingTop="@dimen/layout_12dp"
+        android:paddingBottom="@dimen/layout_16dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_confirm_pickup"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="@dimen/layout_52dp"
             android:text="@string/confirm_pickup"
             android:textAllCaps="false"
-            android:textSize="15sp"
+            android:textSize="@dimen/layout_15sp"
             android:textColor="@color/white"
             android:backgroundTint="@color/laundr_blue"
-            app:cornerRadius="12dp" />
+            app:cornerRadius="@dimen/radius_button" />
 
     </LinearLayout>
 

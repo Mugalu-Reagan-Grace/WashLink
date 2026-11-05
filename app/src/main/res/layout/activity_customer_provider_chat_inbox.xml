@@ -2,24 +2,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/color_background"
     android:orientation="vertical"
-    android:paddingTop="12dp"
+    android:paddingTop="@dimen/layout_12dp"
     >
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="52dp"
+        android:layout_height="@dimen/layout_52dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:paddingStart="@dimen/layout_16dp"
+        android:paddingEnd="@dimen/layout_16dp">
 
         <ImageView
             android:id="@+id/btn_provider_menu"
-            android:layout_width="36dp"
-            android:layout_height="48dp"
-            android:padding="6dp"
+            android:layout_width="@dimen/layout_36dp"
+            android:layout_height="@dimen/layout_48dp"
+            android:padding="@dimen/layout_6dp"
             android:src="@drawable/ic_menu_lines"
             android:contentDescription="@string/provider_nav_more"
             android:clickable="true"
@@ -28,16 +28,17 @@
         <ImageView
             android:id="@+id/btn_chat_inbox_back"
             style="@style/WashLinkBackButton"
-            android:layout_marginStart="4dp" />
+        android:contentDescription="@string/back"
+            android:layout_marginStart="@dimen/layout_4dp" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="@dimen/layout_12dp"
             android:layout_weight="1"
             android:text="@string/chat_inbox_title"
             android:textColor="@color/text_primary"
-            android:textSize="20sp"
+            android:textSize="@dimen/layout_20sp"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -47,9 +48,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:padding="24dp"
+        android:minHeight="@dimen/layout_120dp"
+        android:paddingStart="@dimen/layout_20dp"
+        android:paddingEnd="@dimen/layout_20dp"
+        android:padding="@dimen/layout_24dp"
         android:textColor="@color/text_secondary"
         android:visibility="gone" />
 
@@ -57,8 +59,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
+        android:paddingStart="@dimen/layout_20dp"
+        android:paddingEnd="@dimen/layout_20dp"
         android:clipToPadding="false">
 
         <LinearLayout
@@ -72,5 +74,5 @@
         android:id="@+id/provider_chat_nav"
         layout="@layout/activity_provider_nav_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp" />
+        android:layout_height="@dimen/layout_56dp" />
 </LinearLayout>

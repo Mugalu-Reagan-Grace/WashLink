@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="provider_business_name_example">e.g. CleanWave Laundry</string>
+    <string name="provider_owner_name_hint">Enter your full name</string>
+    <string name="provider_email_example">business@example.com</string>
+    <string name="provider_phone_example">+1 (555) 123-4567</string>
+</resources>

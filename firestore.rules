@@ -94,6 +94,60 @@ service cloud.firestore {
             == resource.data.get('isApproved', false));
       allow delete: if false;
 
+      function isApprovedProviderOwner() {
+        return isProvider()
+          && request.auth.uid == uid
+          && get(/databases/$(database)/documents/providers/$(uid))
+            .data.get('isApproved', false) == true;
+      }
+
+      function validInventoryRecord(item) {
+        return item.keys().hasAll([
+            'name', 'quantity', 'lowStockThreshold', 'createdAt', 'updatedAt'
+          ])
+          && item.keys().hasOnly([
+            'name', 'sku', 'unit', 'quantity', 'lowStockThreshold',
+            'unitCost', 'createdAt', 'updatedAt'
+          ])
+          && item.name is string
+          && item.name.size() >= 1
+          && item.name.size() <= 100
+          && item.get('sku', '') is string
+          && item.get('sku', '').size() <= 60
+          && item.get('unit', '') is string
+          && item.get('unit', '').size() <= 30
+          && item.quantity is int
+          && item.quantity >= 0
+          && item.quantity <= 1000000
+          && item.lowStockThreshold is int
+          && item.lowStockThreshold >= 0
+          && item.lowStockThreshold <= 1000000
+          && item.get('unitCost', 0) is number
+          && item.get('unitCost', 0) >= 0
+          && item.get('unitCost', 0) <= 1000000000
+          && item.createdAt is timestamp
+          && item.updatedAt is timestamp;
+      }
+
+      match /inventory/{itemId} {
+        allow read: if isAdmin() || (isProvider() && request.auth.uid == uid);
+        allow create: if isApprovedProviderOwner()
+          && validInventoryRecord(request.resource.data)
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time
+          && itemId.size() > 0;
+        allow update: if isApprovedProviderOwner()
+          && validInventoryRecord(request.resource.data)
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly([
+              'name', 'sku', 'unit', 'quantity', 'lowStockThreshold',
+              'unitCost', 'updatedAt'
+            ])
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if isApprovedProviderOwner();
+      }
+
       match /reviews/{reviewId} {
         allow read: if isActiveUser() || isAdmin();
       }
@@ -124,6 +178,98 @@ service cloud.firestore {
           && request.resource.data.phone.size() <= 30
           && request.resource.data.isActive is bool;
         allow delete: if false;
+      }
+
+      match /staff/{staffId} {
+        allow read: if isAdmin() || (isProvider() && request.auth.uid == uid);
+        allow create: if isProvider()
+          && request.auth.uid == uid
+          && get(/databases/$(database)/documents/providers/$(uid))
+            .data.get('isApproved', false) == true
+          && request.resource.data.keys().hasOnly([
+            'name', 'phone', 'role', 'active', 'createdAt'
+          ])
+          && request.resource.data.name is string
+          && request.resource.data.name.size() >= 2
+          && request.resource.data.name.size() <= 80
+          && request.resource.data.phone is string
+          && request.resource.data.phone.size() >= 7
+          && request.resource.data.phone.size() <= 30
+          && request.resource.data.role is string
+          && request.resource.data.role.size() >= 2
+          && request.resource.data.role.size() <= 40
+          && request.resource.data.active is bool
+          && request.resource.data.createdAt == request.time;
+        allow update: if isProvider()
+          && request.auth.uid == uid
+          && get(/databases/$(database)/documents/providers/$(uid))
+            .data.get('isApproved', false) == true
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['name', 'phone', 'role', 'active'])
+          && request.resource.data.name is string
+          && request.resource.data.name.size() >= 2
+          && request.resource.data.name.size() <= 80
+          && request.resource.data.phone is string
+          && request.resource.data.phone.size() >= 7
+          && request.resource.data.phone.size() <= 30
+          && request.resource.data.role is string
+          && request.resource.data.role.size() >= 2
+          && request.resource.data.role.size() <= 40
+          && request.resource.data.active is bool;
+        allow delete: if isProvider()
+          && request.auth.uid == uid
+          && get(/databases/$(database)/documents/providers/$(uid))
+            .data.get('isApproved', false) == true;
+      }
+
+      function mayCreatePosRecord(record, recordId) {
+        let profile = get(/databases/$(database)/documents/providers/$(uid)).data;
+        return isProvider()
+          && request.auth.uid == uid
+          && profile.get('isApproved', false) == true
+          && record.keys().hasOnly([
+            'providerId', 'invoiceNumber', 'customerName', 'customerPhone',
+            'serviceName', 'serviceIndex', 'pricePerKg', 'quantityKg',
+            'subtotal', 'total', 'currency', 'paymentMethod', 'createdAt'
+          ])
+          && record.providerId == uid
+          && record.invoiceNumber is string
+          && record.invoiceNumber.size() >= 6
+          && record.invoiceNumber.size() <= 40
+          && record.customerName is string
+          && record.customerName.size() >= 2
+          && record.customerName.size() <= 100
+          && record.customerPhone is string
+          && record.customerPhone.size() <= 30
+          && record.serviceIndex is int
+          && record.serviceIndex >= 0
+          && record.serviceIndex < profile.services.size()
+          && profile.services[record.serviceIndex].name == record.serviceName
+          && profile.services[record.serviceIndex].get('isAvailable', true) == true
+          && record.pricePerKg is number
+          && record.pricePerKg > 0
+          && profile.services[record.serviceIndex].pricePerKg == record.pricePerKg
+          && record.quantityKg is number
+          && record.quantityKg > 0
+          && record.quantityKg <= 1000
+          && record.subtotal == record.pricePerKg * record.quantityKg
+          && record.total == record.subtotal
+          && record.currency == 'UGX'
+          && record.paymentMethod in ['cash', 'mobile_money', 'card', 'other']
+          && record.createdAt == request.time
+          && recordId.size() > 0;
+      }
+
+      match /sales/{saleId} {
+        allow read: if isAdmin() || (isProvider() && request.auth.uid == uid);
+        allow create: if mayCreatePosRecord(request.resource.data, saleId);
+        allow update, delete: if false;
+      }
+
+      match /invoices/{invoiceId} {
+        allow read: if isAdmin() || (isProvider() && request.auth.uid == uid);
+        allow create: if mayCreatePosRecord(request.resource.data, invoiceId);
+        allow update, delete: if false;
       }
     }
 

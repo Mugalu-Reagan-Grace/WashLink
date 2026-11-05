@@ -2,10 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
+    android:layout_marginBottom="@dimen/layout_12dp"
     android:background="@drawable/bg_card_bordered"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="@dimen/layout_16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,30 +19,30 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textColor="@color/text_primary"
-            android:textSize="15sp"
+            android:textSize="@dimen/layout_15sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/btn_service_edit"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="@dimen/touch_target_min"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
-            android:minWidth="48dp"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:text="Edit"
+            android:minWidth="@dimen/layout_48dp"
+            android:paddingStart="@dimen/layout_10dp"
+            android:paddingEnd="@dimen/layout_10dp"
+            android:text="@string/provider_workspace_edit"
             android:textColor="@color/laundr_blue"
-            android:textSize="13sp"
+            android:textSize="@dimen/layout_13sp"
             android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="@dimen/layout_2dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
@@ -52,34 +52,34 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
+            android:textSize="@dimen/layout_13sp" />
 
         <TextView
             android:id="@+id/btn_service_remove"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="@dimen/touch_target_min"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
-            android:minWidth="48dp"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:text="Remove"
+            android:minWidth="@dimen/layout_48dp"
+            android:paddingStart="@dimen/layout_10dp"
+            android:paddingEnd="@dimen/layout_10dp"
+            android:text="@string/provider_workspace_remove"
             android:textColor="@color/reject_red"
-            android:textSize="13sp" />
+            android:textSize="@dimen/layout_13sp" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/btn_service_availability"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
+        android:layout_height="@dimen/touch_target_min"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
-        android:minWidth="64dp"
+        android:minWidth="@dimen/layout_64dp"
         android:text="@string/provider_service_available"
-        android:textSize="12sp"
+        android:textSize="@dimen/layout_12sp"
         android:textStyle="bold" />
 </LinearLayout>

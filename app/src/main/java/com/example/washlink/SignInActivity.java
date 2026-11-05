@@ -49,6 +49,10 @@ public class SignInActivity extends WashLinkActivity {
 
         email_et = findViewById(R.id.et_email_login);
         password_et = findViewById(R.id.et_password_login);
+        if (com.example.washlink.BuildConfig.USE_FIREBASE_EMULATORS) {
+            ((TextView) findViewById(R.id.tv_subtitle))
+                    .setText(R.string.demo_customer_sign_in_hint);
+        }
         findViewById(R.id.cb_remember_me);
         Button signInButton = findViewById(R.id.btn_sign_in);
         View googleButton = findViewById(R.id.btn_google_outlined);

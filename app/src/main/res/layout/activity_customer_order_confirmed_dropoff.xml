@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/color_background"
     tools:context=".OrderConfirmedDropOffActivity">
 
     <!-- Header -->
@@ -12,10 +12,10 @@
         android:id="@+id/tv_header_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="@dimen/layout_20dp"
         android:text="@string/order_confirmed_title"
         android:textColor="@color/text_primary"
-        android:textSize="17sp"
+        android:textSize="@dimen/layout_17sp"
         android:textStyle="bold"
         android:gravity="center"
         app:layout_constraintTop_toTopOf="parent" />
@@ -25,31 +25,31 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:paddingBottom="16dp"
+        android:paddingBottom="@dimen/layout_16dp"
         app:layout_constraintTop_toBottomOf="@id/tv_header_title"
         app:layout_constraintBottom_toTopOf="@id/bottom_bar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="12dp">
+            android:paddingStart="@dimen/layout_20dp"
+            android:paddingEnd="@dimen/layout_20dp"
+            android:paddingTop="@dimen/layout_12dp">
 
             <!-- Success checkmark -->
             <FrameLayout
                 android:id="@+id/success_icon"
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                android:layout_marginTop="12dp"
+                android:layout_width="@dimen/layout_72dp"
+                android:layout_height="@dimen/layout_72dp"
+                android:layout_marginTop="@dimen/layout_12dp"
                 android:background="@drawable/bg_success_circle"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
                 <ImageView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="@dimen/layout_32dp"
+                    android:layout_height="@dimen/layout_32dp"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_check"
                     android:contentDescription="@null" />
@@ -59,10 +59,10 @@
                 android:id="@+id/tv_confirmed_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="@dimen/layout_20dp"
                 android:text="@string/order_confirmed_title"
                 android:textColor="@color/text_primary"
-                android:textSize="22sp"
+                android:textSize="@dimen/layout_22sp"
                 android:textStyle="bold"
                 android:gravity="center"
                 app:layout_constraintTop_toBottomOf="@id/success_icon" />
@@ -71,10 +71,10 @@
                 android:id="@+id/tv_confirmed_thanks"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="@dimen/layout_6dp"
                 android:text="@string/dropoff_confirmed_thanks"
                 android:textColor="@color/text_secondary"
-                android:textSize="13sp"
+                android:textSize="@dimen/layout_13sp"
                 android:gravity="center"
                 app:layout_constraintTop_toBottomOf="@id/tv_confirmed_title" />
 
@@ -83,9 +83,9 @@
                 android:id="@+id/card_order_details"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="@dimen/layout_24dp"
                 android:background="@drawable/bg_card_bordered"
-                android:padding="16dp"
+                android:padding="@dimen/layout_16dp"
                 app:layout_constraintTop_toBottomOf="@id/tv_confirmed_thanks">
 
                 <TextView
@@ -94,7 +94,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/order_details"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/layout_14sp"
                     android:textStyle="bold"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -102,7 +102,7 @@
                     android:id="@+id/row_order_id"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="@dimen/layout_12dp"
                     android:orientation="horizontal"
                     app:layout_constraintTop_toBottomOf="@id/label_order_details">
 
@@ -112,14 +112,14 @@
                         android:layout_weight="1"
                         android:text="@string/order_id"
                         android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
+                        android:textSize="@dimen/layout_13sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/default_order_id"
                         android:textColor="@color/text_primary"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/layout_13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -127,7 +127,7 @@
                     android:id="@+id/row_service_type"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/layout_8dp"
                     android:orientation="horizontal"
                     app:layout_constraintTop_toBottomOf="@id/row_order_id">
 
@@ -137,14 +137,14 @@
                         android:layout_weight="1"
                         android:text="@string/service_type"
                         android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
+                        android:textSize="@dimen/layout_13sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/service_type_dropoff"
                         android:textColor="@color/text_primary"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/layout_13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -152,7 +152,7 @@
                     android:id="@+id/row_total_amount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/layout_8dp"
                     android:orientation="horizontal"
                     app:layout_constraintTop_toBottomOf="@id/row_service_type">
 
@@ -162,14 +162,14 @@
                         android:layout_weight="1"
                         android:text="@string/total_amount"
                         android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
+                        android:textSize="@dimen/layout_13sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/dropoff_summary_total_amount"
                         android:textColor="@color/text_primary"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/layout_13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -177,7 +177,7 @@
                     android:id="@+id/row_payment_method"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/layout_8dp"
                     android:orientation="horizontal"
                     app:layout_constraintTop_toBottomOf="@id/row_total_amount">
 
@@ -187,14 +187,14 @@
                         android:layout_weight="1"
                         android:text="@string/payment_method"
                         android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
+                        android:textSize="@dimen/layout_13sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/default_card_payment_method"
                         android:textColor="@color/text_primary"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/layout_13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -202,7 +202,7 @@
                     android:id="@+id/row_payment_status"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="@dimen/layout_10dp"
                     android:orientation="horizontal"
                     app:layout_constraintTop_toBottomOf="@id/row_payment_method">
                     <TextView
@@ -211,18 +211,18 @@
                         android:layout_weight="1"
                         android:text="@string/payment_status"
                         android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
+                        android:textSize="@dimen/layout_13sp" />
                     <TextView
                         android:id="@+id/tv_payment_status_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"
+                        android:paddingStart="@dimen/layout_10dp"
+                        android:paddingEnd="@dimen/layout_10dp"
+                        android:paddingTop="@dimen/layout_4dp"
+                        android:paddingBottom="@dimen/layout_4dp"
                         android:text="@string/payment_pending"
                         android:textColor="@color/text_primary"
-                        android:textSize="12sp"
+                        android:textSize="@dimen/layout_12sp"
                         android:textStyle="bold"
                         android:background="@drawable/bg_payment_pending_pill" />
                 </LinearLayout>
@@ -231,7 +231,7 @@
                     android:id="@+id/row_schedule"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/layout_8dp"
                     android:orientation="horizontal"
                     app:layout_constraintTop_toBottomOf="@id/row_payment_status">
                     <TextView
@@ -240,45 +240,45 @@
                         android:layout_weight="1"
                         android:text="@string/schedule"
                         android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
+                        android:textSize="@dimen/layout_13sp" />
                     <TextView
                         android:id="@+id/tv_schedule_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/date_pending"
                         android:textColor="@color/text_primary"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/layout_13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
                 <LinearLayout
                     android:id="@+id/row_provider"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/layout_8dp"
                     android:orientation="horizontal"
                     app:layout_constraintTop_toBottomOf="@id/row_schedule">
                     <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:text="@string/provider"
-                        android:textColor="@color/text_secondary" android:textSize="13sp" />
+                        android:textColor="@color/text_secondary" android:textSize="@dimen/layout_13sp" />
                     <TextView android:id="@+id/tv_provider_value" android:layout_width="wrap_content"
                         android:layout_height="wrap_content" android:text="@string/provider_pending"
-                        android:textColor="@color/text_primary" android:textSize="13sp"
+                        android:textColor="@color/text_primary" android:textSize="@dimen/layout_13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
                 <LinearLayout
                     android:id="@+id/row_address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/layout_8dp"
                     android:orientation="horizontal"
                     app:layout_constraintTop_toBottomOf="@id/row_provider">
                     <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:text="@string/address"
-                        android:textColor="@color/text_secondary" android:textSize="13sp" />
+                        android:textColor="@color/text_secondary" android:textSize="@dimen/layout_13sp" />
                     <TextView android:id="@+id/tv_address_value" android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" android:maxWidth="190dp"
+                        android:layout_height="wrap_content" android:maxWidth="@dimen/layout_190dp"
                         android:text="@string/address_pending" android:textColor="@color/text_primary"
-                        android:textSize="13sp" android:textStyle="bold" />
+                        android:textSize="@dimen/layout_13sp" android:textStyle="bold" />
                 </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -288,10 +288,10 @@
                 android:id="@+id/label_whats_next"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="@dimen/layout_24dp"
                 android:text="@string/whats_next"
                 android:textColor="@color/text_primary"
-                android:textSize="15sp"
+                android:textSize="@dimen/layout_15sp"
                 android:textStyle="bold"
                 app:layout_constraintTop_toBottomOf="@id/card_order_details" />
 
@@ -299,22 +299,23 @@
                 android:id="@+id/row_step1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="@dimen/layout_14dp"
                 android:orientation="horizontal"
+                android:baselineAligned="false"
                 app:layout_constraintTop_toBottomOf="@id/label_whats_next">
 
                 <FrameLayout
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
+                    android:layout_width="@dimen/layout_28dp"
+                    android:layout_height="@dimen/layout_28dp"
                     android:background="@drawable/bg_step_circle">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="1"
+                        android:text="@string/dropoff_confirmation_step_1"
                         android:textColor="@color/laundr_blue"
-                        android:textSize="12sp"
+                        android:textSize="@dimen/layout_12sp"
                         android:textStyle="bold" />
                 </FrameLayout>
 
@@ -322,7 +323,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="@dimen/layout_12dp"
                     android:orientation="vertical">
 
                     <TextView
@@ -330,17 +331,17 @@
                         android:layout_height="wrap_content"
                         android:text="@string/step_prepare_items"
                         android:textColor="@color/text_primary"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/layout_13sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/layout_2dp"
                         android:text="@string/step_prepare_items_desc"
                         android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
-                        android:lineSpacingExtra="1dp" />
+                        android:textSize="@dimen/layout_12sp"
+                        android:lineSpacingExtra="@dimen/layout_1dp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -349,22 +350,23 @@
                 android:id="@+id/row_step2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/layout_16dp"
                 android:orientation="horizontal"
+                android:baselineAligned="false"
                 app:layout_constraintTop_toBottomOf="@id/row_step1">
 
                 <FrameLayout
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
+                    android:layout_width="@dimen/layout_28dp"
+                    android:layout_height="@dimen/layout_28dp"
                     android:background="@drawable/bg_step_circle">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="2"
+                        android:text="@string/dropoff_confirmation_step_2"
                         android:textColor="@color/laundr_blue"
-                        android:textSize="12sp"
+                        android:textSize="@dimen/layout_12sp"
                         android:textStyle="bold" />
                 </FrameLayout>
 
@@ -372,7 +374,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="@dimen/layout_12dp"
                     android:orientation="vertical">
 
                     <TextView
@@ -380,17 +382,17 @@
                         android:layout_height="wrap_content"
                         android:text="@string/step_dropoff_location_title"
                         android:textColor="@color/text_primary"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/layout_13sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/layout_2dp"
                         android:text="@string/step_dropoff_location_desc"
                         android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
-                        android:lineSpacingExtra="1dp" />
+                        android:textSize="@dimen/layout_12sp"
+                        android:lineSpacingExtra="@dimen/layout_1dp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -399,22 +401,23 @@
                 android:id="@+id/row_step3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/layout_16dp"
                 android:orientation="horizontal"
+                android:baselineAligned="false"
                 app:layout_constraintTop_toBottomOf="@id/row_step2">
 
                 <FrameLayout
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
+                    android:layout_width="@dimen/layout_28dp"
+                    android:layout_height="@dimen/layout_28dp"
                     android:background="@drawable/bg_step_circle">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="3"
+                        android:text="@string/dropoff_confirmation_step_3"
                         android:textColor="@color/laundr_blue"
-                        android:textSize="12sp"
+                        android:textSize="@dimen/layout_12sp"
                         android:textStyle="bold" />
                 </FrameLayout>
 
@@ -422,7 +425,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="@dimen/layout_12dp"
                     android:orientation="vertical">
 
                     <TextView
@@ -430,17 +433,17 @@
                         android:layout_height="wrap_content"
                         android:text="@string/step_dropoff_cleaning_title"
                         android:textColor="@color/text_primary"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/layout_13sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/layout_2dp"
                         android:text="@string/step_dropoff_cleaning_desc"
                         android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
-                        android:lineSpacingExtra="1dp" />
+                        android:textSize="@dimen/layout_12sp"
+                        android:lineSpacingExtra="@dimen/layout_1dp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -449,22 +452,23 @@
                 android:id="@+id/row_step4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/layout_16dp"
                 android:orientation="horizontal"
+                android:baselineAligned="false"
                 app:layout_constraintTop_toBottomOf="@id/row_step3">
 
                 <FrameLayout
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
+                    android:layout_width="@dimen/layout_28dp"
+                    android:layout_height="@dimen/layout_28dp"
                     android:background="@drawable/bg_step_circle">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="4"
+                        android:text="@string/dropoff_confirmation_step_4"
                         android:textColor="@color/laundr_blue"
-                        android:textSize="12sp"
+                        android:textSize="@dimen/layout_12sp"
                         android:textStyle="bold" />
                 </FrameLayout>
 
@@ -472,7 +476,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="@dimen/layout_12dp"
                     android:orientation="vertical">
 
                     <TextView
@@ -480,17 +484,17 @@
                         android:layout_height="wrap_content"
                         android:text="@string/step_dropoff_ready_title"
                         android:textColor="@color/text_primary"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/layout_13sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/layout_2dp"
                         android:text="@string/step_dropoff_ready_desc"
                         android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
-                        android:lineSpacingExtra="1dp" />
+                        android:textSize="@dimen/layout_12sp"
+                        android:lineSpacingExtra="@dimen/layout_1dp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -506,34 +510,34 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@color/white"
-        android:elevation="8dp"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="16dp"
+        android:elevation="@dimen/layout_8dp"
+        android:paddingStart="@dimen/layout_20dp"
+        android:paddingEnd="@dimen/layout_20dp"
+        android:paddingTop="@dimen/layout_12dp"
+        android:paddingBottom="@dimen/layout_16dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_track_order"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="@dimen/layout_52dp"
             android:text="@string/track_order"
             android:textAllCaps="false"
-            android:textSize="15sp"
+            android:textSize="@dimen/layout_15sp"
             android:textColor="@color/white"
             android:backgroundTint="@color/laundr_blue"
-            app:cornerRadius="12dp" />
+            app:cornerRadius="@dimen/radius_button" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/layout_8dp"
             android:orientation="horizontal">
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_view_receipt"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="@dimen/layout_48dp"
                 android:layout_weight="1"
                 android:text="@string/view_receipt"
                 android:textAllCaps="false" />
@@ -541,7 +545,7 @@
                 android:id="@+id/btn_contact_support"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="@dimen/layout_48dp"
                 android:layout_weight="1"
                 android:text="@string/contact_support"
                 android:textAllCaps="false" />

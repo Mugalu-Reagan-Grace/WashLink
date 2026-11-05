@@ -132,34 +132,18 @@ public final class ThemeManager {
     }
 
     public static void changeTheme(Activity activity, String role, String mode) {
-        String oldMode = themeMode(activity, role);
         setThemeMode(activity, role, mode);
-        boolean dark = MODE_DARK.equals(mode);
-        if (MODE_DARK.equals(oldMode) != dark) {
-            AppCompatDelegate.setDefaultNightMode(dark
-                    ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
-        }
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         activity.recreate();
     }
 
     public static void applySavedNightMode(Context context) {
-        if (!preferences(context).getBoolean(SIGNED_IN, false)) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            return;
-        }
-        AppCompatDelegate.setDefaultNightMode(MODE_DARK.equals(
-                themeMode(context, activeRole(context)))
-                ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }
 
     public static void prepareActivity(AppCompatActivity activity) {
-        if (!preferences(activity).getBoolean(SIGNED_IN, false)) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            return;
-        }
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         String mode = themeMode(activity, activeRole(activity));
-        AppCompatDelegate.setDefaultNightMode(MODE_DARK.equals(mode)
-                ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
         if (MODE_CREAM.equals(mode)) {
             activity.setTheme(R.style.Theme_WashLink_Cream);
         }
@@ -203,8 +187,10 @@ public final class ThemeManager {
     }
 
     public static void apply(View view, Context context) {
-        boolean cream = MODE_CREAM.equals(themeMode(context, activeRole(context)));
-        apply(view, context, cream);
+        String mode = themeMode(context, activeRole(context));
+        boolean cream = MODE_CREAM.equals(mode);
+        boolean dark = MODE_DARK.equals(mode);
+        apply(view, context, cream, dark);
         if (cream && context instanceof Activity) {
             Activity activity = (Activity) context;
             activity.getWindow().setStatusBarColor(
@@ -212,13 +198,22 @@ public final class ThemeManager {
             View decor = activity.getWindow().getDecorView();
             decor.setSystemUiVisibility(decor.getSystemUiVisibility()
                 | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        } else if (dark && context instanceof Activity) {
+            Activity activity = (Activity) context;
+            activity.getWindow().setStatusBarColor(context.getColor(R.color.dark_background));
+            activity.getWindow().setNavigationBarColor(context.getColor(R.color.dark_background));
+            View decor = activity.getWindow().getDecorView();
+            decor.setSystemUiVisibility(decor.getSystemUiVisibility()
+                    & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                    & ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         }
     }
 
-    private static void apply(View view, Context context, boolean cream) {
+    private static void apply(View view, Context context, boolean cream, boolean dark) {
         int blue = context.getColor(R.color.laundr_blue);
         int darkBlue = context.getColor(R.color.laundr_blue_dark);
         int accent = accent(context);
+        if (dark) accent = blendWithWhite(accent, 0.22f);
         String resourceName = "";
         try {
             if (view.getId() != View.NO_ID) {
@@ -235,10 +230,30 @@ public final class ThemeManager {
         if (view instanceof TextView) {
             TextView text = (TextView) view;
             int currentTextColor = text.getCurrentTextColor();
-            if (MODE_DARK.equals(themeMode(context, activeRole(context)))
-                    && currentTextColor == context.getColor(
-                    R.color.white)) {
-                text.setTextColor(context.getColor(R.color.on_accent));
+            if (dark) {
+                if (currentTextColor == context.getColor(R.color.text_primary)) {
+                    text.setTextColor(context.getColor(R.color.dark_text_primary));
+                } else if (currentTextColor == context.getColor(R.color.text_secondary)
+                        || currentTextColor == context.getColor(R.color.chip_unselected_text)
+                        || currentTextColor == context.getColor(R.color.closed_text)) {
+                    text.setTextColor(context.getColor(R.color.dark_text_secondary));
+                } else if (currentTextColor == context.getColor(R.color.success_green)
+                        || currentTextColor == context.getColor(R.color.status_delivered_text)
+                        || currentTextColor == context.getColor(R.color.payment_paid_text)
+                        || currentTextColor == context.getColor(R.color.accepted_text)
+                        || currentTextColor == context.getColor(R.color.open_now_text)
+                        || currentTextColor == context.getColor(R.color.earnings_green)) {
+                    text.setTextColor(context.getColor(R.color.dark_status_green_text));
+                } else if (currentTextColor == context.getColor(R.color.payment_pending_text)
+                        || currentTextColor == context.getColor(R.color.pending_text)) {
+                    text.setTextColor(context.getColor(R.color.dark_status_amber_text));
+                } else if (currentTextColor == context.getColor(R.color.rejected_text)
+                        || currentTextColor == context.getColor(R.color.logout_red)
+                        || currentTextColor == context.getColor(R.color.reject_red)) {
+                    text.setTextColor(context.getColor(R.color.dark_status_red_text));
+                } else if (currentTextColor == blue || currentTextColor == darkBlue) {
+                    text.setTextColor(accent);
+                }
             }
             if (cream) {
                 if (currentTextColor == context.getColor(
@@ -272,8 +287,7 @@ public final class ThemeManager {
             ImageViewCompat.setImageTintList((ImageView) view,
                     ColorStateList.valueOf(accent));
         }
-        if (view instanceof ImageView
-            && MODE_DARK.equals(themeMode(context, activeRole(context)))) {
+        if (view instanceof ImageView && dark) {
             ColorStateList currentTint = ImageViewCompat.getImageTintList((ImageView) view);
             if (currentTint != null && currentTint.getDefaultColor()
                 == context.getColor(R.color.white)) {
@@ -283,19 +297,99 @@ public final class ThemeManager {
             }
         }
         // Do not tint arbitrary images; photos and illustrations must retain their artwork.
-        if (view.getBackground() instanceof ColorDrawable) {
+        if (view.getBackground() instanceof ColorDrawable && !dark) {
             int backgroundColor = ((ColorDrawable) view.getBackground()).getColor();
             if (backgroundColor == blue || backgroundColor == darkBlue) {
                 view.setBackgroundColor(accent);
             }
         }
-        if (cream) recolorCreamBackground(view, context);
+        if (dark) recolorDarkBackground(view, context);
+        else if (cream) recolorCreamBackground(view, context);
         if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
             for (int i = 0; i < group.getChildCount(); i++) {
-                apply(group.getChildAt(i), context, cream);
+                apply(group.getChildAt(i), context, cream, dark);
             }
 
+        }
+    }
+
+    private static int blendWithWhite(int color, float amount) {
+        return Color.rgb(
+                Math.round(Color.red(color) + (255 - Color.red(color)) * amount),
+                Math.round(Color.green(color) + (255 - Color.green(color)) * amount),
+                Math.round(Color.blue(color) + (255 - Color.blue(color)) * amount));
+    }
+
+    private static void recolorDarkBackground(View view, Context context) {
+        Drawable background = view.getBackground();
+        if (background == null) return;
+        int resolved = context.getColor(R.color.white);
+        int darkSurface = context.getColor(R.color.dark_surface);
+        int raised = context.getColor(R.color.dark_surface_raised);
+        int offer = context.getColor(R.color.offer_card_bg);
+        int input = context.getColor(R.color.input_bg);
+        if (view.getId() == android.R.id.content
+                || view.getId() == View.NO_ID && background instanceof ColorDrawable
+                && ((ColorDrawable) background).getColor() == resolved) {
+            if (background instanceof ColorDrawable) {
+                ((ColorDrawable) background.mutate()).setColor(
+                        context.getColor(R.color.dark_background));
+                return;
+            }
+        }
+        recolorDarkDrawable(background.mutate(), context, resolved, darkSurface,
+                raised, offer, input);
+    }
+
+    private static void recolorDarkDrawable(Drawable drawable, Context context,
+                                            int white, int surface, int raised,
+                                            int offer, int input) {
+        if (drawable instanceof ColorDrawable) {
+            int color = ((ColorDrawable) drawable).getColor();
+            if (color == white) ((ColorDrawable) drawable).setColor(surface);
+            else if (color == offer || color == input) {
+                ((ColorDrawable) drawable).setColor(raised);
+            }
+        } else if (drawable instanceof GradientDrawable) {
+            GradientDrawable gradient = (GradientDrawable) drawable;
+            ColorStateList colors = gradient.getColor();
+            if (colors != null) {
+                int color = colors.getDefaultColor();
+                if (color == white) {
+                    gradient.setColor(surface);
+                    gradient.setStroke(context.getResources().getDimensionPixelSize(
+                            R.dimen.layout_1dp), context.getColor(R.color.dark_divider));
+                }
+                else if (color == offer || color == input) gradient.setColor(raised);
+                else if (color == context.getColor(R.color.status_in_progress_bg)
+                        || color == context.getColor(R.color.status_processing_bg)) {
+                    gradient.setColor(context.getColor(R.color.dark_status_blue));
+                } else if (color == context.getColor(R.color.status_delivered_bg)
+                        || color == context.getColor(R.color.success_green_bg)
+                        || color == context.getColor(R.color.accepted_bg)
+                        || color == context.getColor(R.color.open_now_bg)
+                        || color == context.getColor(R.color.payment_paid_bg)) {
+                    gradient.setColor(context.getColor(R.color.dark_status_green));
+                } else if (color == context.getColor(R.color.payment_pending_bg)
+                        || color == context.getColor(R.color.pending_bg)) {
+                    gradient.setColor(context.getColor(R.color.dark_status_amber));
+                } else if (color == context.getColor(R.color.rejected_bg)
+                        || color == context.getColor(R.color.logout_red_bg)
+                        || color == context.getColor(R.color.cancel_action_bg)) {
+                    gradient.setColor(context.getColor(R.color.dark_status_red));
+                }
+            }
+        } else if (drawable instanceof LayerDrawable) {
+            LayerDrawable layers = (LayerDrawable) drawable;
+            for (int i = 0; i < layers.getNumberOfLayers(); i++) {
+                recolorDarkDrawable(layers.getDrawable(i), context, white, surface,
+                        raised, offer, input);
+            }
+        } else if (drawable instanceof InsetDrawable) {
+            Drawable inner = ((InsetDrawable) drawable).getDrawable();
+            if (inner != null) recolorDarkDrawable(inner, context, white, surface,
+                    raised, offer, input);
         }
     }
 
@@ -341,6 +435,7 @@ public final class ThemeManager {
 
     private static boolean isThemedIcon(String name) {
         if (name.contains("payment") || name.contains("card_chip")
+                || name.contains("visa") || name.contains("mastercard")
                 || name.contains("chip_card")
                 || name.contains("airtel") || name.contains("mtn")
                 || name.contains("cash")) {

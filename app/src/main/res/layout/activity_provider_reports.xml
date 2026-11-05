@@ -7,10 +7,10 @@
 
     <ImageView
         android:id="@+id/btn_provider_menu"
-        android:layout_width="36dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="12dp"
-        android:padding="6dp"
+        android:layout_width="@dimen/touch_target_min"
+        android:layout_height="@dimen/touch_target_min"
+        android:layout_marginStart="@dimen/layout_12dp"
+        android:padding="@dimen/layout_6dp"
         android:src="@drawable/ic_menu_lines"
         android:contentDescription="@string/provider_nav_more"
         android:clickable="true"
@@ -22,10 +22,11 @@
     <ImageView
         android:id="@+id/btn_report_back"
         style="@style/WashLinkBackButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="16dp"
+        android:contentDescription="@string/back"
+        android:layout_width="@dimen/layout_48dp"
+        android:layout_height="@dimen/layout_48dp"
+        android:layout_marginStart="@dimen/layout_4dp"
+        android:layout_marginTop="@dimen/layout_16dp"
         app:layout_constraintStart_toEndOf="@id/btn_provider_menu"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -33,11 +34,11 @@
         android:id="@+id/tv_report_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="8dp"
-        android:text="Reports"
+        android:layout_marginStart="@dimen/layout_12dp"
+        android:layout_marginEnd="@dimen/layout_8dp"
+        android:text="@string/provider_workspace_reports_title"
         android:textColor="@color/text_primary"
-        android:textSize="21sp"
+        android:textSize="@dimen/layout_21sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/btn_report_back"
         app:layout_constraintEnd_toEndOf="parent"
@@ -48,102 +49,254 @@
         android:id="@+id/tv_report_subtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="20dp"
-        android:text="Performance based on booking creation date. Collected revenue counts completed cash orders and verified online payments."
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginTop="@dimen/layout_12dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:text="@string/provider_workspace_reports_description"
         android:textColor="@color/text_secondary"
-        android:textSize="13sp"
+        android:textSize="@dimen/layout_13sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_report_back" />
+
+    <HorizontalScrollView
+        android:id="@+id/report_tabs_scroll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginTop="@dimen/layout_12dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:fillViewport="false"
+        android:scrollbars="none"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_report_subtitle">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+        android:baselineAligned="false">
+
+            <TextView
+                android:id="@+id/report_tab_earnings"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/touch_target_min"
+                android:background="@drawable/bg_chip_selected"
+                android:gravity="center"
+                android:paddingStart="@dimen/layout_14dp"
+                android:paddingEnd="@dimen/layout_14dp"
+                android:text="@string/provider_workspace_earnings_report"
+                android:textColor="@color/on_accent"
+                android:textSize="@dimen/layout_12sp"
+                android:textStyle="bold"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/report_tab_orders"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/touch_target_min"
+                android:layout_marginStart="@dimen/layout_8dp"
+                android:background="@drawable/bg_chip_unselected"
+                android:gravity="center"
+                android:paddingStart="@dimen/layout_14dp"
+                android:paddingEnd="@dimen/layout_14dp"
+                android:text="@string/provider_workspace_orders_report"
+                android:textColor="@color/chip_unselected_text"
+                android:textSize="@dimen/layout_12sp"
+                android:textStyle="bold"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/report_tab_services"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/touch_target_min"
+                android:layout_marginStart="@dimen/layout_8dp"
+                android:background="@drawable/bg_chip_unselected"
+                android:gravity="center"
+                android:paddingStart="@dimen/layout_14dp"
+                android:paddingEnd="@dimen/layout_14dp"
+                android:text="@string/provider_workspace_services_report"
+                android:textColor="@color/chip_unselected_text"
+                android:textSize="@dimen/layout_12sp"
+                android:textStyle="bold"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/report_tab_customers"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/touch_target_min"
+                android:layout_marginStart="@dimen/layout_8dp"
+                android:background="@drawable/bg_chip_unselected"
+                android:gravity="center"
+                android:paddingStart="@dimen/layout_14dp"
+                android:paddingEnd="@dimen/layout_14dp"
+                android:text="@string/provider_workspace_customers_report"
+                android:textColor="@color/chip_unselected_text"
+                android:textSize="@dimen/layout_12sp"
+                android:textStyle="bold"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <LinearLayout
         android:id="@+id/report_filters"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginTop="@dimen/layout_10dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_report_subtitle">
+        app:layout_constraintTop_toBottomOf="@id/report_tabs_scroll"
+        android:baselineAligned="false">
 
         <TextView
             android:id="@+id/filter_7_days"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/layout_48dp"
             android:layout_weight="1"
             android:background="@drawable/bg_chip_unselected"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:text="7 days"
+            android:paddingTop="@dimen/layout_10dp"
+            android:paddingBottom="@dimen/layout_10dp"
+            android:text="@string/provider_workspace_seven_days"
             android:textColor="@color/chip_unselected_text"
-            android:textSize="13sp"
+            android:textSize="@dimen/layout_13sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/filter_30_days"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
+            android:layout_height="@dimen/layout_48dp"
+            android:layout_marginStart="@dimen/layout_8dp"
             android:layout_weight="1"
             android:background="@drawable/bg_chip_selected"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:text="30 days"
+            android:paddingTop="@dimen/layout_10dp"
+            android:paddingBottom="@dimen/layout_10dp"
+            android:text="@string/provider_workspace_thirty_days"
             android:textColor="@color/white"
-            android:textSize="13sp"
+            android:textSize="@dimen/layout_13sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/filter_all_time"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
+            android:layout_height="@dimen/layout_48dp"
+            android:layout_marginStart="@dimen/layout_8dp"
             android:layout_weight="1"
             android:background="@drawable/bg_chip_unselected"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:text="All time"
+            android:paddingTop="@dimen/layout_10dp"
+            android:paddingBottom="@dimen/layout_10dp"
+            android:text="@string/provider_workspace_all_time"
             android:textColor="@color/chip_unselected_text"
-            android:textSize="13sp"
+            android:textSize="@dimen/layout_13sp"
             android:textStyle="bold" />
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/report_extra_filters"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginTop="@dimen/layout_4dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/report_filters"
+        android:baselineAligned="false">
+
+        <Spinner
+            android:id="@+id/spinner_report_payment"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_target_min"
+            android:layout_weight="1"
+            android:contentDescription="@string/provider_workspace_payment_filter" />
+
+        <Spinner
+            android:id="@+id/spinner_report_status"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_target_min"
+            android:layout_marginStart="@dimen/layout_8dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/provider_workspace_status_filter" />
+
+        <Spinner
+            android:id="@+id/spinner_report_sort"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_target_min"
+            android:layout_marginStart="@dimen/layout_8dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/provider_workspace_sort_reports" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_report_export"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_target_min"
+            android:layout_marginStart="@dimen/layout_4dp"
+            android:minWidth="@dimen/layout_0dp"
+            android:text="@string/provider_workspace_export_csv"
+            android:textAllCaps="false"
+            android:textSize="@dimen/layout_10sp" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/et_report_search"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/touch_target_min"
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginTop="@dimen/layout_4dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:background="@drawable/bg_card_bordered"
+        android:hint="@string/provider_workspace_search_reports"
+        android:inputType="text"
+        android:paddingStart="@dimen/layout_12dp"
+        android:paddingEnd="@dimen/layout_12dp"
+        android:singleLine="true"
+        android:textSize="@dimen/layout_12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/report_extra_filters" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:paddingBottom="20dp"
+        android:paddingBottom="@dimen/layout_20dp"
         app:layout_constraintBottom_toTopOf="@id/bottom_nav_bar"
-        app:layout_constraintTop_toBottomOf="@id/report_filters">
+        app:layout_constraintTop_toBottomOf="@id/et_report_search">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingStart="20dp"
-            android:paddingTop="16dp"
-            android:paddingEnd="20dp">
+            android:paddingStart="@dimen/layout_20dp"
+            android:paddingTop="@dimen/layout_16dp"
+            android:paddingEnd="@dimen/layout_20dp">
 
             <TextView
                 android:id="@+id/tv_report_state"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:padding="20dp"
-                android:text="Loading report data..."
+                android:padding="@dimen/layout_20dp"
+                android:text="@string/provider_workspace_loading_report"
                 android:textColor="@color/text_secondary"
                 android:visibility="gone" />
 
@@ -151,129 +304,141 @@
                 android:id="@+id/tv_report_period"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:text="Last 30 days"
+                android:layout_marginBottom="@dimen/layout_12dp"
+                android:text="@string/provider_workspace_last_30_days"
                 android:textColor="@color/text_primary"
-                android:textSize="17sp"
+                android:textSize="@dimen/layout_17sp"
                 android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_report_result_count"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/layout_10dp"
+                android:text="@string/provider_workspace_zero_records"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/layout_11sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+        android:baselineAligned="false">
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="6dp"
+                    android:layout_marginEnd="@dimen/layout_6dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_card_bordered"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="@dimen/layout_16dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Bookings"
+                        android:text="@string/provider_workspace_bookings"
                         android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/layout_12sp" />
 
                     <TextView
                         android:id="@+id/tv_report_bookings"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="—"
+                        android:layout_marginTop="@dimen/layout_8dp"
+                        android:text="@string/provider_workspace_not_available"
                         android:textColor="@color/text_primary"
-                        android:textSize="23sp"
+                        android:textSize="@dimen/layout_23sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
+                    android:layout_marginStart="@dimen/layout_6dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_card_bordered"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="@dimen/layout_16dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Completed"
+                        android:text="@string/provider_workspace_completed"
                         android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/layout_12sp" />
 
                     <TextView
                         android:id="@+id/tv_report_completed"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="—"
+                        android:layout_marginTop="@dimen/layout_8dp"
+                        android:text="@string/provider_workspace_not_available"
                         android:textColor="@color/success_green"
-                        android:textSize="23sp"
+                        android:textSize="@dimen/layout_23sp"
                         android:textStyle="bold" />
                 </LinearLayout>
+
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:orientation="horizontal">
+                android:layout_marginTop="@dimen/layout_12dp"
+                android:orientation="horizontal"
+        android:baselineAligned="false">
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="6dp"
+                    android:layout_marginEnd="@dimen/layout_6dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_card_bordered"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="@dimen/layout_16dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Awaiting action"
+                        android:text="@string/provider_workspace_awaiting_action"
                         android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/layout_12sp" />
 
                     <TextView
                         android:id="@+id/tv_report_pending"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="—"
+                        android:layout_marginTop="@dimen/layout_8dp"
+                        android:text="@string/provider_workspace_not_available"
                         android:textColor="@color/pending_text"
-                        android:textSize="23sp"
+                        android:textSize="@dimen/layout_23sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
+                    android:layout_marginStart="@dimen/layout_6dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_card_bordered"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="@dimen/layout_16dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Cancelled / rejected"
+                        android:text="@string/provider_workspace_cancelled_rejected"
                         android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/layout_12sp" />
 
                     <TextView
                         android:id="@+id/tv_report_cancelled"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="—"
+                        android:layout_marginTop="@dimen/layout_8dp"
+                        android:text="@string/provider_workspace_not_available"
                         android:textColor="@color/reject_red"
-                        android:textSize="23sp"
+                        android:textSize="@dimen/layout_23sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
@@ -281,28 +446,112 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="@dimen/layout_12dp"
                 android:background="@drawable/bg_card_bordered"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="@dimen/layout_16dp">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Collected revenue"
+                    android:text="@string/provider_workspace_collected_revenue"
                     android:textColor="@color/text_secondary"
-                    android:textSize="12sp" />
+                    android:textSize="@dimen/layout_12sp" />
 
                 <TextView
                     android:id="@+id/tv_report_revenue"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="—"
+                    android:layout_marginTop="@dimen/layout_8dp"
+                    android:text="@string/provider_workspace_not_available"
                     android:textColor="@color/laundr_blue"
-                    android:textSize="22sp"
+                    android:textSize="@dimen/layout_22sp"
                     android:textStyle="bold" />
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/report_payment_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/layout_12dp"
+                android:background="@drawable/bg_card_bordered"
+                android:orientation="vertical"
+                android:padding="@dimen/layout_16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/provider_workspace_revenue_payment_method"
+                    android:textColor="@color/text_primary"
+                    android:textSize="@dimen/layout_14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/layout_4dp"
+                    android:text="@string/provider_workspace_verified_payments_note"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/layout_11sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/layout_14dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+        android:baselineAligned="false">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/provider_workspace_cash"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/layout_12sp" />
+
+                    <TextView
+                        android:id="@+id/tv_report_cash_revenue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/provider_workspace_not_available"
+                        android:textColor="@color/text_primary"
+                        android:textSize="@dimen/layout_13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/layout_12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+        android:baselineAligned="false">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/provider_workspace_verified_online_payment"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/layout_12sp" />
+
+                    <TextView
+                        android:id="@+id/tv_report_online_revenue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/provider_workspace_not_available"
+                        android:textColor="@color/text_primary"
+                        android:textSize="@dimen/layout_13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/ll_report_rows"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/layout_12dp"
+                android:orientation="vertical" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -310,7 +559,7 @@
         android:id="@+id/bottom_nav_bar"
         layout="@layout/activity_provider_nav_bar"
         android:layout_width="0dp"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/layout_56dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

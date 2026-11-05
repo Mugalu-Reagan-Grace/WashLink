@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/color_background"
     tools:context=".ui.customer.HomeFragment">
 
     <!-- Scrollable content -->
@@ -13,22 +13,22 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:paddingBottom="16dp"
+        android:paddingBottom="@dimen/space_16"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/bottom_nav_bar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="20dp">
+            android:paddingStart="@dimen/space_16"
+            android:paddingEnd="@dimen/space_16"
+            android:paddingTop="@dimen/space_16">
 
             <!-- Top bar: avatar, name + address, bell -->
             <ImageView
                 android:id="@+id/iv_avatar"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="@dimen/layout_48dp"
+                android:layout_height="@dimen/layout_48dp"
                 android:contentDescription="@string/profile_photo"
                 android:background="@drawable/bg_thumbnail_placeholder"
                 android:scaleType="centerCrop"
@@ -39,11 +39,11 @@
                 android:id="@+id/tv_user_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
+                android:layout_marginStart="@dimen/space_16"
+                style="@style/TextAppearance.WashLink.Title"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:text="@string/user_name_placeholder"
-                android:textColor="@color/text_primary"
-                android:textSize="15sp"
-                android:textStyle="bold"
                 app:layout_constraintTop_toTopOf="@id/iv_avatar"
                 app:layout_constraintStart_toEndOf="@id/iv_avatar"
                 app:layout_constraintEnd_toStartOf="@id/iv_chat_inbox" />
@@ -52,25 +52,27 @@
                 android:id="@+id/tv_user_address"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_marginTop="2dp"
+                android:layout_marginStart="@dimen/space_16"
+                android:layout_marginTop="@dimen/space_4"
+                style="@style/TextAppearance.WashLink.Caption"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:text="@string/user_address_placeholder"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp"
                 app:layout_constraintTop_toBottomOf="@id/tv_user_name"
                 app:layout_constraintStart_toEndOf="@id/iv_avatar"
                 app:layout_constraintEnd_toStartOf="@id/iv_chat_inbox" />
 
             <FrameLayout
                 android:id="@+id/iv_chat_inbox"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginEnd="8dp"
+                android:layout_width="@dimen/layout_48dp"
+                android:layout_height="@dimen/layout_48dp"
+                android:layout_marginEnd="@dimen/space_4"
                 android:background="@drawable/bg_offer_card"
                 android:clickable="true"
                 android:contentDescription="@string/provider_chat"
                 android:focusable="true"
-                android:padding="8dp"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/layout_8dp"
                 app:layout_constraintBottom_toBottomOf="@id/iv_avatar"
                 app:layout_constraintEnd_toStartOf="@id/iv_calendar"
                 app:layout_constraintTop_toTopOf="@id/iv_avatar">
@@ -80,19 +82,20 @@
                     android:layout_height="match_parent"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_chat_bubble"
-                    app:tint="@color/laundr_blue" />
+                    app:tint="@color/color_primary" />
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/iv_calendar"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginEnd="8dp"
+                android:layout_width="@dimen/layout_48dp"
+                android:layout_height="@dimen/layout_48dp"
+                android:layout_marginEnd="@dimen/space_4"
                 android:background="@drawable/bg_offer_card"
                 android:clickable="true"
-                android:contentDescription="Calendar"
+                android:contentDescription="@string/home_calendar_content_description"
                 android:focusable="true"
-                android:padding="8dp"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/layout_8dp"
                 app:layout_constraintBottom_toBottomOf="@id/iv_avatar"
                 app:layout_constraintEnd_toStartOf="@id/iv_bell"
                 app:layout_constraintTop_toTopOf="@id/iv_avatar">
@@ -101,15 +104,19 @@
                     android:layout_height="match_parent"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_calendar"
-                    app:tint="@color/laundr_blue" />
+                    app:tint="@color/color_primary" />
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/iv_bell"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="@dimen/layout_48dp"
+                android:layout_height="@dimen/layout_48dp"
                 android:background="@drawable/bg_offer_card"
-                android:padding="8dp"
+                android:clickable="true"
+                android:contentDescription="@string/notifications"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/layout_8dp"
                 app:layout_constraintTop_toTopOf="@id/iv_avatar"
                 app:layout_constraintBottom_toBottomOf="@id/iv_avatar"
                 app:layout_constraintEnd_toEndOf="parent">
@@ -121,8 +128,8 @@
                     android:contentDescription="@null" />
 
                 <View
-                    android:layout_width="7dp"
-                    android:layout_height="7dp"
+                    android:layout_width="@dimen/layout_7dp"
+                    android:layout_height="@dimen/layout_7dp"
                     android:layout_gravity="top|end"
                     android:background="@drawable/dot_notification" />
             </FrameLayout>
@@ -132,21 +139,20 @@
                 android:id="@+id/promo_banner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="@dimen/space_24"
                 android:background="@drawable/bg_promo_banner"
-                android:padding="20dp"
+                android:padding="@dimen/space_16"
                 app:layout_constraintTop_toBottomOf="@id/iv_avatar"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
                 <TextView
                     android:id="@+id/tv_promo_title"
+                    style="@style/TextAppearance.WashLink.Title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/promo_banner_title"
                     android:textColor="@color/white"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/iv_promo_laundry" />
@@ -155,19 +161,19 @@
                     android:id="@+id/tv_promo_subtitle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="@dimen/space_4"
                     android:text="@string/promo_banner_subtitle"
                     android:textColor="@color/white"
-                    android:textSize="13sp"
+                    style="@style/TextAppearance.WashLink.Body"
                     app:layout_constraintTop_toBottomOf="@id/tv_promo_title"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/iv_promo_laundry" />
 
                 <ImageView
                     android:id="@+id/iv_promo_laundry"
-                    android:layout_width="108dp"
-                    android:layout_height="150dp"
-                    android:layout_marginStart="8dp"
+                    android:layout_width="@dimen/layout_108dp"
+                    android:layout_height="@dimen/layout_150dp"
+                    android:layout_marginStart="@dimen/layout_8dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/man_carrying_clothes"
                     android:contentDescription="@string/laundry_delivery_image"
@@ -177,15 +183,16 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_book_service"
+                    style="@style/Widget.WashLink.Button"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="14dp"
+                    android:layout_height="@dimen/layout_48dp"
+                    android:layout_marginTop="@dimen/space_16"
                     android:backgroundTint="@color/white"
                     android:text="@string/book_a_service"
                     android:textAllCaps="false"
-                    android:textColor="@color/laundr_blue"
-                    android:textSize="13sp"
-                    app:cornerRadius="10dp"
+                    android:textColor="@color/color_primary"
+                    android:textAppearance="@style/TextAppearance.WashLink.Button"
+                    app:cornerRadius="@dimen/radius_button"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tv_promo_subtitle" />
 
@@ -196,22 +203,22 @@
                 android:id="@+id/tv_active_order_label"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                style="@style/TextAppearance.WashLink.Title"
+                android:layout_marginTop="@dimen/space_24"
                 android:text="@string/active_order"
                 android:textColor="@color/text_primary"
-                android:textSize="16sp"
-                android:textStyle="bold"
                 app:layout_constraintTop_toBottomOf="@id/promo_banner"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/tv_view_details" />
 
             <TextView
                 android:id="@+id/tv_view_details"
+                style="@style/TextAppearance.WashLink.Body"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/layout_48dp"
+                android:gravity="center_vertical"
                 android:text="@string/view_details"
-                android:textColor="@color/laundr_blue"
-                android:textSize="13sp"
+                android:textColor="@color/color_primary"
                 android:textStyle="bold"
                 app:layout_constraintTop_toTopOf="@id/tv_active_order_label"
                 app:layout_constraintBottom_toBottomOf="@id/tv_active_order_label"
@@ -222,29 +229,29 @@
                 android:id="@+id/active_order_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="@dimen/space_16"
                 android:background="@drawable/bg_card_bordered"
-                android:padding="16dp"
+                android:padding="@dimen/space_16"
                 app:layout_constraintTop_toBottomOf="@id/tv_active_order_label"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
                 <View
                     android:id="@+id/iv_order_icon"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
+                    android:layout_width="@dimen/layout_36dp"
+                    android:layout_height="@dimen/layout_36dp"
                     android:background="@drawable/bg_offer_card"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
 
                 <TextView
                     android:id="@+id/tv_order_title"
+                    style="@style/TextAppearance.WashLink.Body"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="@dimen/space_16"
                     android:text="@string/order_wash_fold"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp"
                     android:textStyle="bold"
                     app:layout_constraintTop_toTopOf="@id/iv_order_icon"
                     app:layout_constraintStart_toEndOf="@id/iv_order_icon"
@@ -252,13 +259,13 @@
 
                 <TextView
                     android:id="@+id/tv_order_id"
+                    style="@style/TextAppearance.WashLink.Caption"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginStart="@dimen/space_8"
+                    android:layout_marginTop="@dimen/space_4"
                     android:text="@string/order_id_placeholder"
                     android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
                     app:layout_constraintTop_toBottomOf="@id/tv_order_title"
                     app:layout_constraintStart_toEndOf="@id/iv_order_icon" />
 
@@ -267,13 +274,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_status_pill"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
+                    android:paddingStart="@dimen/layout_10dp"
+                    android:paddingEnd="@dimen/layout_10dp"
+                    android:paddingTop="@dimen/layout_4dp"
+                    android:paddingBottom="@dimen/layout_4dp"
                     android:text="@string/status_in_progress"
                     android:textColor="@color/status_in_progress_text"
-                    android:textSize="11sp"
+                    android:textSize="@dimen/layout_12sp"
                     android:textStyle="bold"
                     app:layout_constraintTop_toTopOf="@id/iv_order_icon"
                     app:layout_constraintEnd_toEndOf="parent" />
@@ -282,8 +289,8 @@
                 <View
                     android:id="@+id/progress_track_bg"
                     android:layout_width="0dp"
-                    android:layout_height="3dp"
-                    android:layout_marginTop="20dp"
+                    android:layout_height="@dimen/layout_3dp"
+                    android:layout_marginTop="@dimen/space_24"
                     android:background="@color/progress_track_empty"
                     app:layout_constraintTop_toBottomOf="@id/iv_order_icon"
                     app:layout_constraintStart_toStartOf="parent"
@@ -292,7 +299,7 @@
                 <View
                     android:id="@+id/progress_track_fill"
                     android:layout_width="0dp"
-                    android:layout_height="3dp"
+                    android:layout_height="@dimen/layout_3dp"
                     android:background="@color/progress_track_filled"
                     app:layout_constraintTop_toTopOf="@id/progress_track_bg"
                     app:layout_constraintBottom_toBottomOf="@id/progress_track_bg"
@@ -302,8 +309,8 @@
 
                 <View
                     android:id="@+id/dot_pickup"
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
+                    android:layout_width="@dimen/layout_10dp"
+                    android:layout_height="@dimen/layout_10dp"
                     android:background="@drawable/dot_active_indicator"
                     app:layout_constraintTop_toTopOf="@id/progress_track_bg"
                     app:layout_constraintBottom_toBottomOf="@id/progress_track_bg"
@@ -311,8 +318,8 @@
 
                 <View
                     android:id="@+id/dot_cleaning"
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
+                    android:layout_width="@dimen/layout_10dp"
+                    android:layout_height="@dimen/layout_10dp"
                     android:background="@drawable/dot_active_indicator"
                     app:layout_constraintTop_toTopOf="@id/progress_track_bg"
                     app:layout_constraintBottom_toBottomOf="@id/progress_track_bg"
@@ -321,8 +328,8 @@
 
                 <View
                     android:id="@+id/dot_delivery"
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
+                    android:layout_width="@dimen/layout_10dp"
+                    android:layout_height="@dimen/layout_10dp"
                     android:background="@drawable/dot_inactive_indicator"
                     app:layout_constraintTop_toTopOf="@id/progress_track_bg"
                     app:layout_constraintBottom_toBottomOf="@id/progress_track_bg"
@@ -330,23 +337,23 @@
 
                 <TextView
                     android:id="@+id/tv_label_pickup"
+                    style="@style/TextAppearance.WashLink.Caption"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="@dimen/space_8"
                     android:text="@string/label_pickup"
                     android:textColor="@color/text_secondary"
-                    android:textSize="11sp"
                     app:layout_constraintTop_toBottomOf="@id/dot_pickup"
                     app:layout_constraintStart_toStartOf="@id/dot_pickup" />
 
                 <TextView
                     android:id="@+id/tv_label_cleaning"
+                    style="@style/TextAppearance.WashLink.Caption"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="@dimen/space_8"
                     android:text="@string/label_cleaning"
                     android:textColor="@color/text_primary"
-                    android:textSize="11sp"
                     android:textStyle="bold"
                     app:layout_constraintTop_toBottomOf="@id/dot_cleaning"
                     app:layout_constraintStart_toStartOf="parent"
@@ -354,20 +361,20 @@
 
                 <TextView
                     android:id="@+id/tv_label_delivery"
+                    style="@style/TextAppearance.WashLink.Caption"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="@dimen/space_8"
                     android:text="@string/label_delivery"
                     android:textColor="@color/text_secondary"
-                    android:textSize="11sp"
                     app:layout_constraintTop_toBottomOf="@id/dot_delivery"
                     app:layout_constraintEnd_toEndOf="@id/dot_delivery" />
 
                 <View
                     android:id="@+id/divider_order"
                     android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_height="@dimen/layout_1dp"
+                    android:layout_marginTop="@dimen/space_16"
                     android:background="@color/divider_gray"
                     app:layout_constraintTop_toBottomOf="@id/tv_label_cleaning"
                     app:layout_constraintStart_toStartOf="parent"
@@ -375,23 +382,23 @@
 
                 <TextView
                     android:id="@+id/tv_eta_label"
+                    style="@style/TextAppearance.WashLink.Caption"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="@dimen/space_8"
                     android:text="@string/estimated_arrival"
                     android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
                     app:layout_constraintTop_toBottomOf="@id/divider_order"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/tv_eta_value" />
 
                 <TextView
                     android:id="@+id/tv_eta_value"
+                    style="@style/TextAppearance.WashLink.Body"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/eta_placeholder"
                     android:textColor="@color/text_primary"
-                    android:textSize="12sp"
                     android:textStyle="bold"
                     app:layout_constraintTop_toTopOf="@id/tv_eta_label"
                     app:layout_constraintEnd_toEndOf="parent" />
@@ -403,20 +410,20 @@
                 android:id="@+id/offer_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/space_16"
                 android:background="@drawable/bg_offer_card"
-                android:padding="14dp"
+                android:padding="@dimen/space_16"
                 app:layout_constraintTop_toBottomOf="@id/active_order_card"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
                 <TextView
                     android:id="@+id/tv_offer_label"
+                    style="@style/TextAppearance.WashLink.Caption"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/welcome_offer"
-                    android:textColor="@color/laundr_blue"
-                    android:textSize="11sp"
+                    android:textColor="@color/color_primary"
                     android:textStyle="bold"
                     android:letterSpacing="0.05"
                     app:layout_constraintTop_toTopOf="parent"
@@ -425,12 +432,12 @@
 
                 <TextView
                     android:id="@+id/tv_offer_desc"
+                    style="@style/TextAppearance.WashLink.Body"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="@dimen/space_4"
                     android:text="@string/welcome_offer_desc"
                     android:textColor="@color/text_primary"
-                    android:textSize="13sp"
                     android:textStyle="normal"
                     app:layout_constraintTop_toBottomOf="@id/tv_offer_label"
                     app:layout_constraintStart_toStartOf="parent"
@@ -443,11 +450,10 @@
                 android:id="@+id/tv_more_options_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                style="@style/TextAppearance.WashLink.Title"
+                android:layout_marginTop="@dimen/space_24"
                 android:text="@string/more_options"
                 android:textColor="@color/text_primary"
-                android:textSize="16sp"
-                android:textStyle="bold"
                 app:layout_constraintTop_toBottomOf="@id/offer_card"
                 app:layout_constraintStart_toStartOf="parent" />
 
@@ -455,19 +461,20 @@
                 android:id="@+id/row_order_history"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="@dimen/space_16"
+                android:minHeight="@dimen/layout_64dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
+                android:paddingTop="@dimen/space_8"
+                android:paddingBottom="@dimen/space_8"
                 app:layout_constraintTop_toBottomOf="@id/tv_more_options_label">
 
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="@dimen/layout_22dp"
+                    android:layout_height="@dimen/layout_22dp"
                     android:src="@drawable/ic_nav_history"
                     android:contentDescription="@null" />
 
@@ -475,29 +482,29 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="14dp"
+                    android:layout_marginStart="@dimen/space_16"
                     android:orientation="vertical">
 
                     <TextView
+                        style="@style/TextAppearance.WashLink.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/nav_history"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <TextView
+                        style="@style/TextAppearance.WashLink.Caption"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/space_4"
                         android:text="@string/order_history_desc"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:textColor="@color/text_secondary" />
                 </LinearLayout>
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="@dimen/layout_20dp"
+                    android:layout_height="@dimen/layout_20dp"
                     android:src="@drawable/ic_chevron_right"
                     android:contentDescription="@null" />
 
@@ -509,16 +516,17 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
+                android:minHeight="@dimen/layout_64dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
+                android:paddingTop="@dimen/space_8"
+                android:paddingBottom="@dimen/space_8"
                 app:layout_constraintTop_toBottomOf="@id/row_order_history">
 
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="@dimen/layout_22dp"
+                    android:layout_height="@dimen/layout_22dp"
                     android:src="@drawable/ic_nav_profile"
                     android:contentDescription="@null" />
 
@@ -526,29 +534,29 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="14dp"
+                    android:layout_marginStart="@dimen/space_16"
                     android:orientation="vertical">
 
                     <TextView
+                        style="@style/TextAppearance.WashLink.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/profile_settings"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <TextView
+                        style="@style/TextAppearance.WashLink.Caption"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/space_4"
                         android:text="@string/profile_settings_desc"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:textColor="@color/text_secondary" />
                 </LinearLayout>
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="@dimen/layout_20dp"
+                    android:layout_height="@dimen/layout_20dp"
                     android:src="@drawable/ic_chevron_right"
                     android:contentDescription="@null" />
 

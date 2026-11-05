@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -30,6 +31,19 @@ public class MainActivity extends com.example.washlink.WashLinkActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_customer_main);
         AuthGuard.requireRole(this, UserAccount.ROLE_CUSTOMER, SignInActivity.class);
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                Fragment current = getSupportFragmentManager()
+                        .findFragmentById(R.id.main_fragment_container);
+                if (!(current instanceof HomeFragment)) {
+                    showTab(TAB_HOME);
+                    return;
+                }
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+            }
+        });
         NotificationPermissionHelper.requestIfNeeded(this);
         PushTokenManager.registerCurrentUser();
         if (savedInstanceState == null) {
@@ -75,14 +89,4 @@ public class MainActivity extends com.example.washlink.WashLinkActivity {
                 .commit();
     }
 
-    @Override
-    public void onBackPressed() {
-        Fragment current = getSupportFragmentManager()
-                .findFragmentById(R.id.main_fragment_container);
-        if (!(current instanceof HomeFragment)) {
-            showTab(TAB_HOME);
-            return;
-        }
-        super.onBackPressed();
-    }
 }

@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ArrayAdapter;
@@ -63,6 +64,8 @@ public class ProviderProfileActivity extends WashLinkActivity {
         photoPicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
                 this::uploadProfilePhoto);
         if (profilePhoto != null) {
+            profilePhoto.setOutlineProvider(ViewOutlineProvider.BACKGROUND);
+            profilePhoto.setClipToOutline(true);
             profilePhoto.setContentDescription(getString(R.string.edit_profile_picture));
             profilePhoto.setOnClickListener(v -> photoPicker.launch(new String[]{
                     "image/jpeg", "image/png", "image/webp", "image/gif"}));
@@ -370,7 +373,7 @@ public class ProviderProfileActivity extends WashLinkActivity {
         fields.addView(status);
 
         TextView payoutPolicy = new TextView(this);
-        payoutPolicy.setText("Flutterwave-paid deliveries transfer the order subtotal. "
+        payoutPolicy.setText("Automated payouts are not enabled. "
                 + "Cash-on-delivery payments are collected directly by you.");
         fields.addView(payoutPolicy);
 

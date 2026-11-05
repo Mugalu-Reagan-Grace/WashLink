@@ -1,5 +1,10 @@
 package com.example.washlink.models;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 public class Provider {
     private String uid;
     private String businessName;
@@ -15,7 +20,7 @@ public class Provider {
     private Integer reviewCount;
 
     public Provider() {
-        this.createdAt = java.time.Instant.now().toString();
+        this.createdAt = currentTimestamp();
     }
 
     public Provider(String uid, String businessName, String ownerName, String email, String phone, String address) {
@@ -25,7 +30,13 @@ public class Provider {
         this.email = email;
         this.phone = phone;
         this.address = address;
-        this.createdAt = java.time.Instant.now().toString();
+        this.createdAt = currentTimestamp();
+    }
+
+    private static String currentTimestamp() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return format.format(new Date());
     }
 
     public String getUid() {

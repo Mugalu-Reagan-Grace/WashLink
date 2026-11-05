@@ -11,15 +11,15 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="16dp">
+        android:layout_marginStart="@dimen/layout_16dp"
+        android:layout_marginTop="@dimen/layout_12dp"
+        android:layout_marginEnd="@dimen/layout_16dp">
 
         <ImageView
             android:id="@+id/btn_provider_menu"
-            android:layout_width="36dp"
-            android:layout_height="48dp"
-            android:padding="6dp"
+            android:layout_width="@dimen/touch_target_min"
+            android:layout_height="@dimen/touch_target_min"
+            android:padding="@dimen/layout_6dp"
             android:src="@drawable/ic_menu_lines"
             android:contentDescription="@string/provider_nav_more"
             android:clickable="true"
@@ -28,7 +28,8 @@
         <ImageView
             android:id="@+id/btn_rider_back"
             style="@style/WashLinkBackButton"
-            android:layout_marginStart="4dp" />
+        android:contentDescription="@string/back"
+            android:layout_marginStart="@dimen/layout_4dp" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -40,19 +41,19 @@
                 android:id="@+id/tv_rider_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Delivery team"
+                android:text="@string/provider_workspace_delivery_team"
                 android:textColor="@color/text_primary"
-                android:textSize="20sp"
+                android:textSize="@dimen/layout_20sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_rider_count"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="Loading riders"
+                android:layout_marginTop="@dimen/layout_2dp"
+                android:text="@string/provider_workspace_loading_riders"
                 android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
+                android:textSize="@dimen/layout_12sp" />
         </LinearLayout>
 
     </LinearLayout>
@@ -60,31 +61,99 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:text="Keep your delivery team up to date. Active riders can be assigned to orders."
+        android:layout_marginTop="@dimen/layout_8dp"
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:text="@string/provider_workspace_riders_description"
         android:textColor="@color/text_secondary"
-        android:textSize="13sp" />
+        android:textSize="@dimen/layout_13sp" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_add_rider"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginTop="14dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:text="Add rider"
-        android:textAllCaps="false" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/layout_14dp"
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_add_rider"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_target_min"
+            android:layout_weight="1"
+            android:text="@string/provider_workspace_add_rider"
+            android:textAllCaps="false" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_export_riders"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_target_min"
+            android:layout_marginStart="@dimen/layout_8dp"
+            android:text="@string/provider_workspace_share"
+            android:textAllCaps="false" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/et_rider_search"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/touch_target_min"
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginTop="@dimen/layout_12dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:background="@drawable/bg_card_bordered"
+        android:hint="@string/provider_workspace_search_rider"
+        android:inputType="text"
+        android:paddingStart="@dimen/layout_14dp"
+        android:paddingEnd="@dimen/layout_14dp"
+        android:singleLine="true"
+        android:textSize="@dimen/layout_13sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginTop="@dimen/layout_8dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <Spinner
+            android:id="@+id/spinner_rider_filter"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_target_min"
+            android:layout_weight="1"
+            android:contentDescription="@string/provider_workspace_rider_filter" />
+
+        <Spinner
+            android:id="@+id/spinner_rider_sort"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_target_min"
+            android:layout_marginStart="@dimen/layout_8dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/provider_workspace_sort_riders" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_rider_view"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_target_min"
+            android:layout_marginStart="@dimen/layout_8dp"
+            android:minWidth="@dimen/layout_0dp"
+            android:text="@string/provider_workspace_grid"
+            android:textAllCaps="false"
+            android:textSize="@dimen/layout_11sp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tv_rider_state"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:padding="24dp"
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:padding="@dimen/layout_24dp"
         android:textColor="@color/text_secondary"
         android:visibility="gone" />
 
@@ -92,20 +161,20 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
+        android:paddingStart="@dimen/layout_20dp"
+        android:paddingEnd="@dimen/layout_20dp"
         android:clipToPadding="false">
 
         <LinearLayout
             android:id="@+id/rider_items"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="@dimen/layout_12dp"
             android:orientation="vertical" />
     </ScrollView>
 
     <include
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/layout_56dp"
         layout="@layout/activity_provider_nav_bar" />
 </LinearLayout>

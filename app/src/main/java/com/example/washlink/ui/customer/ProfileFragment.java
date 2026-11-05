@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -88,11 +89,13 @@ public class ProfileFragment extends CustomerTabFragment {
         bindNavigation(view, MainActivity.TAB_PROFILE);
         view.findViewById(R.id.iv_bell).setOnClickListener(v -> openNotifications());
         view.findViewById(R.id.btn_back).setOnClickListener(v -> {
-            if (getActivity() != null) getActivity().onBackPressed();
+            if (getActivity() != null) getActivity().getOnBackPressedDispatcher().onBackPressed();
         });
 
         avatar = view.findViewById(R.id.iv_avatar);
         if (avatar != null) {
+            avatar.setOutlineProvider(ViewOutlineProvider.BACKGROUND);
+            avatar.setClipToOutline(true);
             avatar.setOnClickListener(v -> imagePicker.launch(new String[]{
                     "image/jpeg", "image/png", "image/webp", "image/gif"}));
         }
@@ -250,7 +253,8 @@ public class ProfileFragment extends CustomerTabFragment {
         list.setPadding(24, 0, 24, 0);
         if (addresses.isEmpty()) {
             TextView empty = new TextView(requireContext());
-            empty.setText("No saved addresses yet.");
+            empty.setText(R.string.saved_addresses_empty);
+            empty.setMinHeight((int) (48 * getResources().getDisplayMetrics().density + 0.5f));
             empty.setPadding(8, 20, 8, 20);
             list.addView(empty);
         }
@@ -267,18 +271,20 @@ public class ProfileFragment extends CustomerTabFragment {
                     LinearLayout.LayoutParams.WRAP_CONTENT, 1));
 
             Button use = new Button(requireContext());
-            use.setText("Use");
+            use.setText(R.string.saved_address_use);
+            use.setMinHeight((int) (48 * getResources().getDisplayMetrics().density + 0.5f));
             use.setOnClickListener(v -> persistAddresses(addresses, address, () -> {
                 if (dialogRef[0] != null) dialogRef[0].dismiss();
             }));
             row.addView(use);
 
             Button remove = new Button(requireContext());
-            remove.setText("Remove");
+            remove.setText(R.string.saved_address_remove);
+            remove.setMinHeight((int) (48 * getResources().getDisplayMetrics().density + 0.5f));
             remove.setOnClickListener(v -> new AlertDialog.Builder(requireContext())
-                    .setMessage("Remove this saved address?")
+                    .setMessage(R.string.saved_address_remove_confirmation)
                     .setNegativeButton(android.R.string.cancel, null)
-                    .setPositiveButton("Remove", (confirm, which) -> {
+                    .setPositiveButton(R.string.saved_address_remove, (confirm, which) -> {
                         List<String> updated = new ArrayList<>(addresses);
                         updated.removeIf(item -> item.equalsIgnoreCase(address));
                         String primary = account.getAddress() != null
@@ -301,7 +307,8 @@ public class ProfileFragment extends CustomerTabFragment {
                 .setMessage(R.string.profile_address_dialog_message)
                 .setView(scroll)
                 .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton("Add address", (dialog, which) -> showNewAddressDialog(addresses))
+                .setPositiveButton(R.string.saved_address_add,
+                        (dialog, which) -> showNewAddressDialog(addresses))
                 .show();
     }
 
@@ -309,6 +316,8 @@ public class ProfileFragment extends CustomerTabFragment {
         AutoCompleteTextView input = new AutoCompleteTextView(requireContext());
         input.setHint(R.string.enter_your_address);
         input.setSingleLine(true);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS);
+        input.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_DONE);
         input.setThreshold(1);
         input.setPadding(32, 24, 32, 24);
         ArrayAdapter<String> suggestionsAdapter = new ArrayAdapter<>(requireContext(),
@@ -345,7 +354,7 @@ public class ProfileFragment extends CustomerTabFragment {
                         .addOnFailureListener(error -> {
                             if (isAdded() && query.equals(input.getText().toString().trim())) {
                                 Toast.makeText(requireContext(),
-                                        "Could not load place suggestions.",
+                                        getString(R.string.saved_address_suggestions_error),
                                         Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -368,12 +377,12 @@ public class ProfileFragment extends CustomerTabFragment {
                 selectedPlace[0] = true;
             }).addOnFailureListener(error -> {
                 if (isAdded()) Toast.makeText(requireContext(),
-                        "Could not load that place.", Toast.LENGTH_SHORT).show();
+                        getString(R.string.saved_address_place_error), Toast.LENGTH_SHORT).show();
             });
         });
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
-                .setTitle("Add saved address")
-                .setMessage("Start typing a place and select a Google Maps result.")
+                .setTitle(R.string.saved_address_add_title)
+                .setMessage(R.string.saved_address_suggestion_instructions)
                 .setView(input)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.save, null)
@@ -381,11 +390,11 @@ public class ProfileFragment extends CustomerTabFragment {
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String address = input.getText().toString().trim();
             if (address.isEmpty()) {
-                input.setError("Select a place first");
+                input.setError(getString(R.string.saved_address_select_place_error));
                 return;
             }
             if (placesClient == null || !selectedPlace[0]) {
-                input.setError("Select a Google Maps suggestion");
+                input.setError(getString(R.string.saved_address_select_suggestion_error));
                 return;
             }
             List<String> updated = new ArrayList<>(addresses);

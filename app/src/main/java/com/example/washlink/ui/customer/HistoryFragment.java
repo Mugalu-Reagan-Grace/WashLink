@@ -34,6 +34,8 @@ public class HistoryFragment extends CustomerTabFragment {
     private HistoryAdapter adapter;
     private RecyclerView recyclerView;
     private TextView emptyState;
+    private View statePanel;
+    private View loadingProgress;
     private String filter = "active";
     private ListenerRegistration registration;
     private boolean loaded;
@@ -52,6 +54,8 @@ public class HistoryFragment extends CustomerTabFragment {
         view.findViewById(R.id.iv_bell).setOnClickListener(v -> openNotifications());
         recyclerView = view.findViewById(R.id.rv_order_history);
         emptyState = view.findViewById(R.id.tv_empty_history);
+        statePanel = view.findViewById(R.id.history_state_panel);
+        loadingProgress = view.findViewById(R.id.history_loading_progress);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new HistoryAdapter();
         recyclerView.setAdapter(adapter);
@@ -145,20 +149,37 @@ public class HistoryFragment extends CustomerTabFragment {
         if (recyclerView == null || emptyState == null || adapter == null) return;
         boolean hasItems = adapter.getItemCount() > 0;
         recyclerView.setVisibility(hasItems ? View.VISIBLE : View.GONE);
-        emptyState.setVisibility(hasItems ? View.GONE : View.VISIBLE);
+        statePanel.setVisibility(hasItems ? View.GONE : View.VISIBLE);
         if (hasItems) return;
+        boolean showLoading = !loaded && !loadFailed
+                && FirebaseAuth.getInstance().getCurrentUser() != null;
+        loadingProgress.setVisibility(showLoading ? View.VISIBLE : View.GONE);
         if (loadFailed) {
             emptyState.setText(R.string.history_load_error_retry);
+            emptyState.setCompoundDrawablesWithIntrinsicBounds(
+                    null, ContextCompat.getDrawable(requireContext(), R.drawable.ic_error_state),
+                    null, null);
         } else if (!loaded) {
             emptyState.setText(R.string.history_loading);
+            emptyState.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
         } else if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             emptyState.setText(R.string.history_sign_in_required);
+            emptyState.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
         } else if ("completed".equals(filter) && !allBookings.isEmpty()) {
             emptyState.setText(R.string.history_no_completed_orders);
+            emptyState.setCompoundDrawablesWithIntrinsicBounds(
+                    null, ContextCompat.getDrawable(requireContext(), R.drawable.ic_empty_basket),
+                    null, null);
         } else if ("active".equals(filter) && !allBookings.isEmpty()) {
             emptyState.setText(R.string.history_no_active_orders);
+            emptyState.setCompoundDrawablesWithIntrinsicBounds(
+                    null, ContextCompat.getDrawable(requireContext(), R.drawable.ic_empty_basket),
+                    null, null);
         } else {
             emptyState.setText(R.string.history_no_orders);
+            emptyState.setCompoundDrawablesWithIntrinsicBounds(
+                    null, ContextCompat.getDrawable(requireContext(), R.drawable.ic_empty_basket),
+                    null, null);
         }
         emptyState.setClickable(loadFailed);
         emptyState.setFocusable(loadFailed);

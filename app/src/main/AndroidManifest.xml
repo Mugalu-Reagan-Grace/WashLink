@@ -92,6 +92,10 @@
         <activity android:name=".AdminManagementActivity" />
         <activity android:name=".ProviderReportsActivity" />
         <activity android:name=".ProviderRidersActivity" />
+        <activity android:name=".ProviderCustomersActivity" />
+        <activity android:name=".ProviderPosActivity" />
+        <activity android:name=".ProviderInventoryActivity" />
+        <activity android:name=".ProviderStaffActivity" />
         <activity android:name=".BookingRequestsActivity" />
         <activity android:name=".ManageServicesActivity" />
         <activity android:name=".UpdateOrderStatusActivity" />

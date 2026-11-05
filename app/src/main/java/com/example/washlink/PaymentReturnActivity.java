@@ -8,7 +8,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.washlink.data.FlutterwavePaymentClient;
+import com.example.washlink.data.PaymentClient;
 import com.example.washlink.models.Booking;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -27,6 +27,8 @@ public class PaymentReturnActivity extends WashLinkActivity {
 
         Uri callback = getIntent() == null ? null : getIntent().getData();
         String bookingId = callback == null ? null : callback.getQueryParameter("bookingId");
+        String trackingId = callback == null
+                ? null : callback.getQueryParameter("orderTrackingId");
         String transactionId = callback == null
                 ? null : callback.getQueryParameter("transaction_id");
         if (FirebaseAuth.getInstance().getCurrentUser() == null
@@ -37,6 +39,24 @@ public class PaymentReturnActivity extends WashLinkActivity {
             return;
         }
 
+        if (trackingId != null && trackingId.matches("[A-Za-z0-9-]{10,100}")) {
+            PaymentClient.verifyPesapal(bookingId, trackingId,
+                    status -> {
+                        if (!"PAID".equals(status)) {
+                            Toast.makeText(this,
+                                    "Payment is not confirmed yet. Check your order status shortly.",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        openBookingConfirmation(bookingId);
+                    },
+                    error -> {
+                        Toast.makeText(this, "Could not verify payment: " + error,
+                                Toast.LENGTH_LONG).show();
+                        openBookingConfirmation(bookingId);
+                    });
+            return;
+        }
+
         if (transactionId == null || !transactionId.matches("\\d{1,30}")) {
             Toast.makeText(this, "Payment was not confirmed. Your booking remains unpaid.",
                     Toast.LENGTH_LONG).show();
@@ -44,7 +64,7 @@ public class PaymentReturnActivity extends WashLinkActivity {
             return;
         }
 
-        FlutterwavePaymentClient.verify(bookingId, transactionId,
+        PaymentClient.verifyFlutterwave(bookingId, transactionId,
                 status -> {
                     if (!"PAID".equals(status)) {
                         Toast.makeText(this, "Payment is not confirmed yet. Check your order status shortly.",

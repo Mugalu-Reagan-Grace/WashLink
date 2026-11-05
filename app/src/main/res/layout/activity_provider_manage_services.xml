@@ -12,12 +12,12 @@
         android:id="@+id/tv_header_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginEnd="@dimen/layout_12dp"
+        android:layout_marginTop="@dimen/layout_20dp"
         android:text="@string/manage_services_title"
         android:textColor="@color/text_primary"
-        android:textSize="20sp"
+        android:textSize="@dimen/layout_20sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/btn_provider_menu"
@@ -25,10 +25,10 @@
 
     <ImageView
         android:id="@+id/btn_provider_menu"
-        android:layout_width="36dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="12dp"
-        android:padding="6dp"
+        android:layout_width="@dimen/touch_target_min"
+        android:layout_height="@dimen/touch_target_min"
+        android:layout_marginStart="@dimen/layout_12dp"
+        android:padding="@dimen/layout_6dp"
         android:src="@drawable/ic_menu_lines"
         android:contentDescription="@string/provider_nav_more"
         android:clickable="true"
@@ -39,10 +39,10 @@
 
     <ImageView
         android:id="@+id/btn_add_service"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="20dp"
-        android:padding="8dp"
+        android:layout_width="@dimen/touch_target_min"
+        android:layout_height="@dimen/touch_target_min"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:padding="@dimen/layout_8dp"
         android:src="@drawable/ic_plus"
         android:background="@drawable/bg_offer_card"
         android:clickable="true"
@@ -56,12 +56,12 @@
         android:id="@+id/tv_services_subtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginEnd="20dp"
-        android:text="Set the services and per-kilogram prices customers can book."
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginTop="@dimen/layout_6dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:text="@string/provider_workspace_service_description"
         android:textColor="@color/text_secondary"
-        android:textSize="13sp"
+        android:textSize="@dimen/layout_13sp"
         app:layout_constraintTop_toBottomOf="@id/tv_header_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -70,12 +70,12 @@
         android:id="@+id/tv_booking_options_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginTop="@dimen/layout_12dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
         android:text="@string/provider_booking_options"
         android:textColor="@color/text_primary"
-        android:textSize="14sp"
+        android:textSize="@dimen/layout_14sp"
         android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/tv_services_subtitle"
         app:layout_constraintStart_toStartOf="parent"
@@ -85,15 +85,15 @@
         android:id="@+id/layout_booking_options"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="@dimen/layout_16dp"
+        android:layout_marginEnd="@dimen/layout_16dp"
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/tv_booking_options_title">
 
         <LinearLayout
             android:id="@+id/row_supports_pickup"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/layout_48dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
             <com.google.android.material.checkbox.MaterialCheckBox
@@ -105,16 +105,16 @@
                 android:id="@+id/tv_supports_pickup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="@dimen/layout_4dp"
                 android:text="@string/provider_supports_pickup"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp" />
+                android:textSize="@dimen/layout_14sp" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/row_supports_dropoff"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/layout_48dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
             <com.google.android.material.checkbox.MaterialCheckBox
@@ -126,21 +126,21 @@
                 android:id="@+id/tv_supports_dropoff"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="@dimen/layout_4dp"
                 android:text="@string/provider_supports_dropoff"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp" />
+                android:textSize="@dimen/layout_14sp" />
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_save_booking_options"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
+            android:layout_height="@dimen/layout_48dp"
+            android:layout_marginStart="@dimen/layout_4dp"
+            android:layout_marginEnd="@dimen/layout_4dp"
             android:text="@string/save_booking_options"
             android:textAllCaps="false"
-            app:cornerRadius="10dp" />
+            app:cornerRadius="@dimen/layout_10dp" />
     </LinearLayout>
 
     <!-- Services list -->
@@ -149,10 +149,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="16dp"
+        android:paddingStart="@dimen/layout_20dp"
+        android:paddingEnd="@dimen/layout_20dp"
+        android:paddingTop="@dimen/layout_20dp"
+        android:paddingBottom="@dimen/layout_16dp"
         tools:listitem="@layout/activity_provider_service_item"
         tools:itemCount="4"
         app:layout_constraintTop_toBottomOf="@id/layout_booking_options"
@@ -163,7 +163,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:padding="24dp"
+        android:padding="@dimen/layout_24dp"
         android:textColor="@color/text_secondary"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="@id/rv_services"
@@ -176,7 +176,7 @@
         android:id="@+id/bottom_nav_bar"
         layout="@layout/activity_provider_nav_bar"
         android:layout_width="0dp"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/layout_56dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

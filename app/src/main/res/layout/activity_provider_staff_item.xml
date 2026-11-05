@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/layout_8dp"
+    android:background="@drawable/bg_card_bordered"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="@dimen/layout_12dp">
+
+    <TextView
+        android:id="@+id/tv_provider_staff_initial"
+        android:layout_width="@dimen/layout_40dp"
+        android:layout_height="@dimen/layout_40dp"
+        android:background="@drawable/bg_accepted_pill"
+        android:gravity="center"
+        android:textColor="@color/laundr_blue"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_10dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_provider_staff_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_provider_staff_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/layout_3dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/layout_12sp" />
+
+        <TextView
+            android:id="@+id/tv_provider_staff_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/layout_4dp"
+            android:textSize="@dimen/layout_11sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/btn_provider_staff_edit"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_target_min"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:minWidth="@dimen/layout_58dp"
+            android:text="@string/provider_workspace_edit"
+            android:textColor="@color/laundr_blue"
+            android:textSize="@dimen/layout_12sp" />
+
+        <TextView
+            android:id="@+id/btn_provider_staff_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_target_min"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:minWidth="@dimen/layout_58dp"
+            android:text="@string/provider_workspace_toggle"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/layout_11sp" />
+
+        <TextView
+            android:id="@+id/btn_provider_staff_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_target_min"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:minWidth="@dimen/layout_58dp"
+            android:text="@string/provider_workspace_remove"
+            android:textColor="@color/reject_red"
+            android:textSize="@dimen/layout_11sp" />
+    </LinearLayout>
+</LinearLayout>

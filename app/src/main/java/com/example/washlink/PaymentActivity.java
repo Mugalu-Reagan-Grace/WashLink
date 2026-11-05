@@ -19,7 +19,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.button.MaterialButton;
 import com.example.washlink.data.BookingPricing;
-import com.example.washlink.data.FlutterwavePaymentClient;
+import com.example.washlink.data.PaymentClient;
 import com.example.washlink.models.Booking;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -41,7 +41,7 @@ public class PaymentActivity extends WashLinkActivity {
     private RadioButton mtnRadio;
     private RadioButton cashRadio;
     private MaterialButton payButton;
-    private String selectedPaymentMethod = "Flutterwave card";
+    private String selectedPaymentMethod = "Pesapal online payment";
     private String selectedPaymentCode = "card";
     private Booking pendingBooking;
     private BookingPricing.Quote pendingQuote;
@@ -162,7 +162,7 @@ public class PaymentActivity extends WashLinkActivity {
             booking.setPaymentMethod(requestedPaymentLabel);
             booking.setPaymentStatus("PENDING");
 
-            FlutterwavePaymentClient.createBooking(booking, requestedPaymentCode,
+            PaymentClient.createBooking(booking, requestedPaymentCode,
                     bookingId -> {
                     booking.setId(bookingId);
                     pendingBooking = booking;
@@ -185,16 +185,10 @@ public class PaymentActivity extends WashLinkActivity {
 
     private void continuePayment(Booking booking, BookingPricing.Quote quote, String methodCode) {
         if ("cash".equals(methodCode)) {
-            FlutterwavePaymentClient.registerCashOnDelivery(booking.getId(),
-                    () -> confirmBooking(booking, quote),
-                    message -> {
-                        payButton.setEnabled(true);
-                        Toast.makeText(this, "Could not confirm cash on delivery: " + message,
-                                Toast.LENGTH_LONG).show();
-                    });
+            confirmBooking(booking, quote);
             return;
         }
-        FlutterwavePaymentClient.initialize(booking.getId(), methodCode,
+        PaymentClient.initializePesapal(booking.getId(), methodCode,
                 checkoutUrl -> {
                     try {
                         startActivity(new Intent(Intent.ACTION_VIEW,
@@ -232,7 +226,7 @@ public class PaymentActivity extends WashLinkActivity {
 
     private void selectPaymentMethod(String method) {
         if ("card".equals(method)) {
-            selectedPaymentMethod = "Flutterwave card";
+            selectedPaymentMethod = getString(R.string.payment_card_label);
             selectedPaymentCode = "card";
         } else if ("airtel".equals(method)) {
             selectedPaymentMethod = getString(R.string.payment_airtel_money);

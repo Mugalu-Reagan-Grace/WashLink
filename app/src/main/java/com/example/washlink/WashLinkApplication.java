@@ -10,11 +10,16 @@ import com.example.washlink.ui.NotificationBadgeManager;
 import com.example.washlink.ui.ChatBadgeManager;
 import com.example.washlink.ui.ThemeManager;
 import com.google.android.libraries.places.api.Places;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.storage.FirebaseStorage;
 
 public class WashLinkApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        connectFirebaseEmulatorsIfEnabled();
         ThemeManager.applySavedNightMode(this);
         String placesKey = getApplicationInfo().metaData == null ? null
                 : getApplicationInfo().metaData.getString("com.google.android.geo.API_KEY");
@@ -61,5 +66,15 @@ public class WashLinkApplication extends Application {
                 }
             }
         });
+    }
+
+    private void connectFirebaseEmulatorsIfEnabled() {
+        if (!BuildConfig.USE_FIREBASE_EMULATORS) return;
+
+        String host = BuildConfig.FIREBASE_EMULATOR_HOST;
+        FirebaseAuth.getInstance().useEmulator(host, 9099);
+        FirebaseFirestore.getInstance().useEmulator(host, 8080);
+        FirebaseFunctions.getInstance("us-central1").useEmulator(host, 5001);
+        FirebaseStorage.getInstance().useEmulator(host, 9199);
     }
 }

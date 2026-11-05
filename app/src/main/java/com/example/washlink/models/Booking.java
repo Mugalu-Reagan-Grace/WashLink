@@ -36,7 +36,7 @@ public class Booking {
     private double subtotal;
     private double tax;
     private double total;
-    private String paymentMethod;     // e.g. "Flutterwave card"
+    private String paymentMethod;     // e.g. "Pesapal online payment"
     private String paymentStatus;     // PENDING, PAID, FAILED, or REFUND_PENDING
     private String paymentProvider;
     private String paymentReference;

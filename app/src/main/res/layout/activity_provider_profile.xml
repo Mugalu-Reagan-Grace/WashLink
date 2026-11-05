@@ -12,11 +12,11 @@
         android:id="@+id/tv_header_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginTop="@dimen/layout_20dp"
         android:text="@string/provider_profile_title"
         android:textColor="@color/text_primary"
-        android:textSize="20sp"
+        android:textSize="@dimen/layout_20sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/btn_provider_menu"
@@ -24,10 +24,10 @@
 
     <ImageView
         android:id="@+id/btn_provider_menu"
-        android:layout_width="36dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="12dp"
-        android:padding="6dp"
+        android:layout_width="@dimen/touch_target_min"
+        android:layout_height="@dimen/touch_target_min"
+        android:layout_marginStart="@dimen/layout_12dp"
+        android:padding="@dimen/layout_6dp"
         android:src="@drawable/ic_menu_lines"
         android:contentDescription="@string/provider_nav_more"
         android:clickable="true"
@@ -39,11 +39,18 @@
     <TextView
         android:id="@+id/tv_edit"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="20dp"
+        android:layout_height="@dimen/touch_target_min"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:minWidth="@dimen/touch_target_min"
+        android:paddingStart="@dimen/layout_8dp"
+        android:paddingEnd="@dimen/layout_8dp"
         android:text="@string/edit_profile"
         android:textColor="@color/laundr_blue"
-        android:textSize="13sp"
+        android:textSize="@dimen/layout_13sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="@id/tv_header_title"
         app:layout_constraintBottom_toBottomOf="@id/tv_header_title"
@@ -53,12 +60,12 @@
         android:id="@+id/tv_profile_subtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="20dp"
-        android:text="Update your business information, availability, and account settings."
+        android:layout_marginStart="@dimen/layout_20dp"
+        android:layout_marginTop="@dimen/layout_4dp"
+        android:layout_marginEnd="@dimen/layout_20dp"
+        android:text="@string/provider_workspace_profile_description"
         android:textColor="@color/text_secondary"
-        android:textSize="13sp"
+        android:textSize="@dimen/layout_13sp"
         app:layout_constraintTop_toBottomOf="@id/tv_header_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -68,16 +75,16 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:paddingBottom="16dp"
+        android:paddingBottom="@dimen/layout_16dp"
         app:layout_constraintTop_toBottomOf="@id/tv_profile_subtitle"
         app:layout_constraintBottom_toTopOf="@id/bottom_nav_bar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="20dp">
+            android:paddingStart="@dimen/layout_20dp"
+            android:paddingEnd="@dimen/layout_20dp"
+            android:paddingTop="@dimen/layout_20dp">
 
             <!-- Business info card -->
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -85,16 +92,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_card_bordered"
-                android:padding="16dp"
+                android:padding="@dimen/layout_16dp"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
                     android:id="@+id/iv_logo"
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
+                    android:layout_width="@dimen/layout_56dp"
+                    android:layout_height="@dimen/layout_56dp"
                     android:background="@drawable/bg_thumbnail_placeholder"
                     android:scaleType="centerCrop"
-                    android:clipToOutline="true"
                     android:clickable="true"
                     android:focusable="true"
                     android:contentDescription="@string/edit_profile_picture"
@@ -105,10 +111,10 @@
                     android:id="@+id/tv_business_name"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
+                    android:layout_marginStart="@dimen/layout_14dp"
                     android:text="@string/provider_business_name_fallback"
                     android:textColor="@color/text_primary"
-                    android:textSize="16sp"
+                    android:textSize="@dimen/layout_16sp"
                     android:textStyle="bold"
                     app:layout_constraintTop_toTopOf="@id/iv_logo"
                     app:layout_constraintStart_toEndOf="@id/iv_logo"
@@ -117,16 +123,16 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="@dimen/layout_14dp"
+                    android:layout_marginTop="@dimen/layout_4dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     app:layout_constraintTop_toBottomOf="@id/tv_business_name"
                     app:layout_constraintStart_toEndOf="@id/iv_logo">
 
                     <ImageView
-                        android:layout_width="13dp"
-                        android:layout_height="13dp"
+                        android:layout_width="@dimen/layout_13dp"
+                        android:layout_height="@dimen/layout_13dp"
                         android:src="@drawable/ic_star_filled"
                         android:contentDescription="@null" />
 
@@ -134,29 +140,29 @@
                         android:id="@+id/tv_profile_rating_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="New"
+                        android:layout_marginStart="@dimen/layout_4dp"
+                        android:text="@string/provider_workspace_new_rating"
                         android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/layout_12sp" />
 
                     <TextView
                         android:id="@+id/tv_profile_review_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
+                        android:layout_marginStart="@dimen/layout_4dp"
                         android:text="@string/provider_no_reviews"
                         android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:textSize="@dimen/layout_12sp" />
                 </LinearLayout>
 
                 <TextView
                     android:id="@+id/tv_address"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="Business address not set"
+                    android:layout_marginTop="@dimen/layout_12dp"
+                    android:text="@string/provider_workspace_address_unset"
                     android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/layout_12sp"
                     app:layout_constraintTop_toBottomOf="@id/iv_logo"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
@@ -165,10 +171,10 @@
                     android:id="@+id/tv_provider_phone"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Phone not set"
+                    android:layout_marginTop="@dimen/layout_4dp"
+                    android:text="@string/provider_workspace_phone_unset"
                     android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/layout_12sp"
                     app:layout_constraintTop_toBottomOf="@id/tv_address"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
@@ -177,10 +183,10 @@
                     android:id="@+id/tv_provider_availability"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Availability not set"
+                    android:layout_marginTop="@dimen/layout_4dp"
+                    android:text="@string/provider_workspace_availability_unset"
                     android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/layout_12sp"
                     app:layout_constraintTop_toBottomOf="@id/tv_provider_phone"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
@@ -191,12 +197,12 @@
                 android:id="@+id/tv_profile_completion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="@dimen/layout_12dp"
                 android:background="@drawable/bg_offer_card"
-                android:padding="12dp"
-                android:text="Loading business profile status..."
+                android:padding="@dimen/layout_12dp"
+                android:text="@string/provider_workspace_profile_loading"
                 android:textColor="@color/laundr_blue_dark"
-                android:textSize="12sp"
+                android:textSize="@dimen/layout_12sp"
                 app:layout_constraintTop_toBottomOf="@id/card_business_info" />
 
             <!-- Description -->
@@ -204,10 +210,10 @@
                 android:id="@+id/label_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="@dimen/layout_20dp"
                 android:text="@string/business_description"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp"
+                android:textSize="@dimen/layout_14sp"
                 android:textStyle="bold"
                 app:layout_constraintTop_toBottomOf="@id/tv_profile_completion" />
 
@@ -215,11 +221,11 @@
                 android:id="@+id/tv_description_value"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="Add a business description to help customers understand your services."
+                android:layout_marginTop="@dimen/layout_6dp"
+                android:text="@string/provider_workspace_description_empty"
                 android:textColor="@color/text_secondary"
-                android:textSize="13sp"
-                android:lineSpacingExtra="2dp"
+                android:textSize="@dimen/layout_13sp"
+                android:lineSpacingExtra="@dimen/layout_2dp"
                 app:layout_constraintTop_toBottomOf="@id/label_description" />
 
             <!-- Operating Hours -->
@@ -227,10 +233,10 @@
                 android:id="@+id/label_hours"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="@dimen/layout_20dp"
                 android:text="@string/operating_hours"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp"
+                android:textSize="@dimen/layout_14sp"
                 android:textStyle="bold"
                 app:layout_constraintTop_toBottomOf="@id/tv_description_value" />
 
@@ -238,11 +244,11 @@
                 android:id="@+id/tv_hours_value"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="Operating hours have not been configured."
+                android:layout_marginTop="@dimen/layout_6dp"
+                android:text="@string/provider_workspace_hours_empty"
                 android:textColor="@color/text_secondary"
-                android:textSize="13sp"
-                android:lineSpacingExtra="2dp"
+                android:textSize="@dimen/layout_13sp"
+                android:lineSpacingExtra="@dimen/layout_2dp"
                 app:layout_constraintTop_toBottomOf="@id/label_hours" />
 
             <!-- Settings rows -->
@@ -250,19 +256,20 @@
                 android:id="@+id/row_manage_services"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:minHeight="@dimen/touch_target_min"
+                android:layout_marginTop="@dimen/layout_24dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
+                android:paddingTop="@dimen/layout_10dp"
+                android:paddingBottom="@dimen/layout_10dp"
                 app:layout_constraintTop_toBottomOf="@id/tv_hours_value">
 
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="@dimen/layout_22dp"
+                    android:layout_height="@dimen/layout_22dp"
                     android:src="@drawable/ic_nav_services"
                     android:contentDescription="@null" />
 
@@ -270,15 +277,15 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="14dp"
+                    android:layout_marginStart="@dimen/layout_14dp"
                     android:text="@string/manage_services_title"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/layout_14sp"
                     android:textStyle="bold" />
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="@dimen/layout_20dp"
+                    android:layout_height="@dimen/layout_20dp"
                     android:src="@drawable/ic_chevron_right"
                     android:contentDescription="@null" />
             </LinearLayout>
@@ -287,18 +294,19 @@
                 android:id="@+id/row_manage_riders"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="@dimen/touch_target_min"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
+                android:paddingTop="@dimen/layout_10dp"
+                android:paddingBottom="@dimen/layout_10dp"
                 app:layout_constraintTop_toBottomOf="@id/row_manage_services">
 
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="@dimen/layout_22dp"
+                    android:layout_height="@dimen/layout_22dp"
                     android:src="@drawable/ic_calendar"
                     android:contentDescription="@null" />
 
@@ -306,15 +314,15 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="14dp"
-                    android:text="Manage delivery riders"
+                    android:layout_marginStart="@dimen/layout_14dp"
+                    android:text="@string/provider_workspace_manage_riders"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/layout_14sp"
                     android:textStyle="bold" />
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="@dimen/layout_20dp"
+                    android:layout_height="@dimen/layout_20dp"
                     android:src="@drawable/ic_chevron_right"
                     android:contentDescription="@null" />
             </LinearLayout>
@@ -323,18 +331,19 @@
                 android:id="@+id/row_provider_reports"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="@dimen/touch_target_min"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
+                android:paddingTop="@dimen/layout_10dp"
+                android:paddingBottom="@dimen/layout_10dp"
                 app:layout_constraintTop_toBottomOf="@id/row_manage_riders">
 
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="@dimen/layout_22dp"
+                    android:layout_height="@dimen/layout_22dp"
                     android:src="@drawable/ic_provider_stat_revenue"
                     android:contentDescription="@null" />
 
@@ -342,15 +351,15 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="14dp"
-                    android:text="Business reports"
+                    android:layout_marginStart="@dimen/layout_14dp"
+                    android:text="@string/provider_workspace_business_reports"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/layout_14sp"
                     android:textStyle="bold" />
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="@dimen/layout_20dp"
+                    android:layout_height="@dimen/layout_20dp"
                     android:src="@drawable/ic_chevron_right"
                     android:contentDescription="@null" />
             </LinearLayout>
@@ -358,7 +367,7 @@
             <View
                 android:id="@+id/divider_theme_top"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
+                android:layout_height="@dimen/layout_1dp"
                 android:background="@color/divider_gray"
                 app:layout_constraintTop_toBottomOf="@id/row_provider_reports" />
 
@@ -366,18 +375,19 @@
                 android:id="@+id/row_provider_theme"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="@dimen/touch_target_min"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
+                android:paddingTop="@dimen/layout_10dp"
+                android:paddingBottom="@dimen/layout_10dp"
                 app:layout_constraintTop_toBottomOf="@id/divider_theme_top">
 
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="@dimen/layout_22dp"
+                    android:layout_height="@dimen/layout_22dp"
                     android:src="@drawable/ic_profile_card"
                     android:contentDescription="@null" />
 
@@ -385,24 +395,25 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="14dp"
-                    android:text="Appearance"
+                    android:layout_marginStart="@dimen/layout_14dp"
+                    android:text="@string/provider_workspace_appearance"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/layout_14sp"
                     android:textStyle="bold" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/switch_provider_dark_mode"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="Toggle dark mode"
+                    android:layout_height="@dimen/touch_target_min"
+                    android:minWidth="@dimen/touch_target_min"
+                    android:contentDescription="@string/provider_workspace_toggle_dark_mode"
                     android:showText="false" />
             </LinearLayout>
 
             <View
                 android:id="@+id/divider1"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
+                android:layout_height="@dimen/layout_1dp"
                 android:background="@color/divider_gray"
                 app:layout_constraintTop_toBottomOf="@id/row_provider_theme" />
 
@@ -410,18 +421,19 @@
                 android:id="@+id/row_payment_settings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="@dimen/touch_target_min"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
+                android:paddingTop="@dimen/layout_10dp"
+                android:paddingBottom="@dimen/layout_10dp"
                 app:layout_constraintTop_toBottomOf="@id/divider1">
 
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="@dimen/layout_22dp"
+                    android:layout_height="@dimen/layout_22dp"
                     android:src="@drawable/ic_profile_card"
                     android:contentDescription="@null" />
 
@@ -429,15 +441,15 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="14dp"
+                    android:layout_marginStart="@dimen/layout_14dp"
                     android:text="@string/provider_payout_settings"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/layout_14sp"
                     android:textStyle="bold" />
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="@dimen/layout_20dp"
+                    android:layout_height="@dimen/layout_20dp"
                     android:src="@drawable/ic_chevron_right"
                     android:contentDescription="@null" />
             </LinearLayout>
@@ -445,7 +457,7 @@
             <View
                 android:id="@+id/divider2"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
+                android:layout_height="@dimen/layout_1dp"
                 android:background="@color/divider_gray"
                 app:layout_constraintTop_toBottomOf="@id/row_payment_settings" />
 
@@ -453,18 +465,19 @@
                 android:id="@+id/row_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="@dimen/touch_target_min"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
+                android:paddingTop="@dimen/layout_10dp"
+                android:paddingBottom="@dimen/layout_10dp"
                 app:layout_constraintTop_toBottomOf="@id/divider2">
 
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="@dimen/layout_22dp"
+                    android:layout_height="@dimen/layout_22dp"
                     android:src="@drawable/ic_profile_password"
                     android:contentDescription="@null" />
 
@@ -472,15 +485,15 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="14dp"
+                    android:layout_marginStart="@dimen/layout_14dp"
                     android:text="@string/profile_password"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/layout_14sp"
                     android:textStyle="bold" />
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="@dimen/layout_20dp"
+                    android:layout_height="@dimen/layout_20dp"
                     android:src="@drawable/ic_chevron_right"
                     android:contentDescription="@null" />
             </LinearLayout>
@@ -490,18 +503,18 @@
                 android:id="@+id/btn_logout"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="28dp"
+                android:layout_height="@dimen/layout_48dp"
+                android:layout_marginTop="@dimen/layout_28dp"
                 android:text="@string/provider_logout"
                 android:textAllCaps="false"
-                android:textSize="14sp"
+                android:textSize="@dimen/layout_14sp"
                 android:textColor="@color/logout_red"
                 app:icon="@drawable/ic_logout"
                 app:iconTint="@null"
                 app:iconGravity="textStart"
-                app:iconPadding="8dp"
+                app:iconPadding="@dimen/layout_8dp"
                 app:strokeColor="@color/logout_red"
-                app:cornerRadius="12dp"
+                app:cornerRadius="@dimen/layout_12dp"
                 app:layout_constraintTop_toBottomOf="@id/row_password" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -513,7 +526,7 @@
         android:id="@+id/bottom_nav_bar"
         layout="@layout/activity_provider_nav_bar"
         android:layout_width="0dp"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/layout_56dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

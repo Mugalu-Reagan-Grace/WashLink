@@ -24,6 +24,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class TrackingFragment extends CustomerTabFragment {
     private ListenerRegistration registration;
     private String providerPhone;
+    private View trackingContent;
+    private View trackingStatePanel;
+    private View trackingProgress;
+    private TextView trackingState;
     @Override
     public View onCreateView(@NonNull android.view.LayoutInflater inflater,
                              @Nullable android.view.ViewGroup container,
@@ -36,6 +40,10 @@ public class TrackingFragment extends CustomerTabFragment {
         bindNavigation(view, MainActivity.TAB_TRACKING);
         View bell = view.findViewById(R.id.iv_bell);
         if (bell != null) bell.setOnClickListener(v -> openNotifications());
+        trackingContent = view.findViewById(R.id.tracking_content);
+        trackingStatePanel = view.findViewById(R.id.tracking_state_panel);
+        trackingProgress = view.findViewById(R.id.tracking_state_progress);
+        trackingState = view.findViewById(R.id.tv_tracking_state);
         TextView orderId = view.findViewById(R.id.tv_order_id);
         TextView status = view.findViewById(R.id.tv_order_status);
         View timeline = view.findViewById(R.id.timeline);
@@ -47,7 +55,7 @@ public class TrackingFragment extends CustomerTabFragment {
             call.setEnabled(false);
             call.setOnClickListener(v -> {
                 if (providerPhone == null || providerPhone.trim().isEmpty()) {
-                    Toast.makeText(requireContext(), "Provider contact is unavailable.",
+                    Toast.makeText(requireContext(), R.string.tracking_contact_unavailable,
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -67,6 +75,11 @@ public class TrackingFragment extends CustomerTabFragment {
         registration = null;
         View root = getView();
         if (root == null) return;
+        trackingContent = root.findViewById(R.id.tracking_content);
+        trackingStatePanel = root.findViewById(R.id.tracking_state_panel);
+        trackingProgress = root.findViewById(R.id.tracking_state_progress);
+        trackingState = root.findViewById(R.id.tv_tracking_state);
+        showTrackingState(R.string.tracking_loading, false);
         TextView orderId = root.findViewById(R.id.tv_order_id);
         TextView status = root.findViewById(R.id.tv_order_status);
         View timeline = root.findViewById(R.id.timeline);
@@ -74,7 +87,7 @@ public class TrackingFragment extends CustomerTabFragment {
         View cancel = root.findViewById(R.id.btn_cancel_booking);
         providerPhone = null;
         if (status != null) {
-            status.setText("Loading order updates...");
+            status.setText(R.string.tracking_loading);
             status.setOnClickListener(null);
         }
         if (call != null) {
@@ -88,6 +101,11 @@ public class TrackingFragment extends CustomerTabFragment {
                     requestedBookingId, new BookingService.BookingListener() {
                         @Override public void onBookingLoaded(Booking booking) {
                             if (!isAdded() || getView() == null) return;
+                            if (booking == null) {
+                                showTrackingState(R.string.tracking_order_unavailable, true);
+                                return;
+                            }
+                            showTrackingContent();
                             OrderTrackingRenderer.render(requireContext(), getView(), booking);
                             if (cancel != null) BookingCancellationHelper.bind(
                                     requireContext(), cancel, booking);
@@ -106,6 +124,7 @@ public class TrackingFragment extends CustomerTabFragment {
                             if (!isAdded() || getView() == null) return;
                             for (Booking booking : bookings) {
                                 if (!OrderStatus.fromString(booking.getStatus()).isTerminal()) {
+                                    showTrackingContent();
                                     OrderTrackingRenderer.render(requireContext(), getView(), booking);
                                     if (cancel != null) BookingCancellationHelper.bind(
                                             requireContext(), cancel, booking);
@@ -113,11 +132,9 @@ public class TrackingFragment extends CustomerTabFragment {
                                     return;
                                 }
                             }
-                            if (orderId != null) orderId.setText("No active order");
-                            if (status != null) {
-                                status.setText("Book a service to track an order");
-                                status.setOnClickListener(null);
-                            }
+                            showTrackingState(R.string.tracking_no_active_order, false);
+                            if (orderId != null) orderId.setText(R.string.tracking_no_active_order);
+                            if (status != null) status.setText(R.string.tracking_status_empty);
                             if (timeline != null) timeline.setVisibility(View.GONE);
                             if (call != null) call.setVisibility(View.GONE);
                             if (cancel != null) cancel.setVisibility(View.GONE);
@@ -128,11 +145,9 @@ public class TrackingFragment extends CustomerTabFragment {
                         }
                     });
         } else {
-            if (orderId != null) orderId.setText("Sign in to view orders");
-            if (status != null) {
-                status.setText("No active booking");
-                status.setOnClickListener(null);
-            }
+            showTrackingState(R.string.tracking_sign_in_required, false);
+            if (orderId != null) orderId.setText(R.string.tracking_sign_in_required);
+            if (status != null) status.setText(R.string.tracking_status_empty);
             if (timeline != null) timeline.setVisibility(View.GONE);
             if (call != null) call.setVisibility(View.GONE);
             if (cancel != null) cancel.setVisibility(View.GONE);
@@ -142,23 +157,45 @@ public class TrackingFragment extends CustomerTabFragment {
     private void showRetryError(TextView orderId, TextView status, View timeline,
                                 View call, View cancel) {
         if (!isAdded()) return;
-        if (orderId != null) orderId.setText("Could not load this order");
-        if (status != null) {
-            status.setText("Tap to retry loading order updates");
-            status.setOnClickListener(v -> {
-                String bookingId = getArguments() == null
-                        ? null : getArguments().getString("booking_id");
-                loadBookingData(bookingId);
-            });
-        }
+        if (orderId != null) orderId.setText(R.string.tracking_load_error);
+        if (status != null) status.setText(R.string.tracking_status_error);
+        showTrackingState(R.string.tracking_load_error_retry, true);
         if (timeline != null) timeline.setVisibility(View.GONE);
         if (call != null) call.setVisibility(View.GONE);
         if (cancel != null) cancel.setVisibility(View.GONE);
     }
 
+    private void showTrackingState(int message, boolean retry) {
+        if (trackingContent == null || trackingState == null) return;
+        trackingContent.setVisibility(View.GONE);
+        trackingStatePanel.setVisibility(View.VISIBLE);
+        trackingState.setText(message);
+        trackingProgress.setVisibility(message == R.string.tracking_loading
+                ? View.VISIBLE : View.GONE);
+        trackingState.setClickable(retry);
+        trackingState.setFocusable(retry);
+        trackingState.setOnClickListener(retry ? v -> {
+            String bookingId = getArguments() == null
+                    ? null : getArguments().getString("booking_id");
+            loadBookingData(bookingId);
+        } : null);
+    }
+
+    private void showTrackingContent() {
+        if (trackingContent != null) trackingContent.setVisibility(View.VISIBLE);
+        if (trackingStatePanel != null) {
+            trackingStatePanel.setVisibility(View.GONE);
+        }
+        if (trackingState != null) {
+            trackingState.setClickable(false);
+            trackingState.setFocusable(false);
+            trackingState.setOnClickListener(null);
+        }
+    }
+
     private void loadProviderContact(Booking booking, View call) {
         if (booking.getProviderId() == null || booking.getProviderId().trim().isEmpty()) {
-            showContactState(call, booking, "Provider details unavailable", false);
+            showContactState(call, booking, R.string.tracking_provider_details_unavailable, false);
             return;
         }
         FirebaseFirestore.getInstance().collection("providers").document(booking.getProviderId()).get()
@@ -181,14 +218,15 @@ public class TrackingFragment extends CustomerTabFragment {
                             call.setEnabled(true);
                         }
                     } else {
-                        showContactState(call, booking, "Provider contact unavailable", false);
+                        showContactState(call, booking,
+                                R.string.tracking_provider_contact_unavailable, false);
                     }
                 })
                 .addOnFailureListener(error -> showContactState(
-                        call, booking, "Contact unavailable. Tap to retry", true));
+                        call, booking, R.string.tracking_contact_retry, true));
     }
 
-    private void showContactState(View call, Booking booking, String message, boolean retry) {
+    private void showContactState(View call, Booking booking, int message, boolean retry) {
         if (!isAdded() || call == null) return;
         if (call instanceof TextView) ((TextView) call).setText(message);
         call.setVisibility(View.VISIBLE);

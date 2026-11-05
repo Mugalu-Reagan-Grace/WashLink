@@ -1,5 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="color_primary">@color/laundr_blue</color>
+    <color name="color_primary_variant">@color/laundr_blue_dark</color>
+    <color name="color_secondary">@color/laundr_blue</color>
+    <color name="color_secondary_variant">@color/laundr_blue_dark</color>
+    <color name="color_background">@color/white</color>
+    <color name="color_surface">@color/white</color>
+    <color name="color_text_primary">@color/text_primary</color>
+    <color name="color_text_secondary">@color/text_secondary</color>
+    <color name="color_divider">@color/divider_gray</color>
+    <color name="color_success">@color/success_green</color>
+    <color name="color_warning">@color/payment_pending_text</color>
+    <color name="color_error">@color/rejected_text</color>
+    <color name="dark_background">#101720</color>
+    <color name="dark_surface">#182230</color>
+    <color name="dark_surface_raised">#222F3E</color>
+    <color name="dark_text_primary">#F1F5F9</color>
+    <color name="dark_text_secondary">#B7C3D0</color>
+    <color name="dark_divider">#344154</color>
+    <color name="dark_status_blue">#263B62</color>
+    <color name="dark_status_green">#1E4538</color>
+    <color name="dark_status_amber">#4B3922</color>
+    <color name="dark_status_red">#4A2B32</color>
+    <color name="dark_status_green_text">#72E3A5</color>
+    <color name="dark_status_amber_text">#FFD27A</color>
+    <color name="dark_status_red_text">#FF9AA5</color>
+    <color name="color_calendar_amber">#D97706</color>
+    <color name="color_calendar_emerald">#059669</color>
+    <color name="color_calendar_violet">#7C3AED</color>
+    <color name="color_ripple_cream">#332C4B67</color>
+
     <color name="laundr_blue">#1652E6</color>
     <color name="laundr_blue_dark">#0F3FB8</color>
     <color name="white">#FFFFFF</color>
@@ -37,6 +67,8 @@
     <color name="button_disabled_bg">#E5E7EB</color>
     <color name="button_disabled_text">#B0B4BA</color>
     <color name="success_green">#1FA855</color>
+    <color name="whatsapp_green">#25D366</color>
+    <color name="whatsapp_text">#102A15</color>
     <color name="success_green_bg">#E7F7ED</color>
     <color name="visa_navy">#1A1F3D</color>
     <color name="step_number_bg">#EFF3FE</color>

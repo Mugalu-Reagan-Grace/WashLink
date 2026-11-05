@@ -3,9 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
+    android:layout_marginBottom="@dimen/layout_12dp"
     android:background="@drawable/bg_card_bordered"
-    android:padding="16dp">
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:padding="@dimen/layout_16dp">
 
     <TextView
         android:id="@+id/tv_order_id"
@@ -13,7 +16,7 @@
         android:layout_height="wrap_content"
         android:text="@string/order_1_id"
         android:textColor="@color/text_primary"
-        android:textSize="15sp"
+        android:textSize="@dimen/layout_15sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/tv_order_status"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,10 +26,10 @@
         android:id="@+id/tv_order_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="@dimen/layout_4dp"
         android:text="@string/order_1_date"
         android:textColor="@color/text_secondary"
-        android:textSize="13sp"
+        android:textSize="@dimen/layout_13sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_order_id" />
 
@@ -35,13 +38,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_status_pill"
-        android:paddingStart="10dp"
-        android:paddingTop="4dp"
-        android:paddingEnd="10dp"
-        android:paddingBottom="4dp"
+        android:paddingStart="@dimen/layout_10dp"
+        android:paddingTop="@dimen/layout_4dp"
+        android:paddingEnd="@dimen/layout_10dp"
+        android:paddingBottom="@dimen/layout_4dp"
         android:text="@string/order_1_status"
         android:textColor="@color/status_processing_text"
-        android:textSize="11sp"
+        android:textSize="@dimen/layout_11sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -52,10 +55,10 @@
         android:layout_height="wrap_content"
         android:text="@string/order_1_type"
         android:textColor="@color/text_secondary"
-        android:textSize="13sp"
+        android:textSize="@dimen/layout_13sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_order_date"
-        android:layout_marginTop="12dp" />
+        android:layout_marginTop="@dimen/layout_12dp" />
 
     <TextView
         android:id="@+id/tv_order_price"
@@ -63,7 +66,7 @@
         android:layout_height="wrap_content"
         android:text="@string/order_1_price"
         android:textColor="@color/laundr_blue"
-        android:textSize="15sp"
+        android:textSize="@dimen/layout_15sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tv_order_type" />
@@ -72,7 +75,7 @@
         android:id="@+id/layout_order_actions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/layout_8dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -82,25 +85,25 @@
             android:id="@+id/btn_review_booking"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="6dp"
+            android:layout_height="@dimen/layout_48dp"
+            android:layout_marginEnd="@dimen/layout_6dp"
             android:layout_weight="1"
             android:text="@string/review_order_action"
             android:textAllCaps="false"
             android:visibility="gone"
-            app:cornerRadius="10dp"
+            app:cornerRadius="@dimen/radius_button"
             app:strokeColor="@color/divider_gray" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_book_again"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="6dp"
+            android:layout_height="@dimen/layout_48dp"
+            android:layout_marginStart="@dimen/layout_6dp"
             android:layout_weight="1"
             android:text="@string/book_again_action"
             android:textAllCaps="false"
             android:visibility="gone"
-            app:cornerRadius="10dp" />
+            app:cornerRadius="@dimen/radius_button" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

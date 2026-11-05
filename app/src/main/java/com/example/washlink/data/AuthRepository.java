@@ -12,6 +12,8 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.FirebaseNetworkException;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -126,10 +128,32 @@ public class AuthRepository {
                             .addOnSuccessListener(unused -> callback.onSuccess(user))
                             .addOnFailureListener(e -> {
                                 auth.signOut();
-                                callback.onError(e.getMessage());
+                                callback.onError(loginFailureMessage(e));
                             });
                 })
-                .addOnFailureListener(e -> callback.onError(e.getMessage()));
+                .addOnFailureListener(e -> callback.onError(loginFailureMessage(e)));
+    }
+
+    private String loginFailureMessage(Exception error) {
+        boolean firestoreUnavailable = error instanceof FirebaseFirestoreException
+                && ((FirebaseFirestoreException) error).getCode()
+                == FirebaseFirestoreException.Code.UNAVAILABLE;
+        String details = error.getLocalizedMessage();
+        String lowerDetails = details == null ? "" : details.toLowerCase(java.util.Locale.ROOT);
+        boolean connectionFailure = lowerDetails.contains("failed to connect")
+                || lowerDetails.contains("network request failed")
+                || lowerDetails.contains("unable to resolve host")
+                || lowerDetails.contains("timed out");
+        if (error instanceof FirebaseNetworkException || firestoreUnavailable
+                || connectionFailure) {
+            if (com.example.washlink.BuildConfig.USE_FIREBASE_EMULATORS) {
+                return "Cannot reach the demo login server. Start Firebase emulators on the PC "
+                        + "and connect this phone to the same Wi-Fi.";
+            }
+            return "Could not connect to Firebase. Check your internet connection and try again.";
+        }
+        return details == null || details.trim().isEmpty()
+                ? "Sign in failed. Check your details and try again." : details;
     }
 
     // ------------------------------------------------------------------

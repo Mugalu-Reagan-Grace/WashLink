@@ -57,9 +57,10 @@ public class NotificationsActivity extends WashLinkActivity {
                 message.setText(formatNotification(notification));
                 message.setTypeface(null, notification.isUnread()
                         ? Typeface.BOLD : Typeface.NORMAL);
-                message.setContentDescription((notification.isUnread()
-                        ? "Unread notification. " : "Read notification. ")
-                        + formatNotification(notification));
+                message.setContentDescription(getString(notification.isUnread()
+                        ? R.string.notification_unread_accessibility
+                        : R.string.notification_read_accessibility,
+                        formatNotification(notification)));
                 return row;
             }
         };
@@ -76,7 +77,7 @@ public class NotificationsActivity extends WashLinkActivity {
         });
 
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            showState("Sign in to view order updates.");
+            showState(getString(R.string.notification_sign_in_required));
             return;
         }
         AuthRepository.getInstance().getCurrentSession(new AuthRepository.RoleCallback() {
@@ -88,8 +89,8 @@ public class NotificationsActivity extends WashLinkActivity {
                     return;
                 }
                 isProvider = UserAccount.ROLE_PROVIDER.equals(account.getRole());
-                String title = isProvider ? "Provider notifications" : "Notifications";
-                ((TextView) findViewById(R.id.tv_notifications_title)).setText(title);
+                ((TextView) findViewById(R.id.tv_notifications_title)).setText(
+                        isProvider ? R.string.notification_provider_title : R.string.notifications);
                 if (isProvider) listenForProviderNotifications(account.getUid());
                 else {
                     BottomNavHelper.bind(NotificationsActivity.this);
@@ -104,13 +105,13 @@ public class NotificationsActivity extends WashLinkActivity {
 
     private void listenForProviderNotifications(String uid) {
         if (providerRegistration != null) providerRegistration.remove();
-        showState("Loading notifications...");
+        showState(getString(R.string.notification_loading));
         providerRegistration = FirebaseFirestore.getInstance().collection("users")
                 .document(uid).collection("notifications")
                 .limit(100)
                 .addSnapshotListener((snapshot, error) -> {
                     if (error != null) {
-                        showState("Could not load notifications. Tap to retry.");
+                        showState(getString(R.string.notification_load_error));
                         if (stateView != null) {
                             stateView.setClickable(true);
                             stateView.setOnClickListener(v -> listenForProviderNotifications(uid));
@@ -130,7 +131,7 @@ public class NotificationsActivity extends WashLinkActivity {
                     notifications.sort(Comparator.comparingLong(
                             BookingNotification::getCreatedAt).reversed());
                     adapter.notifyDataSetChanged();
-                    if (notifications.isEmpty()) showState("No notifications yet.");
+                    if (notifications.isEmpty()) showState(getString(R.string.notification_empty));
                     else showList();
                 });
     }
@@ -139,7 +140,7 @@ public class NotificationsActivity extends WashLinkActivity {
         if (registration != null) registration.remove();
         notifications.clear();
         adapter.notifyDataSetChanged();
-        showState("Loading notifications...");
+        showState(getString(R.string.notification_loading));
         registration = BookingServiceFacade.getBookingService().addCustomerNotificationsListener(uid,
                 new BookingService.CustomerNotificationsListener() {
                     @Override
@@ -147,13 +148,13 @@ public class NotificationsActivity extends WashLinkActivity {
                         notifications.clear();
                         notifications.addAll(incoming);
                         adapter.notifyDataSetChanged();
-                        if (notifications.isEmpty()) showState("No notifications yet.");
+                        if (notifications.isEmpty()) showState(getString(R.string.notification_empty));
                         else showList();
                     }
 
                     @Override
                     public void onError(String message) {
-                        showState("Could not load notifications. Tap to retry.");
+                        showState(getString(R.string.notification_load_error));
                         if (stateView != null) {
                             stateView.setClickable(true);
                             stateView.setFocusable(true);
@@ -164,7 +165,8 @@ public class NotificationsActivity extends WashLinkActivity {
     }
 
     private String formatNotification(BookingNotification notification) {
-        String title = notification.getTitle() == null ? "Order update" : notification.getTitle();
+        String title = notification.getTitle() == null
+                ? getString(R.string.notification_order_update) : notification.getTitle();
         String body = notification.getBody() == null ? "" : notification.getBody();
         if (notification.getCreatedAt() > 0) {
             body += "\n" + DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
@@ -188,7 +190,8 @@ public class NotificationsActivity extends WashLinkActivity {
                     adapter.notifyDataSetChanged();
                     Toast.makeText(this, "Could not update notification: "
                             + (error.getLocalizedMessage() == null
-                            ? "Please try again." : error.getLocalizedMessage()),
+                            ? getString(R.string.notification_retry_fallback)
+                            : error.getLocalizedMessage()),
                             Toast.LENGTH_LONG).show();
                 });
     }

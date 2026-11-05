@@ -5,7 +5,7 @@ const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
-const { defineSecret } = require("firebase-functions/params");
+const { defineSecret, defineString } = require("firebase-functions/params");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions");
 const { onRequest } = require("firebase-functions/v2/https");
@@ -31,6 +31,10 @@ initializeApp();
 const db = getFirestore();
 const FLUTTERWAVE_SECRET_KEY = defineSecret("FLUTTERWAVE_SECRET_KEY");
 const FLUTTERWAVE_WEBHOOK_HASH = defineSecret("FLUTTERWAVE_WEBHOOK_HASH");
+const PESAPAL_CONSUMER_KEY = defineSecret("PESAPAL_CONSUMER_KEY");
+const PESAPAL_CONSUMER_SECRET = defineSecret("PESAPAL_CONSUMER_SECRET");
+const PESAPAL_IPN_ID = defineSecret("PESAPAL_IPN_ID");
+const PESAPAL_ENVIRONMENT = defineString("PESAPAL_ENVIRONMENT", { default: "sandbox" });
 const REGION = "us-central1";
 const AUTOMATED_PAYOUTS_ENABLED = false;
 
@@ -52,13 +56,13 @@ function paymentMethodInfo(method) {
     return { label: "Cash", option: null, cashOnDelivery: true };
   }
   if (method === "card") {
-    return { label: "Flutterwave card", option: "card", cashOnDelivery: false };
+    return { label: "Pesapal online payment", option: null, cashOnDelivery: false };
   }
   if (method === "airtel") {
-    return { label: "Airtel Money", option: "mobilemoneyuganda", cashOnDelivery: false };
+    return { label: "Pesapal online payment", option: null, cashOnDelivery: false };
   }
   if (method === "mtn") {
-    return { label: "MTN Mobile Money", option: "mobilemoneyuganda", cashOnDelivery: false };
+    return { label: "Pesapal online payment", option: null, cashOnDelivery: false };
   }
   throw new HttpsError("invalid-argument", "Choose card, Uganda mobile money, or cash on delivery.");
 }
@@ -90,6 +94,54 @@ async function flutterwaveRequest(path, body) {
     throw new HttpsError("unavailable", "The payment provider could not process the request.");
   }
   return payload.data;
+}
+
+function pesapalBaseUrl() {
+  const environment = PESAPAL_ENVIRONMENT.value();
+  if (environment === "live") return "https://pay.pesapal.com/v3";
+  if (environment === "sandbox") return "https://cybqa.pesapal.com/pesapalv3";
+  throw new HttpsError("failed-precondition",
+    "PESAPAL_ENVIRONMENT must be set to sandbox or live.");
+}
+
+async function pesapalToken() {
+  const response = await fetch(`${pesapalBaseUrl()}/api/Auth/RequestToken`, {
+    method: "POST",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify({
+      consumer_key: PESAPAL_CONSUMER_KEY.value(),
+      consumer_secret: PESAPAL_CONSUMER_SECRET.value(),
+    }),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || typeof payload.token !== "string" || !payload.token) {
+    logger.error("Pesapal authentication failed", { httpStatus: response.status });
+    throw new HttpsError("unavailable", "Pesapal authentication failed.");
+  }
+  return payload.token;
+}
+
+async function pesapalRequest(path, token, body) {
+  const response = await fetch(`${pesapalBaseUrl()}/${path}`, {
+    method: body ? "POST" : "GET",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || (payload.status != null && String(payload.status) !== "200")
+      || payload.error) {
+    logger.error("Pesapal API request failed", {
+      path,
+      httpStatus: response.status,
+      providerMessage: payload.message || payload.error?.message || "No response message",
+    });
+    throw new HttpsError("unavailable", "Pesapal could not process the payment request.");
+  }
+  return payload;
 }
 
 function validPayoutProfile(profile) {
@@ -429,6 +481,79 @@ async function verifiedTransaction(bookingId, transactionId) {
   return "PENDING";
 }
 
+function pesapalParameter(request, name) {
+  const value = request.method === "GET"
+    ? request.query[name] : request.body && request.body[name];
+  return typeof value === "string" ? value : "";
+}
+
+async function reconcilePesapalPayment(reference, trackingId, providerTransaction) {
+  if (typeof reference !== "string" || !/^wl_[a-f0-9]{32}$/.test(reference)
+      || typeof trackingId !== "string" || !/^[A-Za-z0-9-]{10,100}$/.test(trackingId)
+      || !providerTransaction || providerTransaction.merchant_reference !== reference) {
+    throw new HttpsError("invalid-argument", "Pesapal payment identifiers are invalid.");
+  }
+  const matches = await db.collection("bookings")
+    .where("paymentReference", "==", reference).limit(1).get();
+  if (matches.empty) throw new HttpsError("not-found", "No booking matches this Pesapal payment.");
+  const bookingRef = matches.docs[0].ref;
+  const booking = matches.docs[0].data();
+  if (booking.paymentProvider !== "pesapal"
+      || (booking.paymentTrackingId && booking.paymentTrackingId !== trackingId)) {
+    throw new HttpsError("failed-precondition", "The Pesapal transaction does not match the booking.");
+  }
+
+  const statusCode = Number(providerTransaction.status_code);
+  const isPaid = isVerifiedPesapalPayment(providerTransaction, reference, booking.paymentAmount);
+  if (statusCode === 1 && !isPaid) {
+    throw new HttpsError("failed-precondition", "Pesapal payment amount or currency does not match.");
+  }
+  const nextPaymentStatus = isPaid ? "PAID"
+    : statusCode === 2 || statusCode === 0 ? "FAILED"
+      : statusCode === 3 ? "REVERSED" : "PENDING";
+
+  await db.runTransaction(async (transaction) => {
+    const currentSnapshot = await transaction.get(bookingRef);
+    if (!currentSnapshot.exists) throw new HttpsError("not-found", "Booking not found.");
+    const current = currentSnapshot.data();
+    if (current.paymentReference !== reference
+        || current.paymentProvider !== "pesapal"
+        || (current.paymentTrackingId && current.paymentTrackingId !== trackingId)) {
+      throw new HttpsError("failed-precondition", "The Pesapal transaction no longer matches the booking.");
+    }
+    if (isPaid && current.status !== "BOOKED" && current.paymentStatus !== "PAID") {
+      throw new HttpsError("failed-precondition", "Cancelled bookings cannot be paid.");
+    }
+    const updates = {
+      paymentTrackingId: trackingId,
+      paymentInitializationState: (current.paymentCheckoutUrl
+        || ["PAID", "FAILED", "REVERSED"].includes(nextPaymentStatus))
+        ? "READY" : "UNKNOWN",
+      updatedAt: Date.now(),
+    };
+    if (current.paymentStatus !== "PAID" || nextPaymentStatus === "REVERSED") {
+      updates.paymentStatus = nextPaymentStatus;
+    }
+    if (isPaid) {
+      updates.paymentVerifiedAt = FieldValue.serverTimestamp();
+      if (providerTransaction.confirmation_code) {
+        updates.paymentConfirmationCode = String(providerTransaction.confirmation_code);
+      }
+    }
+    transaction.update(bookingRef, updates);
+  });
+  return nextPaymentStatus;
+}
+
+async function verifyPesapalPayment(reference, trackingId) {
+  const token = await pesapalToken();
+  const transaction = await pesapalRequest(
+    `api/Transactions/GetTransactionStatus?orderTrackingId=${encodeURIComponent(trackingId)}`,
+    token
+  );
+  return reconcilePesapalPayment(reference, trackingId, transaction);
+}
+
 function inputText(value, field, maxLength) {
   if (typeof value !== "string" || value.trim().length === 0
       || value.length > maxLength) {
@@ -523,6 +648,11 @@ exports.createBooking = onCall({ region: REGION }, async (request) => {
     total: quote.total,
     paymentMethod: method.label,
     paymentStatus: "PENDING",
+    paymentProvider: method.cashOnDelivery ? "cash" : "pesapal",
+    ...(method.cashOnDelivery ? {
+      paymentAmount: quote.total,
+      paymentCurrency: "UGX",
+    } : {}),
     pickupFee: quote.pickupFee,
     deliveryFee: quote.deliveryFee,
     serviceFee: quote.serviceFee,
@@ -1059,31 +1189,45 @@ exports.cancelBooking = onCall({ region: REGION }, async (request) => {
   return { status: "CANCELLED" };
 });
 
-exports.initializeFlutterwaveCheckout = onCall(
-  { region: REGION, secrets: [FLUTTERWAVE_SECRET_KEY] },
+exports.initializePesapalCheckout = onCall(
+  {
+    region: REGION,
+    secrets: [PESAPAL_CONSUMER_KEY, PESAPAL_CONSUMER_SECRET, PESAPAL_IPN_ID],
+  },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in to start a payment.");
     }
+    if (!PESAPAL_CONSUMER_KEY.value() || !PESAPAL_CONSUMER_SECRET.value()
+        || !PESAPAL_IPN_ID.value()) {
+      throw new HttpsError("failed-precondition", "Pesapal is not configured yet.");
+    }
     const bookingId = requireBookingId(request.data && request.data.bookingId);
     const method = paymentMethodInfo(request.data && request.data.paymentMethod);
-    const bookingRef = db.collection("bookings").doc(bookingId);
-    const generatedReference = `washlink_${bookingId}_${randomBytes(12).toString("hex")}`;
-
-    let paymentReference;
-    let amount;
-    let customerName = "WashLink customer";
-    let customerEmail;
-    try {
-      const user = await getAuth().getUser(request.auth.uid);
-      customerEmail = user.email;
-      customerName = user.displayName || customerName;
-    } catch (error) {
-      logger.warn("Could not retrieve authenticated customer profile", error);
+    if (method.cashOnDelivery) {
+      throw new HttpsError("invalid-argument", "Cash bookings do not need online checkout.");
     }
-    if (!method.cashOnDelivery && !customerEmail) {
+
+    let customer;
+    try {
+      customer = await getAuth().getUser(request.auth.uid);
+    } catch (error) {
+      logger.warn("Could not retrieve authenticated customer profile", {
+        uid: request.auth.uid,
+        error: error.message,
+      });
+      throw new HttpsError("failed-precondition", "Add a valid email to your WashLink account before paying.");
+    }
+    if (!customer.email) {
       throw new HttpsError("failed-precondition", "Add an email to your WashLink account before paying.");
     }
+
+    const bookingRef = db.collection("bookings").doc(bookingId);
+    const generatedReference = `wl_${randomBytes(16).toString("hex")}`;
+    let paymentReference = null;
+    let amount = 0;
+    let customerPhone = "";
+    let existingCheckoutUrl = null;
 
     await db.runTransaction(async (transaction) => {
       const bookingSnapshot = await transaction.get(bookingRef);
@@ -1099,6 +1243,17 @@ exports.initializeFlutterwaveCheckout = onCall(
       }
       if (booking.paymentStatus === "PAID") {
         throw new HttpsError("failed-precondition", "This booking is already paid.");
+      }
+      if (booking.paymentStatus === "REVERSED") {
+        throw new HttpsError("failed-precondition",
+          "This payment was reversed. Contact support before starting another payment.");
+      }
+      if (booking.paymentProvider === "flutterwave") {
+        throw new HttpsError("failed-precondition",
+          "This booking has a legacy Flutterwave payment. Continue that payment or contact support.");
+      }
+      if (booking.paymentProvider !== "pesapal") {
+        throw new HttpsError("failed-precondition", "This booking is not set up for Pesapal.");
       }
 
       const providerId = booking.providerId;
@@ -1126,55 +1281,101 @@ exports.initializeFlutterwaveCheckout = onCall(
         throw new HttpsError("failed-precondition", error.message);
       }
       amount = quote.total;
-      if (method.cashOnDelivery && typeof booking.paymentReference === "string"
-          && booking.paymentReference.length > 0) {
-        throw new HttpsError("failed-precondition",
-          "This booking already has an online payment attempt. Continue that payment instead.");
+      customerPhone = typeof customerRole.get("phone") === "string"
+        ? customerRole.get("phone") : "";
+
+      if (booking.paymentStatus !== "FAILED"
+          && booking.paymentInitializationState === "READY"
+          && typeof booking.paymentCheckoutUrl === "string"
+          && booking.paymentCheckoutUrl.startsWith("https://")) {
+        existingCheckoutUrl = booking.paymentCheckoutUrl;
+        paymentReference = booking.paymentReference;
+        return;
       }
-      const existingReference = booking.paymentStatus === "PENDING"
-        && typeof booking.paymentReference === "string"
-        && booking.paymentReference.startsWith(`washlink_${bookingId}_`)
-        ? booking.paymentReference : generatedReference;
-      paymentReference = method.cashOnDelivery ? null : existingReference;
-      const updates = {
+      if (["PROCESSING", "UNKNOWN"].includes(booking.paymentInitializationState)) {
+        throw new HttpsError("failed-precondition",
+          "This payment request is being reconciled. Check order status before trying again.");
+      }
+
+      paymentReference = generatedReference;
+      transaction.update(bookingRef, {
         paymentStatus: "PENDING",
         paymentMethod: method.label,
-        paymentProvider: method.cashOnDelivery ? "cash" : "flutterwave",
+        paymentProvider: "pesapal",
         paymentAmount: amount,
         paymentCurrency: "UGX",
+        paymentReference,
+        paymentInitializationState: "PROCESSING",
+        paymentCheckoutUrl: FieldValue.delete(),
+        paymentTrackingId: FieldValue.delete(),
         updatedAt: Date.now(),
-      };
-      if (method.cashOnDelivery) {
-        updates.paymentReference = FieldValue.delete();
-      } else {
-        updates.paymentReference = paymentReference;
-      }
-      transaction.update(bookingRef, updates);
+      });
     });
 
-    if (method.cashOnDelivery) {
-      return { cashOnDelivery: true };
-    }
+    if (existingCheckoutUrl) return { checkoutUrl: existingCheckoutUrl };
 
     const projectId = process.env.GCLOUD_PROJECT;
-    const redirectUrl = `https://${REGION}-${projectId}.cloudfunctions.net/flutterwaveReturn`;
-    const checkout = await flutterwaveRequest("payments", {
-      tx_ref: paymentReference,
-      amount,
-      currency: "UGX",
-      redirect_url: redirectUrl,
-      payment_options: method.option,
-      customer: { email: customerEmail, name: customerName },
-      meta: { booking_id: bookingId, customer_id: request.auth.uid },
-      customizations: {
-        title: "WashLink laundry booking",
-        description: `Payment for booking ${bookingId}`,
-      },
-    });
-    if (typeof checkout.link !== "string" || !checkout.link.startsWith("https://")) {
-      throw new HttpsError("unavailable", "The payment provider returned an invalid checkout link.");
+    const callbackUrl = `https://${REGION}-${projectId}.cloudfunctions.net/pesapalReturn`;
+    let order;
+    try {
+      const token = await pesapalToken();
+      const names = (customer.displayName || "WashLink customer").trim().split(/\s+/);
+      order = await pesapalRequest("api/Transactions/SubmitOrderRequest", token, {
+        id: paymentReference,
+        currency: "UGX",
+        amount,
+        description: `WashLink booking ${bookingId}`.slice(0, 100),
+        callback_url: callbackUrl,
+        notification_id: PESAPAL_IPN_ID.value(),
+        billing_address: {
+          email_address: customer.email,
+          phone_number: customerPhone || undefined,
+          country_code: "UG",
+          first_name: names[0] || "WashLink",
+          last_name: names.slice(1).join(" ") || "Customer",
+        },
+      });
+      if (typeof order.order_tracking_id !== "string"
+          || !order.order_tracking_id
+          || typeof order.redirect_url !== "string"
+          || !order.redirect_url.startsWith("https://")
+          || order.merchant_reference !== paymentReference) {
+        throw new HttpsError("unavailable", "Pesapal returned an invalid checkout response.");
+      }
+      await db.runTransaction(async (transaction) => {
+        const snapshot = await transaction.get(bookingRef);
+        if (!snapshot.exists || snapshot.get("paymentReference") !== paymentReference
+            || snapshot.get("status") !== "BOOKED") {
+          throw new HttpsError("failed-precondition",
+            "The booking changed while Pesapal checkout was starting.");
+        }
+        transaction.update(bookingRef, {
+          paymentTrackingId: order.order_tracking_id,
+          paymentCheckoutUrl: order.redirect_url,
+          paymentInitializationState: "READY",
+          updatedAt: Date.now(),
+        });
+      });
+      return { checkoutUrl: order.redirect_url };
+    } catch (error) {
+      await db.runTransaction(async (transaction) => {
+        const snapshot = await transaction.get(bookingRef);
+        if (snapshot.exists && snapshot.get("paymentReference") === paymentReference
+            && snapshot.get("paymentInitializationState") === "PROCESSING") {
+          transaction.update(bookingRef, {
+            paymentInitializationState: "UNKNOWN",
+            updatedAt: Date.now(),
+          });
+        }
+      });
+      if (error instanceof HttpsError) throw error;
+      logger.error("Pesapal checkout could not be reconciled", {
+        bookingId,
+        error: error.message,
+      });
+      throw new HttpsError("unavailable",
+        "Pesapal checkout could not be confirmed. Check order status before retrying.");
     }
-    return { checkoutUrl: checkout.link };
   }
 );
 
@@ -1195,6 +1396,113 @@ exports.verifyFlutterwavePayment = onCall(
     }
     const paymentStatus = await verifiedTransaction(bookingId, request.data.transactionId);
     return { paymentStatus };
+  }
+);
+
+exports.verifyPesapalPayment = onCall(
+  {
+    region: REGION,
+    secrets: [PESAPAL_CONSUMER_KEY, PESAPAL_CONSUMER_SECRET],
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in to verify a payment.");
+    }
+    const user = await db.collection("users").doc(request.auth.uid).get();
+    if (!user.exists || !hasActiveRole(user.data(), "customer")) {
+      throw new HttpsError("permission-denied", "This customer account is not active.");
+    }
+    const bookingId = requireBookingId(request.data && request.data.bookingId);
+    const trackingId = request.data && request.data.orderTrackingId;
+    if (typeof trackingId !== "string" || !/^[A-Za-z0-9-]{10,100}$/.test(trackingId)) {
+      throw new HttpsError("invalid-argument", "A valid Pesapal order tracking ID is required.");
+    }
+    const booking = await db.collection("bookings").doc(bookingId).get();
+    if (!booking.exists || booking.get("customerId") !== request.auth.uid) {
+      throw new HttpsError("permission-denied", "You can only verify your own booking.");
+    }
+    if (booking.get("paymentProvider") !== "pesapal"
+        || typeof booking.get("paymentReference") !== "string") {
+      throw new HttpsError("failed-precondition", "This booking has no active Pesapal payment.");
+    }
+    if (booking.get("paymentTrackingId")
+        && booking.get("paymentTrackingId") !== trackingId) {
+      throw new HttpsError("failed-precondition", "This tracking ID does not match the booking.");
+    }
+    const paymentStatus = await verifyPesapalPayment(
+      booking.get("paymentReference"),
+      trackingId
+    );
+    return { paymentStatus };
+  }
+);
+
+exports.pesapalReturn = onRequest({ region: REGION }, async (request, response) => {
+  const trackingId = pesapalParameter(request, "OrderTrackingId");
+  const reference = pesapalParameter(request, "OrderMerchantReference");
+  if (!/^[A-Za-z0-9-]{10,100}$/.test(trackingId)
+      || !/^wl_[a-f0-9]{32}$/.test(reference)) {
+    response.status(400).send("Invalid WashLink payment reference.");
+    return;
+  }
+  try {
+    const bookings = await db.collection("bookings")
+      .where("paymentReference", "==", reference).limit(1).get();
+    if (bookings.empty || bookings.docs[0].get("paymentProvider") !== "pesapal"
+        || (bookings.docs[0].get("paymentTrackingId")
+          && bookings.docs[0].get("paymentTrackingId") !== trackingId)) {
+      response.status(404).send("WashLink booking not found.");
+      return;
+    }
+    const appUrl = `washlink://payment-return?${new URLSearchParams({
+      bookingId: bookings.docs[0].id,
+      orderTrackingId: trackingId,
+    }).toString()}`;
+    const escapedUrl = appUrl.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+    response.status(200).type("html").send(
+      `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=${escapedUrl}">`
+      + `<title>Return to WashLink</title></head><body><p>Returning to WashLink…</p>`
+      + `<a href="${escapedUrl}">Tap here if the app does not open</a>`
+      + `<script>window.location.replace(${JSON.stringify(appUrl)});</script></body></html>`
+    );
+  } catch (error) {
+    logger.error("Pesapal callback could not load the booking", { error: error.message });
+    response.status(500).send("Could not return to WashLink. Check your order status in the app.");
+  }
+});
+
+exports.pesapalIpn = onRequest(
+  { region: REGION, secrets: [PESAPAL_CONSUMER_KEY, PESAPAL_CONSUMER_SECRET] },
+  async (request, response) => {
+    const notificationType = pesapalParameter(request, "OrderNotificationType");
+    const trackingId = pesapalParameter(request, "OrderTrackingId");
+    const reference = pesapalParameter(request, "OrderMerchantReference");
+    if (notificationType !== "IPNCHANGE"
+        || !/^[A-Za-z0-9-]{10,100}$/.test(trackingId)
+        || !/^wl_[a-f0-9]{32}$/.test(reference)) {
+      response.status(400).json({ status: 500, message: "Invalid IPN notification." });
+      return;
+    }
+    try {
+      await verifyPesapalPayment(reference, trackingId);
+      response.status(200).json({
+        orderNotificationType: notificationType,
+        orderTrackingId: trackingId,
+        orderMerchantReference: reference,
+        status: 200,
+      });
+    } catch (error) {
+      logger.error("Pesapal IPN could not be reconciled", {
+        trackingId,
+        error: error.message,
+      });
+      response.status(500).json({
+        orderNotificationType: notificationType,
+        orderTrackingId: trackingId,
+        orderMerchantReference: reference,
+        status: 500,
+      });
+    }
   }
 );
 

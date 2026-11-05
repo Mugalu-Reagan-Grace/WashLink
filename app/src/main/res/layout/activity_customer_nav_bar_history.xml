@@ -4,11 +4,11 @@
     android:id="@+id/bottom_nav_bar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
-    android:elevation="8dp"
+    android:background="@color/color_surface"
+    android:elevation="@dimen/layout_8dp"
     android:orientation="horizontal"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
+    android:paddingTop="@dimen/layout_10dp"
+    android:paddingBottom="@dimen/layout_10dp"
     android:baselineAligned="false">
 
     <!-- Home -->
@@ -17,6 +17,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:minHeight="@dimen/touch_target_min"
         android:gravity="center"
         android:orientation="vertical"
         android:clickable="true"
@@ -24,18 +25,18 @@
         android:background="?attr/selectableItemBackgroundBorderless">
 
         <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="@dimen/layout_22dp"
+            android:layout_height="@dimen/layout_22dp"
             android:src="@drawable/ic_nav_home"
             android:contentDescription="@string/nav_home" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="@dimen/layout_3dp"
             android:text="@string/nav_home"
             android:textColor="@color/nav_inactive"
-            android:textSize="11sp" />
+            android:textSize="@dimen/layout_11sp" />
     </LinearLayout>
 
     <!-- Services -->
@@ -44,6 +45,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:minHeight="@dimen/touch_target_min"
         android:gravity="center"
         android:orientation="vertical"
         android:clickable="true"
@@ -51,18 +53,18 @@
         android:background="?attr/selectableItemBackgroundBorderless">
 
         <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="@dimen/layout_22dp"
+            android:layout_height="@dimen/layout_22dp"
             android:src="@drawable/ic_nav_services"
             android:contentDescription="@string/nav_services" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="@dimen/layout_3dp"
             android:text="@string/nav_services"
             android:textColor="@color/nav_inactive"
-            android:textSize="11sp" />
+            android:textSize="@dimen/layout_11sp" />
     </LinearLayout>
 
     <!-- Tracking -->
@@ -71,6 +73,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:minHeight="@dimen/touch_target_min"
         android:gravity="center"
         android:orientation="vertical"
         android:clickable="true"
@@ -78,18 +81,18 @@
         android:background="?attr/selectableItemBackgroundBorderless">
 
         <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="@dimen/layout_22dp"
+            android:layout_height="@dimen/layout_22dp"
             android:src="@drawable/ic_nav_tracking"
             android:contentDescription="@string/nav_tracking" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="@dimen/layout_3dp"
             android:text="@string/nav_tracking"
             android:textColor="@color/nav_inactive"
-            android:textSize="11sp" />
+            android:textSize="@dimen/layout_11sp" />
     </LinearLayout>
 
     <!-- History (active) -->
@@ -98,6 +101,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:minHeight="@dimen/touch_target_min"
         android:gravity="center"
         android:orientation="vertical"
         android:clickable="true"
@@ -105,18 +109,18 @@
         android:background="?attr/selectableItemBackgroundBorderless">
 
         <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="@dimen/layout_22dp"
+            android:layout_height="@dimen/layout_22dp"
             android:src="@drawable/ic_nav_history"
             android:contentDescription="@string/nav_history" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="@dimen/layout_3dp"
             android:text="@string/nav_history"
             android:textColor="@color/laundr_blue"
-            android:textSize="11sp" />
+            android:textSize="@dimen/layout_11sp" />
     </LinearLayout>
 
     <!-- Profile -->
@@ -125,6 +129,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:minHeight="@dimen/touch_target_min"
         android:gravity="center"
         android:orientation="vertical"
         android:clickable="true"
@@ -132,18 +137,18 @@
         android:background="?attr/selectableItemBackgroundBorderless">
 
         <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="@dimen/layout_22dp"
+            android:layout_height="@dimen/layout_22dp"
             android:src="@drawable/ic_nav_profile"
             android:contentDescription="@string/nav_profile" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="@dimen/layout_3dp"
             android:text="@string/nav_profile"
             android:textColor="@color/nav_inactive"
-            android:textSize="11sp" />
+            android:textSize="@dimen/layout_11sp" />
     </LinearLayout>
 
 </LinearLayout>
