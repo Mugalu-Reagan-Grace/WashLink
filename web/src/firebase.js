@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { connectAuthEmulator, getAuth } from "firebase/auth";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
-import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
 
 const config = {
@@ -16,13 +15,11 @@ export const firebaseConfigured = Object.values(config).every(Boolean);
 const app = firebaseConfigured ? initializeApp(config) : null;
 export const auth = app ? getAuth(app) : null;
 export const db = app ? getFirestore(app) : null;
-export const functions = app ? getFunctions(app, "us-central1") : null;
 export const storage = app ? getStorage(app) : null;
 
 if (app && import.meta.env.VITE_USE_FIREBASE_EMULATORS === "true") {
   const host = import.meta.env.VITE_FIREBASE_EMULATOR_HOST || "127.0.0.1";
   connectAuthEmulator(auth, `http://${host}:9099`, { disableWarnings: true });
   connectFirestoreEmulator(db, host, 8080);
-  connectFunctionsEmulator(functions, host, 5001);
   connectStorageEmulator(storage, host, 9199);
 }

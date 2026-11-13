@@ -5,7 +5,6 @@ import com.example.washlink.models.BookingNotification;
 import com.example.washlink.models.OrderStatus;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.functions.FirebaseFunctions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -159,14 +158,7 @@ public class BookingService {
             cb.onError("A booking and next status are required.");
             return;
         }
-        Map<String, Object> data = new HashMap<>();
-        data.put("bookingId", bookingId);
-        data.put("status", newStatus.name());
-        FirebaseFunctions.getInstance("us-central1")
-                .getHttpsCallable("updateBookingStatus")
-                .call(data)
-                .addOnSuccessListener(unused -> cb.onSuccess())
-                .addOnFailureListener(error -> cb.onError(error.getLocalizedMessage()));
+        PaymentClient.updateBookingStatus(bookingId, newStatus.name(), cb::onSuccess, cb::onError);
     }
 
     public void cancelBooking(String bookingId, SimpleCallback cb) {
@@ -174,13 +166,7 @@ public class BookingService {
             cb.onError("A booking is required.");
             return;
         }
-        Map<String, Object> data = new HashMap<>();
-        data.put("bookingId", bookingId);
-        FirebaseFunctions.getInstance("us-central1")
-                .getHttpsCallable("cancelBooking")
-                .call(data)
-                .addOnSuccessListener(unused -> cb.onSuccess())
-                .addOnFailureListener(error -> cb.onError(error.getLocalizedMessage()));
+        PaymentClient.cancelBooking(bookingId, cb::onSuccess, cb::onError);
     }
 
     public void submitBookingReview(String bookingId, int rating, String reviewText,
@@ -191,15 +177,8 @@ public class BookingService {
             callback.onError("Choose a rating from 1 to 5 and enter a review of at most 1,000 characters.");
             return;
         }
-        Map<String, Object> data = new HashMap<>();
-        data.put("bookingId", bookingId);
-        data.put("rating", rating);
-        data.put("reviewText", reviewText.trim());
-        FirebaseFunctions.getInstance("us-central1")
-                .getHttpsCallable("submitBookingReview")
-                .call(data)
-                .addOnSuccessListener(unused -> callback.onSuccess())
-                .addOnFailureListener(error -> callback.onError(error.getLocalizedMessage()));
+        PaymentClient.submitBookingReview(bookingId, rating, reviewText.trim(),
+                callback::onSuccess, callback::onError);
     }
 
     public void assignBookingRider(String bookingId, String riderId, SimpleCallback callback) {
@@ -208,54 +187,16 @@ public class BookingService {
             callback.onError("Select a booking and rider.");
             return;
         }
-        Map<String, Object> data = new HashMap<>();
-        data.put("bookingId", bookingId);
-        data.put("riderId", riderId);
-        FirebaseFunctions.getInstance("us-central1")
-                .getHttpsCallable("assignBookingRider")
-                .call(data)
-                .addOnSuccessListener(unused -> callback.onSuccess())
-                .addOnFailureListener(error -> callback.onError(error.getLocalizedMessage()));
+        PaymentClient.assignBookingRider(bookingId, riderId,
+                callback::onSuccess, callback::onError);
     }
 
     public void createBooking(Booking booking, SimpleCallback cb) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("providerId", booking.getProviderId());
-        data.put("serviceType", booking.getServiceType());
-        data.put("serviceName", booking.getServiceName());
-        data.put("serviceNames", booking.getServiceNames() == null
-                || booking.getServiceNames().isEmpty()
-                ? Collections.singletonList(booking.getServiceName())
-                : booking.getServiceNames());
-        if (booking.getWeightKg() > 0) data.put("weightKg", booking.getWeightKg());
-        data.put("address", booking.getAddress());
-        data.put("scheduledDateTime", booking.getScheduledDateTime());
-        data.put("itemCount", booking.getItemCount());
-        data.put("specialInstructions", booking.getSpecialInstructions());
-        data.put("subtotal", booking.getSubtotal());
-        data.put("pickupFee", booking.getPickupFee());
-        data.put("deliveryFee", booking.getDeliveryFee());
-        data.put("serviceFee", booking.getServiceFee());
-        data.put("tax", booking.getTax());
-        data.put("total", booking.getTotal());
-        data.put("paymentMethod", paymentMethodCode(booking.getPaymentMethod()));
-
-        FirebaseFunctions.getInstance("us-central1")
-                .getHttpsCallable("createBooking")
-                .call(data)
-                .addOnSuccessListener(result -> {
-                    Object value = result.getData();
-                    if (value instanceof Map<?, ?>) {
-                        Object bookingId = ((Map<?, ?>) value).get("bookingId");
-                        if (bookingId instanceof String) {
-                            booking.setId((String) bookingId);
-                            cb.onSuccess();
-                            return;
-                        }
-                    }
-                    cb.onError("Booking service returned an invalid response.");
-                })
-                .addOnFailureListener(error -> cb.onError(error.getLocalizedMessage()));
+        PaymentClient.createBooking(booking, paymentMethodCode(booking.getPaymentMethod()),
+                bookingId -> {
+                    booking.setId(bookingId);
+                    cb.onSuccess();
+                }, cb::onError);
     }
 
     private String paymentMethodCode(String paymentMethod) {

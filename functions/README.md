@@ -103,11 +103,76 @@ routing is opt-in for the Android debug build and web app, and should not be
 enabled for a release build. Online checkout and provider payouts are not part
 of this local demo; use only the cash flow while running it.
 
-Bookings and provider status changes are also handled by authenticated
-callables. Status changes atomically persist the customer in-app event and send
-an FCM push when the recipient has registered a device token. Customers receive
-status updates; providers receive new booking requests. The first app launch
-after sign-in requests Android notification permission where required.
+## Hosted booking and Pesapal API without Blaze
+
+When Firebase Blaze billing is unavailable, the Android app can use the
+standalone Node API in `api/` instead of Firebase Cloud Functions for booking
+creation and Pesapal checkout. It still uses the existing Firebase
+Authentication and Firestore project, so customer and provider data remain in
+the same place. The Android and web app's booking, payment, status, rider,
+cancellation, and review requests use this API instead of Firebase callables.
+
+The API is configured for Render's free web-service plan. Free instances can
+sleep while idle, so the first request during a presentation may take longer.
+To set it up:
+
+1. Push this repository to GitHub and create a Render Blueprint from the
+   repository's root `render.yaml`. During setup, set
+   `FIREBASE_SERVICE_ACCOUNT_JSON` to a Firebase service-account JSON key.
+   Cash bookings can work without Pesapal credentials. Keep the Firebase key
+   in Render's secret environment field only; never commit it or add it to the
+   Android app.
+2. After Render deploys, open `https://<your-service>.onrender.com/health` and
+   confirm it returns `{"status":"ok"}`. To enable online checkout, add the
+   Pesapal sandbox `PESAPAL_CONSUMER_KEY` and `PESAPAL_CONSUMER_SECRET` as
+   Render secrets and set `PESAPAL_IPN_ID` to `pending`. Then use the service's
+   HTTPS URL to register the Pesapal IPN endpoint. For sandbox, request a token from
+   `https://cybqa.pesapal.com/pesapalv3/api/Auth/RequestToken`, then register
+   `https://<your-service>.onrender.com/v1/payments/pesapal/ipn` using
+   `POST https://cybqa.pesapal.com/pesapalv3/api/URLSetup/RegisterIPN` with
+   JSON `{"url":"https://<your-service>.onrender.com/v1/payments/pesapal/ipn","ipn_notification_type":"GET"}`.
+   Include the bearer token in the `Authorization` header and set
+   `Content-Type: application/json` on the registration request. Replace
+   `pending` with the returned `ipn_id`
+   in Render's `PESAPAL_IPN_ID` secret, then redeploy the service. Never share
+   the access token or API credentials.
+3. Build the Android app with the deployed HTTPS API URL:
+
+   ```powershell
+   .\gradlew.bat :app:assembleDebug -PwashlinkApiBaseUrl=https://<your-service>.onrender.com
+   ```
+
+   Install `app\build\outputs\apk\debug\app-debug.apk`. Cash bookings use this
+   API but do not call Pesapal; card and mobile-money checkout use Pesapal's
+   hosted checkout page.
+
+If you also host the web app, set `PUBLIC_WEB_ORIGIN` on the API to the web
+app's exact HTTPS origin (without a trailing slash), and set
+`VITE_WASHLINK_API_BASE_URL` in the web app's hosting environment to the
+Render HTTPS URL. The API authenticates requests with Firebase ID tokens,
+checks customer and provider roles, recalculates booking totals from the provider's current
+services, and verifies payment status with Pesapal before recording payment.
+This hosted API connects to the configured Firebase project, not the local
+emulators; use a production-configured app and Firebase accounts for this
+deployment. If Pesapal credentials are not ready, the API can still create
+cash bookings; configure valid Pesapal secrets and register the IPN before
+offering card or mobile-money checkout.
+Do not grant public Firestore client writes for bookings as a workaround. A
+Firebase service-account key grants privileged access to the project; restrict
+its IAM permissions where possible and rotate/delete the key if it is exposed.
+Booking creation, Pesapal checkout/verification, provider order-status updates,
+rider assignment, customer cancellation, and reviews now use this API. These
+flows no longer need Firebase Cloud Functions. Other Firebase products (such
+as Authentication, Firestore, and any enabled Storage features) remain subject
+to Firebase's current Spark-plan quotas and product requirements.
+
+The standalone API writes in-app booking notifications atomically with booking
+creation, status updates, and cancellation; it also sends an FCM push when the
+recipient has registered a device token. The first app launch after sign-in
+requests Android notification permission where required. Remaining callable
+implementations in `functions/` are retained for the local emulator and
+optional legacy deployment, but the migrated booking/payment screens do not
+call them.
 
 Customers can cancel only a still-booked order before a payment attempt starts.
 The cancellation callable checks ownership and commits the cancelled status and
@@ -152,7 +217,12 @@ approve or unapprove provider listings. Newly registered providers stay hidden
 from discovery until approved; older provider profiles without an approval
 field remain visible until an administrator explicitly unapproves them.
 
-## One-time project and provider setup
+## Optional legacy Cloud Functions deployment (requires Blaze)
+
+Skip this section when using the standalone API above. The Android and web
+booking/payment/status flows now use the hosted API and do not require Firebase
+Cloud Functions deployment. These steps are only for retaining the older
+Firebase Functions deployment for features or records not migrated to the API.
 
 Use Node.js 20 and the Firebase CLI. Cloud Functions deployment requires a
 Firebase project on the Blaze billing plan, Cloud Functions and Secret Manager

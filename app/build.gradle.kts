@@ -7,9 +7,17 @@ val useFirebaseEmulators = providers.gradleProperty("useFirebaseEmulators")
     .orElse("false").get().toBoolean()
 val firebaseEmulatorHost = providers.gradleProperty("firebaseEmulatorHost")
     .orElse("10.0.2.2").get()
+val washlinkApiBaseUrl = providers.gradleProperty("washlinkApiBaseUrl")
+    .orElse("").get().trimEnd('/')
 require(Regex("^[A-Za-z0-9.-]+$").matches(firebaseEmulatorHost)) {
     "firebaseEmulatorHost must be a hostname or IP address without a port."
 }
+require(washlinkApiBaseUrl.isEmpty() || washlinkApiBaseUrl.startsWith("https://")) {
+    "washlinkApiBaseUrl must be an HTTPS URL."
+}
+val escapedWashlinkApiBaseUrl = washlinkApiBaseUrl
+    .replace("\\", "\\\\")
+    .replace("\"", "\\\"")
 
 android {
     namespace = "com.example.washlink"
@@ -21,6 +29,7 @@ android {
             providers.gradleProperty("MAPS_API_KEY").orElse("").get()
         buildConfigField("boolean", "USE_FIREBASE_EMULATORS", useFirebaseEmulators.toString())
         buildConfigField("String", "FIREBASE_EMULATOR_HOST", "\"$firebaseEmulatorHost\"")
+        buildConfigField("String", "WASHLINK_API_BASE_URL", "\"$escapedWashlinkApiBaseUrl\"")
     }
     compileSdk {
         version = release(36) {

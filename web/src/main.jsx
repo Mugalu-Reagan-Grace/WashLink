@@ -26,8 +26,8 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import { httpsCallable } from "firebase/functions";
-import { auth, db, firebaseConfigured, functions, storage } from "./firebase";
+import { auth, db, firebaseConfigured, storage } from "./firebase";
+import { washLinkApiPost } from "./api";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import "./styles.css";
 
@@ -1775,10 +1775,10 @@ function ProviderOrders({ uid, setNotice, setBusy, targetBookingId, onTargetReso
     setBusy(true);
     setNotice("");
     try {
-      await httpsCallable(functions, "updateBookingStatus")({ bookingId: booking.id, status });
+      await washLinkApiPost("/v1/bookings/status", { bookingId: booking.id, status });
       setNotice(`Order #${booking.id} updated to ${statusLabel(status)}.`);
       await bookings.reload();
-    } catch (error) { setNotice(error.message || "Could not update order. The Functions deployment may be required."); }
+    } catch (error) { setNotice(error.message || "Could not update order."); }
     finally { setBusy(false); }
   }
   async function assignRider(booking, riderId) {
@@ -1792,10 +1792,10 @@ function ProviderOrders({ uid, setNotice, setBusy, targetBookingId, onTargetReso
     }
     setBusy(true);
     try {
-      await httpsCallable(functions, "assignBookingRider")({ bookingId: booking.id, riderId });
+      await washLinkApiPost("/v1/bookings/assign-rider", { bookingId: booking.id, riderId });
       setNotice("Rider assigned to booking.");
       await bookings.reload();
-    } catch (error) { setNotice(error.message || "Could not assign rider. Functions deployment may be required."); }
+    } catch (error) { setNotice(error.message || "Could not assign rider."); }
     finally { setBusy(false); }
   }
   return <>
@@ -2780,138 +2780,20 @@ function ProviderMessages({ uid, setNotice, setBusy }) {
 function ProviderPayouts({ uid, setNotice, setBusy }) {
   const saved = useProviderPayout(uid);
   const current = saved.data || {};
-  const [destinationType, setDestinationType] = useState("");
-  const [banks, setBanks] = useState([]);
-  const [branches, setBranches] = useState([]);
-  const [branchesLoading, setBranchesLoading] = useState(false);
-  const [banksLoading, setBanksLoading] = useState(Boolean(functions));
-  const [banksRefreshKey, setBanksRefreshKey] = useState(0);
-  const [bankCode, setBankCode] = useState("");
-  const [branchCode, setBranchCode] = useState("");
-  const [optionsError, setOptionsError] = useState("");
-
-  useEffect(() => {
-    if (!functions) {
-      setBanksLoading(false);
-      setOptionsError("Payout options are unavailable because the server is not configured.");
-      return undefined;
-    }
-    let active = true;
-    setBanksLoading(true);
-    setOptionsError("");
-    httpsCallable(functions, "getUgandaPayoutBanks")()
-      .then((result) => {
-        if (active) setBanks(Array.isArray(result.data) ? result.data : []);
-      })
-      .catch((error) => {
-        if (active) setOptionsError(error.message || "Could not load Uganda banks.");
-      })
-      .finally(() => { if (active) setBanksLoading(false); });
-    return () => { active = false; };
-  }, [banksRefreshKey]);
-  useEffect(() => {
-    let active = true;
-    const bank = banks.find((entry) => entry.code === bankCode);
-    if (!bank?.hasBranches) {
-      setBranches([]);
-      setBranchCode("");
-      setBranchesLoading(false);
-      return () => { active = false; };
-    }
-    setBranches([]);
-    setBranchesLoading(true);
-    setOptionsError("");
-    httpsCallable(functions, "getUgandaPayoutBranches")({ bankId: bank.id })
-      .then((result) => {
-        if (!active) return;
-        const values = Array.isArray(result.data) ? result.data : [];
-        setBranches(values);
-        setBranchCode((previous) => values.some((entry) => entry.code === previous)
-          ? previous : "");
-        setBranchesLoading(false);
-      })
-      .catch((error) => {
-        if (!active) return;
-        setOptionsError(error.message || "Could not load bank branches.");
-        setBranchesLoading(false);
-      });
-    return () => { active = false; };
-  }, [bankCode, banks]);
-
-  useEffect(() => {
-    if (!current.destinationType) return;
-    setDestinationType(current.destinationType);
-    setBankCode(current.destinationType === "bank" ? current.accountBank || "" : "");
-    setBranchCode(current.destinationBranchCode || "");
-  }, [current.destinationType, current.accountBank, current.destinationBranchCode]);
-
-  async function save(event) {
-    event.preventDefault();
-    const values = new FormData(event.currentTarget);
-    const data = {
-      destinationType,
-      beneficiaryName: String(values.get("beneficiaryName") || "").trim(),
-      accountNumber: String(values.get("accountNumber") || "").trim(),
-    };
-    if (destinationType === "bank") {
-      data.accountBank = bankCode;
-      data.destinationBranchCode = branchCode || null;
-    }
-    setBusy(true);
-    try {
-      await httpsCallable(functions, "saveProviderPayoutProfile")(data);
-      setNotice("Payout destination saved securely.");
-    } catch (error) { setNotice(error.message || "Could not save payout settings."); }
-    finally { setBusy(false); }
-  }
-
-  const selectedBank = banks.find((bank) => bank.code === bankCode);
   return <>
-    <PageHeading eyebrow="PAYMENT DESTINATION" title="Payout settings" description="Save a Uganda bank or mobile-money destination for eligible verified online order payouts." />
+    <PageHeading eyebrow="PAYMENT DESTINATION" title="Payout settings" description="Provider payouts are currently disabled." />
     <section className="panel profile-panel">
       {saved.loading ? <Loading /> : saved.error ? <div className="settings-error" role="alert">
         <ErrorState message={saved.error} /><button className="secondary" onClick={saved.reload}>Retry</button>
       </div> : <>
-        <div className="notice" role="note">Only your signed-in account can read these payout details. Cash-on-delivery orders are collected directly by your business.</div>
-        {current.accountNumber && <p className="payout-summary">Current destination: <strong>{current.beneficiaryName}</strong> · {current.destinationType} ending {current.accountNumber.slice(-4)}</p>}
-        {optionsError && <div className="settings-options-error" role="alert">
-          <span>{optionsError}</span><button className="secondary small" type="button"
-            onClick={() => setBanksRefreshKey((key) => key + 1)}>Retry</button>
-        </div>}
-        <form key={JSON.stringify([
-          current.destinationType, current.beneficiaryName, current.accountNumber,
-          current.accountBank, current.destinationBranchCode,
-        ])} className="profile-form payout-form" onSubmit={save}>
-          <div className="settings-section-heading wide"><h2>Destination details</h2>
-            <p>Choose where eligible online payouts should be sent. Account details remain private.</p></div>
-          <label className="wide">Destination type<select required value={destinationType} onChange={(event) => setDestinationType(event.target.value)}>
-            <option value="">Choose destination</option><option value="bank">Uganda bank account</option><option value="airtel">Airtel Money</option><option value="mtn">MTN Mobile Money</option>
-          </select></label>
-          {destinationType === "bank" && <>
-            <label>Bank<select required value={bankCode} disabled={banksLoading || Boolean(optionsError)}
-              onChange={(event) => { setBankCode(event.target.value); setBranchCode(""); }}>
-              <option value="">{banksLoading ? "Loading banks…" : "Choose bank"}</option>{banks.map((bank) => <option key={bank.code} value={bank.code}>{bank.name}</option>)}
-            </select></label>
-            {selectedBank?.hasBranches && <label>Branch<select required value={branchCode} disabled={branchesLoading}
-              onChange={(event) => setBranchCode(event.target.value)}>
-              <option value="">{branchesLoading ? "Loading branches…" : "Choose branch"}</option>
-              {branches.map((branch) => <option key={branch.code} value={branch.code}>{branch.name}</option>)}
-            </select></label>}
-          </>}
-          <label>Beneficiary full name<input name="beneficiaryName" autoComplete="name" required maxLength="100" defaultValue={current.beneficiaryName || ""} /></label>
-          <label>{destinationType === "bank" ? "Bank account number" : "Uganda phone number (2567XXXXXXXX)"}
-            <input name="accountNumber" inputMode={destinationType === "bank" ? "numeric" : "tel"}
-              autoComplete={destinationType === "bank" ? "off" : "tel"} required minLength="5" maxLength="32"
-              defaultValue={current.accountNumber || ""} />
-          </label>
-          <div className="settings-form-actions wide">
-            <button className="primary" disabled={!functions || (destinationType === "bank"
-              && (!bankCode || (selectedBank?.hasBranches && !branchCode)
-                || banksLoading || branchesLoading || Boolean(optionsError)))}>
-              Save payout destination
-            </button>
-          </div>
-        </form>
+        <div className="notice" role="note">
+          Online customer payments are handled by Pesapal. Cash-on-delivery
+          collections go directly to your business; automatic provider payouts
+          are not enabled, so this app does not collect payout account details.
+        </div>
+        {current.accountNumber && <p className="payout-summary">
+          A legacy payout destination is saved and hidden while payouts are disabled.
+        </p>}
       </>}
     </section>
   </>;

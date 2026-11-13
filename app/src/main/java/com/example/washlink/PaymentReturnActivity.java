@@ -29,8 +29,6 @@ public class PaymentReturnActivity extends WashLinkActivity {
         String bookingId = callback == null ? null : callback.getQueryParameter("bookingId");
         String trackingId = callback == null
                 ? null : callback.getQueryParameter("orderTrackingId");
-        String transactionId = callback == null
-                ? null : callback.getQueryParameter("transaction_id");
         if (FirebaseAuth.getInstance().getCurrentUser() == null
                 || bookingId == null || !bookingId.matches("[A-Za-z0-9]{10,40}")) {
             Toast.makeText(this, "Could not identify the payment booking. Sign in and check order history.",
@@ -57,26 +55,10 @@ public class PaymentReturnActivity extends WashLinkActivity {
             return;
         }
 
-        if (transactionId == null || !transactionId.matches("\\d{1,30}")) {
-            Toast.makeText(this, "Payment was not confirmed. Your booking remains unpaid.",
-                    Toast.LENGTH_LONG).show();
-            openBookingConfirmation(bookingId);
-            return;
-        }
-
-        PaymentClient.verifyFlutterwave(bookingId, transactionId,
-                status -> {
-                    if (!"PAID".equals(status)) {
-                        Toast.makeText(this, "Payment is not confirmed yet. Check your order status shortly.",
-                                Toast.LENGTH_LONG).show();
-                    }
-                    openBookingConfirmation(bookingId);
-                },
-                error -> {
-                    Toast.makeText(this, "Could not verify payment: " + error,
-                            Toast.LENGTH_LONG).show();
-                    openBookingConfirmation(bookingId);
-                });
+        Toast.makeText(this,
+                "This is a legacy payment link. Check the booking status in order history.",
+                Toast.LENGTH_LONG).show();
+        openBookingConfirmation(bookingId);
     }
 
     private void openBookingConfirmation(String bookingId) {
