@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,7 +121,7 @@ public class NearbyLaundryMapActivity extends WashLinkActivity implements OnMapR
     }
 
     private void loadProviders() {
-        FirebaseFirestore.getInstance().collection("providers").get()
+        FirebaseFirestore.getInstance().collection("providers").get(Source.SERVER)
                 .addOnSuccessListener(snapshot -> {
                     providers.clear();
                     snapshot.getDocuments().forEach(document -> {
@@ -149,7 +150,11 @@ public class NearbyLaundryMapActivity extends WashLinkActivity implements OnMapR
                     redrawMarkers();
                 })
                 .addOnFailureListener(error -> Toast.makeText(this,
-                        "Nearby businesses could not be loaded", Toast.LENGTH_SHORT).show());
+                        "Nearby businesses could not be loaded: "
+                                + (error.getLocalizedMessage() == null
+                                ? "Check your connection and permissions."
+                                : error.getLocalizedMessage()),
+                        Toast.LENGTH_LONG).show());
     }
 
     private void redrawMarkers() {

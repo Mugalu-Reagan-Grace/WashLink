@@ -25,6 +25,7 @@ import com.google.android.material.button.MaterialButton;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.Source;
 import com.example.washlink.data.ProviderCapabilities;
 
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ public class NearbyProvidersActivity extends WashLinkActivity {
     private Location userLocation;
     private boolean providersLoaded;
     private boolean providerLoadFailed;
+    private int providerProfileCount;
     private int approvedProviderCount;
     private int matchingModeProviderCount;
 
@@ -171,10 +173,11 @@ public class NearbyProvidersActivity extends WashLinkActivity {
         if (adapter != null) adapter.replace(Collections.emptyList());
         if (resultCount != null) resultCount.setText("Loading providers...");
         showState("Loading providers...");
-        FirebaseFirestore.getInstance().collection("providers").get()
+        FirebaseFirestore.getInstance().collection("providers").get(Source.SERVER)
                 .addOnSuccessListener(snapshot -> {
                     providersLoaded = true;
                     providerLoadFailed = false;
+                    providerProfileCount = snapshot.size();
                     approvedProviderCount = 0;
                     matchingModeProviderCount = 0;
                     allProviders.clear();
@@ -248,8 +251,12 @@ public class NearbyProvidersActivity extends WashLinkActivity {
                 .addOnFailureListener(error -> {
                     allProviders.clear();
                     providerLoadFailed = true;
+                    String details = error.getLocalizedMessage();
+                    String message = "Could not load providers"
+                            + (details == null || details.trim().isEmpty() ? "" : ": " + details)
+                            + ". Tap to retry.";
                     if (resultCount != null) resultCount.setText("Providers unavailable");
-                    showState("Could not load providers. Tap to retry.");
+                    showState(message);
                 });
     }
 
@@ -328,7 +335,12 @@ public class NearbyProvidersActivity extends WashLinkActivity {
                     : matchingModeProviderCount == 0 ? R.string.providers_none_for_booking_mode
                     : R.string.providers_no_bookable_services
                     : R.string.providers_no_search_matches;
-            showState(getString(emptyMessage));
+            String message = getString(emptyMessage);
+            if (approvedProviderCount == 0) {
+                message += "\n\nFirebase returned " + providerProfileCount
+                        + " provider profiles (" + approvedProviderCount + " approved).";
+            }
+            showState(message);
         }
         else showList();
     }

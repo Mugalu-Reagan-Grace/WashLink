@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -184,23 +185,29 @@ public final class PaymentClient {
                             ? new JSONObject() : new JSONObject(responseBody);
                     if (status < 200 || status >= 300) {
                         String message = result.optString("message",
-                                "The WashLink payment server could not complete the request.");
+                                "The WashLink API returned HTTP " + status
+                                        + " without an error message. Response: " + responseBody);
                         onMain(() -> onError.accept(message));
                     } else {
                         onMain(() -> onSuccess.accept(result));
                     }
                 } catch (Exception error) {
-                    String message = error.getLocalizedMessage();
-                    onMain(() -> onError.accept(message == null || message.trim().isEmpty()
-                            ? "Could not connect to the WashLink payment server." : message));
+                    String message = error instanceof UnknownHostException
+                            ? "Cannot resolve WashLink API host "
+                                    + BuildConfig.WASHLINK_API_BASE_URL
+                                    + ". This network's DNS cannot find it. Turn off Wi-Fi and retry "
+                                    + "on mobile data, or set Android Private DNS to dns.google."
+                            : "WashLink API request failed (" + error.getClass().getSimpleName()
+                                    + "): " + String.valueOf(error.getLocalizedMessage());
+                    onMain(() -> onError.accept(message));
                 } finally {
                     if (connection != null) connection.disconnect();
                 }
             });
         }).addOnFailureListener(error -> {
-            String message = error.getLocalizedMessage();
-            onError.accept(message == null || message.trim().isEmpty()
-                    ? "Could not authenticate with the WashLink payment server." : message);
+            onError.accept("Could not get Firebase sign-in token ("
+                    + error.getClass().getSimpleName() + "): "
+                    + String.valueOf(error.getLocalizedMessage()));
         });
     }
 

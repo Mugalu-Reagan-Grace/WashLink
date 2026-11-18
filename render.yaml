@@ -11,5 +11,7 @@ services:
         value: 22
       - key: PESAPAL_ENVIRONMENT
         value: sandbox
+      - key: PUBLIC_WEB_ORIGIN
+        value: http://192.168.100.250:5173
       - key: FIREBASE_SERVICE_ACCOUNT_JSON
         sync: false

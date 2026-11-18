@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.Source;
 import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
@@ -100,7 +101,7 @@ public class AdminManagementActivity extends WashLinkActivity {
             query = query.orderBy("createdAt", Query.Direction.DESCENDING).limit(100);
         }
 
-        query.get()
+        query.get(SECTION_PROVIDERS.equals(section) ? Source.SERVER : Source.DEFAULT)
                 .addOnSuccessListener(snapshot -> {
                     if (snapshot.isEmpty()) {
                         showState("No " + section + " found.");
@@ -115,7 +116,10 @@ public class AdminManagementActivity extends WashLinkActivity {
                     state.setVisibility(View.GONE);
                 })
                 .addOnFailureListener(error -> {
-                    showState("Could not load " + section + ". Tap to retry.");
+                    String details = error.getLocalizedMessage();
+                    showState("Could not load " + section
+                            + (details == null || details.trim().isEmpty() ? "" : ": " + details)
+                            + ". Tap to retry.");
                     state.setClickable(true);
                     state.setOnClickListener(v -> loadSection(section));
                 });
@@ -160,7 +164,8 @@ public class AdminManagementActivity extends WashLinkActivity {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         firestore.collection(SECTION_BOOKINGS)
                 .orderBy("createdAt", Query.Direction.DESCENDING).limit(1000).get()
-                .addOnSuccessListener(bookings -> firestore.collection(SECTION_PROVIDERS).limit(500).get()
+                .addOnSuccessListener(bookings -> firestore.collection(SECTION_PROVIDERS)
+                        .limit(500).get(Source.SERVER)
                         .addOnSuccessListener(providers -> {
                             if (!SECTION_REPORTS.equals(section)) return;
                             reportBookings = bookings.getDocuments();
@@ -404,7 +409,8 @@ public class AdminManagementActivity extends WashLinkActivity {
         showState("Loading overview...");
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         firestore.collection(SECTION_USERS).limit(500).get()
-                .addOnSuccessListener(users -> firestore.collection(SECTION_PROVIDERS).limit(500).get()
+                .addOnSuccessListener(users -> firestore.collection(SECTION_PROVIDERS)
+                        .limit(500).get(Source.SERVER)
                         .addOnSuccessListener(providers -> firestore.collection(SECTION_BOOKINGS)
                                 .orderBy("createdAt", Query.Direction.DESCENDING).limit(1000).get()
                                                 .addOnSuccessListener(bookings -> {

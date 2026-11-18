@@ -8,7 +8,7 @@ val useFirebaseEmulators = providers.gradleProperty("useFirebaseEmulators")
 val firebaseEmulatorHost = providers.gradleProperty("firebaseEmulatorHost")
     .orElse("10.0.2.2").get()
 val washlinkApiBaseUrl = providers.gradleProperty("washlinkApiBaseUrl")
-    .orElse("").get().trimEnd('/')
+    .orElse("https://washlink-tjqd.onrender.com").get().trimEnd('/')
 require(Regex("^[A-Za-z0-9.-]+$").matches(firebaseEmulatorHost)) {
     "firebaseEmulatorHost must be a hostname or IP address without a port."
 }

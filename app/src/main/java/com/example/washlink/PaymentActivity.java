@@ -175,8 +175,7 @@ public class PaymentActivity extends WashLinkActivity {
                     continuePayment(pendingBooking, pendingQuote, pendingPaymentCode);
             }, message -> {
                     payButton.setEnabled(true);
-                    Toast.makeText(PaymentActivity.this,
-                            "Could not create booking: " + message, Toast.LENGTH_LONG).show();
+                    showBookingError(message);
             });
         });
 
@@ -205,6 +204,34 @@ public class PaymentActivity extends WashLinkActivity {
                     Toast.makeText(this, "Could not start payment: " + message,
                             Toast.LENGTH_LONG).show();
                 });
+    }
+
+    private void showBookingError(String message) {
+        String text = "Could not create booking: " + message;
+        android.util.Log.e("PaymentActivity", text);
+        showErrorToastParts(text);
+    }
+
+    private void showErrorToastParts(String message) {
+        java.util.ArrayList<String> parts = new java.util.ArrayList<>();
+        String remaining = message.trim();
+        while (remaining.length() > 0) {
+            if (remaining.length() <= 55) {
+                parts.add(remaining);
+                break;
+            }
+            int split = remaining.lastIndexOf(' ', 55);
+            if (split <= 0) split = 55;
+            parts.add(remaining.substring(0, split));
+            remaining = remaining.substring(split).trim();
+        }
+        android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
+        long interval = Toast.LENGTH_LONG + 500L;
+        for (int i = 0; i < parts.size(); i++) {
+            String part = parts.get(i);
+            handler.postDelayed(() ->
+                    Toast.makeText(this, part, Toast.LENGTH_LONG).show(), interval * i);
+        }
     }
 
     private void confirmBooking(Booking booking, BookingPricing.Quote quote) {
